@@ -1,0 +1,345 @@
+---
+// Una escena, frases que avanzan: la foto del horizonte se queda fija mientras
+// el día pasa por encima, del baño de las 7:30 al cielo de las 22:00. La hora
+// áurea y la luna se calculan para hoy en el cabo (src/scripts/hoja.ts); sin
+// JavaScript queda la frase general.
+// Movimiento (src/scripts/motion/dia.ts): en escritorio la sección se fija y
+// los momentos se suceden en el sitio; cada uno abre su propio fondo con un
+// barrido. Los fondos y el indicador solo se muestran en esa escena.
+import Foto from "../Foto.astro";
+import type { ClaveFoto } from "../../data/fotos";
+
+interface Momento {
+  titulo: string;
+  /** Rótulo corto para el indicador de progreso */
+  rotulo: string;
+  texto: string;
+  fotos: [ClaveFoto, ClaveFoto];
+  /** Fondo a pantalla completa en la escena fijada */
+  fondo: ClaveFoto;
+  vivo?: "sol" | "luna";
+}
+
+// La hora va en el propio título: el día se lee de arriba abajo.
+const momentos: Momento[] = [
+  {
+    titulo: "La poza, a las 7:30",
+    rotulo: "7:30",
+    texto: "Al pie de los escalones, la marea llena una poza tallada en la roca. Agua quieta a veinte grados, antes que nadie.",
+    fotos: ["diaPoza", "costaRoca"],
+    fondo: "diaPoza",
+  },
+  {
+    titulo: "Desayuno sin reloj",
+    rotulo: "9:00",
+    texto: "De nueve a doce, en la habitación o en la terraza: pan de leña, queso de cabra de la ladera y fruta del valle.",
+    fotos: ["diaDesayuno", "materialLino"],
+    fondo: "materialLino",
+  },
+  {
+    titulo: "La mesa, a las 13:30",
+    rotulo: "13:30",
+    texto: "Nueve mesas en la Mesa de Lumbre y un menú que cambia según lo que entra por la mañana en la lonja del puerto.",
+    fotos: ["mesaPlato", "mesaVino"],
+    fondo: "mesaVino",
+  },
+  {
+    titulo: "La hora áurea",
+    rotulo: "Hora áurea",
+    texto: "El sol se pone delante de las veintidós habitaciones: hacia las 18:20 en invierno y las 21:10 en verano.",
+    fotos: ["nocheHorizonte", "materialCal"],
+    fondo: "costaAcantilado",
+    vivo: "sol",
+  },
+  {
+    titulo: "El cielo, a las 22:00",
+    rotulo: "22:00",
+    texto: "Sin una farola en nueve kilómetros. Arriba espera un telescopio y alguien que sabe dónde mirar.",
+    fotos: ["nocheCielo", "nocheAgua"],
+    fondo: "nocheCielo",
+    vivo: "luna",
+  },
+];
+---
+
+<section class="dia" aria-labelledby="dia-titulo" data-escena="dia">
+  <div class="escena" aria-hidden="true">
+    <Foto foto="casaPiscina" sizes="100vw" alt="" anchos={[800, 1200, 1600, 2000, 2400]} />
+    <div class="fondos">
+      {
+        momentos.map((m) => (
+          <div class="fondo">
+            <Foto foto={m.fondo} sizes="100vw" alt="" anchos={[960, 1280, 1600, 2000]} />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <div class="progreso marco" aria-hidden="true">
+    <ol>
+      {momentos.map((m) => <li>{m.rotulo}</li>)}
+    </ol>
+    <span class="progreso-barra"><span></span></span>
+  </div>
+  <div class="pasos">
+    <header class="paso paso-inicio marco">
+      <h2 id="dia-titulo">Un día en Aurea</h2>
+      <p>Cinco momentos que se repiten cada día en el cabo. Los horarios son los de la casa; el del sol lo pone el sol.</p>
+    </header>
+    {
+      momentos.map((m, i) => (
+        <article class="paso marco" style={`--lado:${i % 2 ? -1 : 1}`}>
+          <div class="paso-texto">
+            <h3>{m.titulo}</h3>
+            <p class="paso-frase" data-hoja={m.vivo}>
+              {m.texto}
+            </p>
+          </div>
+          <Foto foto={m.fotos[0]} sizes="(min-width: 48rem) 15vw, 44vw" anchos={[320, 480, 640]} class="paso-foto paso-foto-a" />
+          <Foto foto={m.fotos[1]} sizes="(min-width: 48rem) 12vw, 44vw" anchos={[320, 480, 640]} class="paso-foto paso-foto-b" />
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  import "../../scripts/hoja";
+</script>
+
+<style>
+  .dia {
+    position: relative;
+    margin-top: var(--seccion);
+  }
+
+  .escena {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .escena :global(picture),
+  .escena :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .escena :global(img) {
+    object-fit: cover;
+    object-position: 50% 70%;
+    filter: brightness(0.8) contrast(1.05);
+  }
+
+  /* Velo neutro en el tercio superior, donde va el texto */
+  .escena::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 40%;
+    background: linear-gradient(rgb(16 14 12 / 0.85) 35%, rgb(16 14 12 / 0)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
+  }
+
+  .pasos {
+    position: relative;
+    margin-top: -100svh;
+  }
+
+  .paso {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 34rem) 1fr;
+    align-content: start;
+    min-height: 85svh;
+    padding-top: 9svh;
+  }
+
+  .paso-inicio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .paso-inicio h2 {
+    font-size: var(--step-display);
+  }
+
+  .paso-inicio p {
+    max-width: 30rem;
+  }
+
+  .paso-texto {
+    grid-column: 2;
+    text-align: center;
+  }
+
+  h3 {
+    font-size: var(--step-head);
+  }
+
+  .paso-frase {
+    margin-top: 1.25rem;
+    font-size: var(--step-body);
+  }
+
+  .paso :global(.paso-foto) {
+    position: absolute;
+    object-fit: cover;
+  }
+
+  .paso :global(.paso-foto-a) {
+    width: clamp(10rem, 15vw, 15rem);
+    aspect-ratio: 4 / 5;
+    top: 44svh;
+    left: calc(var(--margen) + 6vw);
+  }
+
+  .paso :global(.paso-foto-b) {
+    width: clamp(9rem, 12vw, 12rem);
+    aspect-ratio: 1;
+    top: 58svh;
+    right: calc(var(--margen) + 8vw);
+  }
+
+  .paso:nth-of-type(odd) :global(.paso-foto-a) {
+    top: 56svh;
+  }
+
+  .paso:nth-of-type(odd) :global(.paso-foto-b) {
+    top: 40svh;
+  }
+
+  /* Piezas de la escena fijada: no existen fuera de ella */
+  .fondos,
+  .progreso {
+    display: none;
+  }
+
+  /* Escena activa (escritorio con movimiento): una pantalla, fijada por
+     ScrollTrigger; los momentos se apilan en el mismo sitio. */
+  .dia.es-escena .escena {
+    position: relative;
+    height: 100svh;
+  }
+
+  .dia.es-escena .fondos {
+    display: block;
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Velo neutro en la franja baja, para que el indicador se lea sobre
+     cualquier fondo */
+  .dia.es-escena .escena::before {
+    content: "";
+    position: absolute;
+    inset: 70% 0 0;
+    z-index: 1;
+    background: linear-gradient(rgb(16 14 12 / 0), rgb(16 14 12 / 0.8)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
+  }
+
+  .fondo {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    clip-path: inset(100% 0% 0% 0%);
+  }
+
+  .fondo :global(picture),
+  .fondo :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .fondo :global(img) {
+    object-fit: cover;
+    filter: brightness(0.72) contrast(1.05);
+  }
+
+  .dia.es-escena .pasos {
+    position: absolute;
+    inset: 0;
+    margin-top: 0;
+  }
+
+  .dia.es-escena .paso {
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+  }
+
+  .dia.es-escena .progreso {
+    display: grid;
+    gap: 0.75rem;
+    position: absolute;
+    z-index: 3;
+    inset: auto 0 2.25rem;
+  }
+
+  .progreso ol {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  .progreso li {
+    transition: color 300ms ease-out;
+  }
+
+  .progreso li.activo {
+    color: var(--ink);
+  }
+
+  .progreso-barra {
+    display: block;
+    height: 3px;
+    background: rgb(235 232 226 / 0.22);
+  }
+
+  .progreso-barra span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
+  @media (max-width: 47.99rem) {
+    .escena::after {
+      inset: 40% 0 0;
+      background: linear-gradient(rgb(16 14 12 / 0), rgb(16 14 12 / 0.8)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
+    }
+
+    .paso {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-block: 0 4rem;
+    }
+
+    .paso-texto {
+      text-align: left;
+    }
+
+    .paso-inicio {
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .paso :global(.paso-foto-a),
+    .paso:nth-of-type(odd) :global(.paso-foto-a) {
+      top: 5rem;
+      right: var(--margen);
+      left: auto;
+      width: 44vw;
+    }
+
+    .paso :global(.paso-foto-b) {
+      display: none;
+    }
+  }
+</style>

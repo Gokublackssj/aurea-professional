@@ -1,0 +1,96 @@
+---
+// Frase en escalera: cada línea empieza más a la derecha que la anterior, como
+// los escalones que bajan a la cala. A la derecha, los dos materiales del cabo.
+import Foto from "../Foto.astro";
+import { sitio } from "../../data/sitio";
+
+const lineas = ["Aquí el día", "se mide por la luz:", "basalto al alba,", "cal a mediodía", "y oro al caer la tarde."];
+---
+
+<section class="manifiesto marco" aria-labelledby="manifiesto-titulo" data-escena="manifiesto">
+  <h2 id="manifiesto-titulo" class="solo-lector">El cabo</h2>
+  <p class="escalera">
+    {lineas.map((l, i) => <span style={`--i:${i}`}>{l}</span>)}
+  </p>
+  <div class="materiales">
+    <Foto foto="materialBasalto" sizes="(min-width: 48rem) 28vw, 46vw" anchos={[400, 600, 800, 1000]} />
+    <Foto foto="materialCal" sizes="(min-width: 48rem) 28vw, 46vw" anchos={[400, 600, 800, 1000]} />
+  </div>
+  <p class="nota">
+    {sitio.lugar}, costa de poniente. A {sitio.alturaSobreElMar} metros sobre el Atlántico y a {sitio.escalones} escalones de la cala.
+  </p>
+</section>
+
+<style>
+  .manifiesto {
+    display: grid;
+    grid-template-columns: 1fr 28vw;
+    grid-template-rows: 1fr auto;
+    column-gap: 4vw;
+    row-gap: 3rem;
+    align-items: start;
+    min-height: 100svh;
+    padding-block: var(--seccion) 4rem;
+    background: var(--surface);
+  }
+
+  .escalera {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    font-family: var(--display);
+    font-size: clamp(1.5rem, 1rem + 1.4vw, 2.25rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .escalera span {
+    padding-left: calc(var(--i) * 6vw);
+  }
+
+  .escalera span:nth-child(even) {
+    color: var(--muted);
+  }
+
+  .materiales {
+    display: grid;
+    gap: 1rem;
+    grid-row: 1;
+    grid-column: 2;
+    align-self: center;
+  }
+
+  .materiales :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .nota {
+    grid-column: 1;
+    max-width: 24rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 47.99rem) {
+    .manifiesto {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      min-height: 0;
+    }
+
+    .escalera {
+      font-size: 1.5rem;
+    }
+
+    .escalera span {
+      padding-left: calc(var(--i) * 5vw);
+    }
+
+    .materiales {
+      grid-row: auto;
+      grid-column: 1;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

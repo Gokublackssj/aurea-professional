@@ -1,0 +1,476 @@
+---
+import Base from "../layouts/Base.astro";
+import Mapa from "../components/Mapa.astro";
+import Foto from "../components/Foto.astro";
+import { habitaciones, euros } from "../data/habitaciones";
+import { sitio } from "../data/sitio";
+
+const politicas = [
+  ["Entrada y salida", "Entrada desde las 15:00 y salida hasta las 12:00. Si tu vuelo sale tarde, las termas siguen siendo tuyas hasta la hora de irte."],
+  ["Cancelación", "Sin coste hasta catorce días antes de la llegada. Después, se cobra la primera noche."],
+  ["Edad", "Aurea recibe huéspedes a partir de doce años. Es una casa pensada para el silencio."],
+  ["Estancia mínima", "Dos noches; tres en la Residencia Aurea y en julio y agosto."],
+];
+
+// Datos que necesita el script de la reserva (precio y capacidad por habitación).
+const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { nombre: h.nombre, precio: h.precio, huespedes: h.huespedes }]));
+---
+
+<Base title="Reservas" description="Solicita tu estancia en Aurea: fechas, habitación y huéspedes." fotoPie="costaAcantilado">
+  <section class="cabeza marco" aria-labelledby="titulo">
+    <h1 id="titulo">Reservas</h1>
+    <p class="entradilla">
+      Elige fechas y habitación y te respondemos en menos de un día, con la estancia confirmada o la alternativa más cercana.
+    </p>
+  </section>
+
+  <section class="reserva marco" aria-labelledby="solicitud-titulo">
+    <h2 id="solicitud-titulo" class="solo-lector">Solicitud de estancia</h2>
+    <form
+      class="formulario"
+      action={`mailto:${sitio.correo}`}
+      method="post"
+      enctype="text/plain"
+      novalidate
+      data-habitaciones={JSON.stringify(datosHabitaciones)}
+    >
+      <fieldset class="fechas">
+        <legend>Fechas</legend>
+        <label>
+          <span>Llegada</span>
+          <input type="date" name="llegada" required />
+        </label>
+        <label>
+          <span>Salida</span>
+          <input type="date" name="salida" required />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Habitación</legend>
+        <div class="opciones">
+          {
+            habitaciones.map((h, i) => (
+              <label class="opcion">
+                <input type="radio" name="habitacion" value={h.slug} checked={i === 0} required />
+                <Foto foto={h.fotos[0]} sizes="(min-width: 64rem) 18vw, (min-width: 48rem) 40vw, 90vw" anchos={[320, 480, 640]} alt="" />
+                <span class="opcion-nombre">{h.nombre}</span>
+                <span class="opcion-datos">
+                  {h.metros} m² · hasta {h.huespedes} · desde {euros(h.precio)}
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="personas">
+        <legend>Huéspedes y contacto</legend>
+        <label>
+          <span>Huéspedes</span>
+          <select name="huespedes">
+            {[1, 2, 3, 4].map((n) => <option value={n} selected={n === 2}>{n}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>Nombre</span>
+          <input type="text" name="nombre" autocomplete="name" required />
+        </label>
+        <label>
+          <span>Correo electrónico</span>
+          <input type="email" name="correo" autocomplete="email" required />
+        </label>
+        <label>
+          <span>Teléfono <small>(opcional)</small></span>
+          <input type="tel" name="telefono" autocomplete="tel" />
+        </label>
+        <label class="ancho">
+          <span>Algo que debamos saber <small>(opcional)</small></span>
+          <textarea name="mensaje" rows="4"></textarea>
+        </label>
+      </fieldset>
+
+      <div class="errores" role="alert" aria-live="assertive"></div>
+      <button class="boton boton-principal enviar" type="submit">Enviar solicitud</button>
+      <p class="aviso">
+        Aurea es una demo: el botón abre tu programa de correo con la solicitud escrita, y nada se envía a ningún servidor.
+      </p>
+    </form>
+
+    <aside class="resumen" aria-labelledby="resumen-titulo">
+      <h2 id="resumen-titulo">Tu estancia</h2>
+      <dl aria-live="polite">
+        <div>
+          <dt>Habitación</dt>
+          <dd data-resumen="habitacion">{habitaciones[0].nombre}</dd>
+        </div>
+        <div>
+          <dt>Noches</dt>
+          <dd data-resumen="noches">Elige las fechas</dd>
+        </div>
+        <div>
+          <dt>Estimación</dt>
+          <dd data-resumen="total">Desde {euros(habitaciones[0].precio)} la noche</dd>
+        </div>
+      </dl>
+      <p class="resumen-sol" data-resumen="sol">
+        El sol se pone delante de tu habitación: hacia las 18:20 en invierno y las 21:10 en verano.
+      </p>
+      <p class="resumen-nota">Para dos personas, con desayuno y termas. La tarifa final se confirma por correo.</p>
+    </aside>
+  </section>
+
+  <section class="llegar marco" aria-labelledby="llegar-titulo">
+    <Mapa />
+    <div class="llegar-texto">
+      <h2 id="llegar-titulo">Cómo llegar</h2>
+      <p>
+        Desde el aeropuerto son cincuenta minutos por la carretera de la costa. El último kilómetro es una pista de picón que termina en el
+        portón: ahí te esperamos.
+      </p>
+      <p>A partir de tres noches, el traslado está incluido. Si vienes en coche, el aparcamiento queda junto a la entrada.</p>
+      <address>
+        {sitio.direccion.map((l) => <span>{l}</span>)}
+        <a href={`tel:${sitio.telefono.replace(/\s/g, "")}`}>{sitio.telefono}</a>
+        <a href={`mailto:${sitio.correo}`}>{sitio.correo}</a>
+      </address>
+    </div>
+  </section>
+
+  <section class="politicas marco" aria-labelledby="politicas-titulo">
+    <h2 id="politicas-titulo">Antes de reservar</h2>
+    <dl>
+      {
+        politicas.map(([t, d]) => (
+          <div>
+            <dt>{t}</dt>
+            <dd>{d}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+</Base>
+
+<script>
+  import "../scripts/reserva";
+</script>
+
+<style>
+  h2 {
+    font-size: var(--step-head);
+  }
+
+  .cabeza {
+    display: grid;
+    grid-template-columns: auto minmax(0, 30rem);
+    align-items: end;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-top: clamp(3rem, 8vw, 7rem);
+  }
+
+  h1 {
+    font-size: 17vw;
+    line-height: 0.82;
+    letter-spacing: -0.05em;
+  }
+
+  .entradilla {
+    font-size: var(--step-lead);
+    line-height: 1.4;
+    padding-bottom: 1rem;
+  }
+
+  /* Formulario y resumen */
+  .reserva {
+    display: grid;
+    grid-template-columns: 7fr 4fr;
+    gap: clamp(2rem, 6vw, 7rem);
+    align-items: start;
+    margin-top: clamp(4rem, 8vw, 7rem);
+  }
+
+  .formulario {
+    display: grid;
+    gap: 3rem;
+  }
+
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  legend {
+    padding: 0;
+    margin-bottom: 1.25rem;
+    font-family: var(--display);
+    font-size: var(--step-lead);
+  }
+
+  .fechas,
+  .personas {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ancho {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  label:not(.opcion) > span {
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+
+  small {
+    font-size: inherit;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #3a342d;
+    border-radius: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    color-scheme: dark;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 0;
+    border-color: transparent;
+  }
+
+  [aria-invalid="true"] {
+    border-color: #e07a5f;
+  }
+
+  .opciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .opcion {
+    position: relative;
+    gap: 0.25rem;
+    padding: 0 0 1.25rem;
+    background: var(--surface);
+    cursor: pointer;
+  }
+
+  .opcion :global(picture) {
+    margin-bottom: 1rem;
+  }
+
+  .opcion :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .opcion-nombre,
+  .opcion-datos {
+    padding-inline: 1.25rem;
+  }
+
+  .opcion input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+  }
+
+  .opcion-nombre {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    line-height: 1.15;
+  }
+
+  .opcion-datos {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  .opcion:has(input:checked) {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .opcion:has(input:checked) .opcion-datos {
+    color: #4a433a;
+  }
+
+  .opcion:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .errores:empty {
+    display: none;
+  }
+
+  .errores {
+    padding: 1rem 1.25rem;
+    background: #2a1a15;
+    color: #f2c9bd;
+  }
+
+  .errores ul {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .enviar {
+    justify-self: start;
+    min-width: 16rem;
+  }
+
+  .aviso {
+    margin-top: -1.75rem;
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  .resumen {
+    position: sticky;
+    top: 2rem;
+    display: grid;
+    gap: 1.75rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    background: var(--surface);
+  }
+
+  .resumen h2 {
+    font-size: var(--step-lead);
+  }
+
+  .resumen dl {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .resumen dt,
+  .politicas dt {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .resumen dd {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    line-height: 1.2;
+  }
+
+  .resumen-sol {
+    color: var(--accent);
+  }
+
+  .resumen-nota {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  /* Cómo llegar */
+  .llegar {
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: clamp(2rem, 6vw, 7rem);
+    align-items: center;
+    margin-top: var(--seccion);
+  }
+
+  .llegar-texto {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 32rem;
+  }
+
+  address {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 1rem;
+    font-style: normal;
+  }
+
+  address a {
+    text-decoration-color: var(--accent);
+  }
+
+  /* Políticas: bloque de texto a dos columnas */
+  .politicas {
+    display: grid;
+    grid-template-columns: 4fr 8fr;
+    gap: 2rem clamp(2rem, 5vw, 6rem);
+    margin-top: var(--seccion);
+    padding-block: clamp(4rem, 8vw, 7rem);
+    background: var(--surface);
+  }
+
+  .politicas dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem clamp(2rem, 4vw, 4rem);
+  }
+
+  .politicas dt {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 63.99rem) {
+    .reserva {
+      grid-template-columns: 1fr;
+    }
+
+    .resumen {
+      position: static;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .cabeza,
+    .fechas,
+    .personas,
+    .opciones,
+    .llegar,
+    .politicas,
+    .politicas dl {
+      grid-template-columns: 1fr;
+    }
+
+    h1 {
+      font-size: 21vw;
+    }
+
+    .enviar {
+      justify-self: stretch;
+    }
+  }
+</style>

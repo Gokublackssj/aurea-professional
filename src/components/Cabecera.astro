@@ -1,0 +1,167 @@
+---
+// Barra simple: nombre, tres enlaces y una acción (Reservar). En el inicio se
+// apoya sobre la foto del hero y omite el nombre, que ya ocupa la portada.
+// En pantallas estrechas los enlaces se recogen tras un botón «Menú».
+import { navegacion, reservas } from "../data/navegacion";
+import { ruta, enSeccion } from "../lib/ruta";
+
+interface Props {
+  sobreFoto?: boolean;
+}
+
+const { sobreFoto = false } = Astro.props;
+const actual = Astro.url.pathname;
+---
+
+<header class:list={["cabecera", "marco", { "sobre-foto": sobreFoto }]}>
+  {
+    !sobreFoto && (
+      <a class="marca" href={ruta("")}>
+        Aurea
+      </a>
+    )
+  }
+  <button class="menu-boton" type="button" aria-expanded="false" aria-controls="menu-principal">Menú</button>
+  <nav id="menu-principal" class="menu" aria-label="Principal">
+    <ul>
+      {
+        navegacion.map(({ destino, texto }) => (
+          <li>
+            <a href={ruta(destino)} aria-current={enSeccion(actual, destino) ? "page" : undefined}>
+              {texto}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a class="boton boton-principal reservar" href={ruta(reservas.destino)} aria-current={enSeccion(actual, reservas.destino) ? "page" : undefined}>
+          Reservar
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+  import "../scripts/menu";
+</script>
+
+<style>
+  .cabecera {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    min-height: 5.5rem;
+  }
+
+  .sobre-foto {
+    position: absolute;
+    inset: 0 0 auto;
+    justify-content: flex-end;
+  }
+
+  .marca {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .menu ul {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem 2rem;
+  }
+
+  .menu a:not(.boton) {
+    display: inline-block;
+    padding-block: 0.75rem;
+    font-size: var(--step-body);
+    text-decoration: none;
+    text-decoration-color: var(--accent);
+  }
+
+  .menu a:not(.boton):hover,
+  .menu a[aria-current="page"]:not(.boton) {
+    text-decoration-line: underline;
+  }
+
+  .reservar {
+    min-height: 2.75rem;
+    padding-inline: 1.25rem;
+  }
+
+  .menu-boton {
+    display: none;
+    min-height: 2.75rem;
+    padding: 0 0.25rem;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: 500 var(--step-body) / 1 var(--text);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 0.3em;
+  }
+
+  /* Sobre la foto, un velo neutro solo detrás de la fila de enlaces */
+  .sobre-foto::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 -2rem;
+    z-index: -1;
+    background: linear-gradient(rgb(16 14 12 / 0.55), rgb(16 14 12 / 0)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
+    pointer-events: none;
+  }
+
+  @media (max-width: 47.99rem) {
+    :global(html.js) .menu-boton {
+      display: block;
+    }
+
+    :global(html.js) .menu {
+      position: absolute;
+      inset: 100% 0 auto;
+      padding: 0.5rem var(--margen) 1.5rem;
+      background: var(--bg);
+    }
+
+    :global(html.js) .menu:not(.abierto) {
+      display: none;
+    }
+
+    :global(html.js) .menu ul {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    :global(html.js) .menu a:not(.boton) {
+      display: block;
+      padding-block: 0.875rem;
+      font-size: var(--step-lead);
+      font-family: var(--display);
+    }
+
+    :global(html.js) .reservar {
+      width: 100%;
+      margin-top: 1rem;
+      min-height: 3.25rem;
+    }
+
+    /* Sin JavaScript, los enlaces se quedan a la vista y se reparten en filas */
+    :global(html:not(.js)) .cabecera {
+      flex-wrap: wrap;
+    }
+
+    :global(html:not(.js)) .menu ul {
+      flex-wrap: wrap;
+      gap: 0 1.25rem;
+    }
+  }
+</style>

@@ -1,0 +1,61 @@
+---
+// Mapa dibujado del cabo (ficticio): la costa, la carretera que termina en la
+// casa, el sendero de los 112 escalones y la cala. Colores de la paleta.
+---
+
+<figure class="mapa">
+  <svg viewBox="0 0 600 520" role="img" aria-labelledby="mapa-titulo mapa-desc">
+    <title id="mapa-titulo">Mapa de Cabo Lumbre</title>
+    <desc id="mapa-desc">
+      La carretera de la costa llega desde el este y termina en Aurea, en lo alto del cabo. Desde la casa, un sendero de 112 escalones baja
+      hacia el oeste hasta la poza de marea y la cala de arena negra. Al sur del cabo queda el faro viejo.
+    </desc>
+    <!-- Mar -->
+    <rect width="600" height="520" fill="#141a1d"></rect>
+    <!-- Tierra -->
+    <path
+      d="M600 0 V520 H360 C330 470 300 440 250 430 C205 421 180 395 186 360 C192 326 160 300 120 296 C84 292 70 262 92 236 C112 212 150 210 170 186 C196 154 176 118 210 96 C246 72 300 80 330 52 C350 32 360 12 372 0 Z"
+      fill="#1f1b17"></path>
+    <!-- Cala de arena negra -->
+    <path d="M186 360 C180 380 196 404 226 418 C206 400 196 382 196 362 Z" fill="#2c2722"></path>
+    <!-- Carretera -->
+    <path d="M600 214 C520 220 470 250 420 248 C370 246 330 230 286 236" fill="none" stroke="#b3a998" stroke-width="3"></path>
+    <!-- Sendero de los escalones -->
+    <path d="M276 244 C250 268 236 300 214 322 C202 336 196 348 194 358" fill="none" stroke="#b3a998" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"></path>
+    <!-- Faro -->
+    <circle cx="300" cy="438" r="5" fill="#b3a998"></circle>
+    <!-- Aurea -->
+    <circle cx="276" cy="238" r="9" fill="#d9a24e"></circle>
+    <g font-family="Jost Variable, Jost, sans-serif" font-size="17" fill="#eee7da">
+      <text x="296" y="226">Aurea</text>
+      <text x="420" y="282">Carretera de la costa</text>
+      <text x="222" y="452">Cala</text>
+      <text x="314" y="443">Faro viejo</text>
+      <text x="40" y="380" fill="#b3a998">Atlántico</text>
+      <text x="96" y="318" fill="#b3a998">Poza de marea</text>
+    </g>
+    <!-- Poniente: hacia donde se pone el sol -->
+    <g fill="#b3a998" font-family="Jost Variable, Jost, sans-serif" font-size="15">
+      <text x="24" y="40">Poniente</text>
+      <path d="M24 52 H120" stroke="#b3a998" stroke-width="2"></path>
+    </g>
+  </svg>
+  <figcaption>Cabo Lumbre. La carretera termina en la puerta; el resto es a pie.</figcaption>
+</figure>
+
+<style>
+  .mapa {
+    display: grid;
+    gap: 1rem;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+</style>

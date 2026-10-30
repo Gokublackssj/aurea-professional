@@ -1,0 +1,105 @@
+---
+import Base from "../layouts/Base.astro";
+import { fotos } from "../data/fotos";
+---
+
+<Base title="Créditos" description="Autores de las fotografías y tipografías de esta demo.">
+  <section class="creditos marco" aria-labelledby="titulo">
+    <h1 id="titulo">Créditos</h1>
+    <p class="entradilla">
+      Aurea es un hotel ficticio y esta web, una demo de diseño y desarrollo. Ninguna fotografía muestra un hotel real llamado Aurea. Todas
+      vienen de Unsplash y se usan bajo la <a href="https://unsplash.com/license">licencia de Unsplash</a>, comprobada en la página de cada foto
+      el 30 de octubre de 2026.
+    </p>
+    <table>
+      <caption class="solo-lector">Fotografías usadas en la web, con su autor y su página en Unsplash</caption>
+      <thead>
+        <tr>
+          <th scope="col">Fotografía</th>
+          <th scope="col">Autor</th>
+          <th scope="col">En Unsplash</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          Object.values(fotos).map((f) => (
+            <tr>
+              <td>{f.alt}</td>
+              <td>
+                <a href={`https://unsplash.com/@${f.usuario}`}>{f.autor}</a>
+              </td>
+              <td>
+                <a href={`https://unsplash.com/photos/${f.id}`}>{f.id}</a>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="tipos">Tipografías: Bodoni Moda y Jost, bajo la SIL Open Font License, servidas desde el propio sitio mediante Fontsource.</p>
+  </section>
+</Base>
+
+<style>
+  .creditos {
+    padding-top: clamp(3rem, 8vw, 7rem);
+  }
+
+  h1 {
+    font-size: var(--step-display);
+  }
+
+  .entradilla {
+    max-width: 44rem;
+    margin-top: 2rem;
+    font-size: var(--step-lead);
+    line-height: 1.4;
+  }
+
+  .entradilla a,
+  td a {
+    text-decoration-color: var(--accent);
+  }
+
+  table {
+    width: 100%;
+    margin-top: 4rem;
+    border-collapse: collapse;
+  }
+
+  th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--muted);
+    padding-bottom: 1rem;
+  }
+
+  td {
+    padding: 0.75rem 1.5rem 0.75rem 0;
+    border-top: 1px solid #2a2520;
+    vertical-align: top;
+  }
+
+  .tipos {
+    margin-top: 3rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 47.99rem) {
+    thead {
+      display: none;
+    }
+
+    tr {
+      display: grid;
+      gap: 0.25rem;
+      padding-block: 0.75rem;
+      border-top: 1px solid #2a2520;
+    }
+
+    td {
+      padding: 0;
+      border: 0;
+    }
+  }
+</style>

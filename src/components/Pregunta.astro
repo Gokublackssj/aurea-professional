@@ -1,0 +1,108 @@
+---
+// Pregunta a los dos bordes: un campo oscuro de una pantalla, la pregunta
+// partida arriba y abajo, y entre ambas las dos respuestas posibles.
+import { sitio } from "../data/sitio";
+import { ruta } from "../lib/ruta";
+
+interface Props {
+  arriba?: string;
+  abajo?: string;
+  /** Destino del botón principal (por defecto, la página de reservas) */
+  reservar?: string;
+}
+
+const { arriba = "¿Cuándo", abajo = "llegas?", reservar = ruta("reservas") } = Astro.props;
+// En pantallas estrechas el tamaño se ajusta a la línea más larga para que quepa.
+const letras = Math.max(arriba.length, abajo.length);
+const asunto = encodeURIComponent("Consulta sobre una estancia en Aurea");
+---
+
+<section class="pregunta marco" aria-labelledby="pregunta-titulo" style={`--letras:${letras}`}>
+  <h2 id="pregunta-titulo" class="solo-lector">{arriba} {abajo}</h2>
+  <p class="linea-arriba" aria-hidden="true">{arriba}</p>
+  <p class="linea-abajo" aria-hidden="true">{abajo}</p>
+  <div class="respuestas">
+    <div class="botones">
+      <a class="boton boton-principal" href={reservar}>Elegir fechas</a>
+      <span class="o">o</span>
+      <a class="boton" href={`mailto:${sitio.correo}?subject=${asunto}`}>Escribir a recepción</a>
+    </div>
+    <p>Respondemos en menos de un día, con tus fechas confirmadas o la alternativa más cercana.</p>
+  </div>
+</section>
+
+<style>
+  .pregunta {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100svh;
+    margin-top: var(--seccion);
+    padding-block: 2rem 1.5rem;
+    background: #0a0908;
+    text-align: center;
+  }
+
+  .linea-arriba,
+  .linea-abajo {
+    display: block;
+    font-family: var(--display);
+    font-size: clamp(4.5rem, 1rem + 11vw, 10.5rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .linea-abajo {
+    grid-row: 3;
+  }
+
+  .respuestas {
+    grid-row: 2;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 1rem;
+    color: var(--muted);
+  }
+
+  .respuestas p {
+    max-width: 34rem;
+  }
+
+  .botones {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  .botones .boton {
+    min-width: 13rem;
+    min-height: 3.5rem;
+  }
+
+  .botones .boton-principal {
+    justify-self: end;
+  }
+
+  .botones .boton:not(.boton-principal) {
+    justify-self: start;
+  }
+
+  @media (max-width: 47.99rem) {
+    .linea-arriba,
+    .linea-abajo {
+      font-size: min(18vw, calc(160vw / var(--letras)));
+    }
+
+    .botones {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      width: 72vw;
+    }
+
+    .botones .boton {
+      justify-self: stretch !important;
+    }
+  }
+</style>

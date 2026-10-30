@@ -1,0 +1,177 @@
+@import "@fontsource-variable/bodoni-moda/opsz.css";
+@import "@fontsource-variable/jost/index.css";
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 var(--step-body) / 1.6 var(--text);
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+main {
+  flex: 1;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.25em;
+  text-decoration-thickness: 1px;
+}
+
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 500;
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  text-wrap: balance;
+}
+
+ul,
+ol,
+dl,
+dd,
+figure,
+blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* El marco: los mismos márgenes en todas las secciones */
+.marco {
+  padding-inline: var(--margen);
+}
+
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px; /* taste-skill-ignore: texto solo para lectores de pantalla, no es una línea */
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip {
+  position: absolute;
+  left: var(--margen);
+  top: -100%;
+  z-index: 50;
+  padding: 0.75rem 1rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.skip:focus {
+  top: 0.75rem;
+}
+
+/* Botones: rectángulos sólidos, esquinas rectas. El oro solo en la acción principal. */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: 500 var(--step-body) / 1 var(--text);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease-out,
+    color 160ms ease-out;
+}
+
+.boton:hover {
+  background: #2a2520;
+}
+
+.boton-principal {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.boton-principal:hover {
+  background: #e6b464;
+}
+
+/* Fotografías: misma luz para todas */
+.foto img,
+img.foto {
+  filter: var(--foto);
+}
+
+.enlace {
+  font-weight: 500;
+  text-decoration-color: var(--accent);
+}
+
+.enlace:hover {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

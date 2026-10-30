@@ -1,0 +1,149 @@
+---
+// El pie es la última fotografía: enlaces y contacto arriba, el nombre a todo
+// lo ancho abajo y una línea legal debajo.
+import Foto from "./Foto.astro";
+import { navegacion, reservas } from "../data/navegacion";
+import { sitio } from "../data/sitio";
+import type { ClaveFoto } from "../data/fotos";
+import { ruta } from "../lib/ruta";
+
+interface Props {
+  foto?: ClaveFoto;
+}
+
+const { foto = "costaBarca" } = Astro.props;
+---
+
+<footer class="pie">
+  <Foto foto={foto} sizes="100vw" class="pie-foto" alt="" />
+  <div class="pie-capa marco">
+    <div class="pie-fila">
+      <nav aria-label="Pie">
+        <ul>
+          {navegacion.map(({ destino, texto }) => <li><a href={ruta(destino)}>{texto}</a></li>)}
+          <li><a href={ruta(reservas.destino)}>{reservas.texto}</a></li>
+          <li><a href={ruta("creditos")}>Créditos</a></li>
+        </ul>
+      </nav>
+      <address>
+        {sitio.direccion.map((l) => <span>{l}</span>)}
+        <a href={`tel:${sitio.telefono.replace(/\s/g, "")}`}>{sitio.telefono}</a>
+        <a href={`mailto:${sitio.correo}`}>{sitio.correo}</a>
+      </address>
+    </div>
+    <div class="pie-cierre">
+      <p class="pie-nombre" aria-hidden="true">Aurea</p>
+      <p class="pie-demo">
+        Aurea es un hotel ficticio: esta web es una demo de diseño y desarrollo. Fotografías de Unsplash, con sus autores en
+        <a href={ruta("creditos")}>créditos</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .pie {
+    position: relative;
+    display: grid;
+    min-height: 100svh;
+    margin-top: var(--seccion);
+    color: var(--ink);
+    overflow: hidden;
+  }
+
+  /* Tras la pregunta final, el pie empieza pegado: los dos son campos a sangre */
+  :global(main:has(> .pregunta:last-child)) + .pie {
+    margin-top: 0;
+  }
+
+  .pie > :global(picture),
+  .pie-capa {
+    grid-area: 1 / 1;
+  }
+
+  .pie :global(.pie-foto) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.62);
+  }
+
+  .pie-capa {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-block: 2rem 1.5rem;
+  }
+
+  .pie-fila {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  ul {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+  }
+
+  nav a {
+    display: inline-block;
+    padding-block: 0.25rem;
+  }
+
+  address {
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    font-style: normal;
+    text-align: right;
+  }
+
+  .pie-nombre {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 35vw;
+    line-height: 0.8;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+  }
+
+  .pie-demo {
+    margin-top: 1.25rem;
+    max-width: 36rem;
+    font-size: var(--step-small);
+  }
+
+  .pie-demo a {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 47.99rem) {
+    .pie {
+      min-height: 88svh;
+    }
+
+    .pie-fila {
+      flex-direction: column;
+    }
+
+    address {
+      text-align: left;
+    }
+
+    .pie-nombre {
+      font-size: 34vw;
+    }
+  }
+</style>

@@ -1,0 +1,29 @@
+---
+import Base from "../layouts/Base.astro";
+import Hero from "../components/inicio/Hero.astro";
+import Manifiesto from "../components/inicio/Manifiesto.astro";
+import Llegada from "../components/inicio/Llegada.astro";
+import UnDia from "../components/inicio/UnDia.astro";
+import Habitaciones from "../components/inicio/Habitaciones.astro";
+import Fuera from "../components/inicio/Fuera.astro";
+import Pregunta from "../components/Pregunta.astro";
+---
+
+<Base
+  title="Aurea"
+  description="Aurea, hotel de veintidós llaves sobre un cabo de basalto frente al poniente del Atlántico."
+  cabeceraSobreFoto
+>
+  <Hero />
+  <Manifiesto />
+  <Llegada />
+  <UnDia />
+  <Habitaciones />
+  <Fuera />
+  <Pregunta />
+</Base>
+
+<script>
+  // Motor de movimiento (GSAP): solo en las páginas que tienen escenas.
+  import "../scripts/motion";
+</script>

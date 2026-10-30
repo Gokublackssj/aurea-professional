@@ -1,0 +1,74 @@
+---
+import "../styles/base.css";
+import Cabecera from "../components/Cabecera.astro";
+import Pie from "../components/Pie.astro";
+import type { ClaveFoto } from "../data/fotos";
+import { ruta } from "../lib/ruta";
+
+interface Props {
+  title: string;
+  description: string;
+  /** La cabecera se apoya sobre la foto del hero (solo en el inicio) */
+  cabeceraSobreFoto?: boolean;
+  fotoPie?: ClaveFoto;
+}
+
+const { title, description, cabeceraSobreFoto = false, fotoPie } = Astro.props;
+const tituloCompleto = title === "Aurea" ? "Aurea · Hotel en Cabo Lumbre" : `${title} · Aurea`;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={description} />
+    <!-- Demo de un negocio ficticio: no debe aparecer en buscadores. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#100E0C" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href={ruta("favicon.svg")} type="image/svg+xml" />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <!-- Antes del primer pintado:
+         - "js": hay scripts.
+         - data-preferencia: lo que eligió el visitante (auto, completo o
+           reducido; "auto" sigue al sistema operativo).
+         - data-movimiento: el modo resultante, completo o reducido.
+         - "motion": las entradas pueden empezar ocultas, esperando al motor.
+           Si el motor no arranca en 4 s, se quita y todo queda visible.
+         Sin JS no hay ninguna de las tres cosas y todo es visible. -->
+    <script is:inline>
+      (function () {
+        var raiz = document.documentElement;
+        var preferencia = "auto";
+        try {
+          preferencia = localStorage.getItem("aurea-movimiento") || "auto";
+        } catch (e) {}
+        if (preferencia !== "completo" && preferencia !== "reducido") preferencia = "auto";
+        var reducido = preferencia === "reducido" || (preferencia === "auto" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+        raiz.classList.add("js", "motion");
+        raiz.dataset.preferencia = preferencia;
+        raiz.dataset.movimiento = reducido ? "reducido" : "completo";
+        setTimeout(function () {
+          if (raiz.dataset.motion !== "listo") raiz.classList.remove("motion");
+        }, 4000);
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#contenido">Saltar al contenido</a>
+    <Cabecera sobreFoto={cabeceraSobreFoto} />
+    <main id="contenido">
+      <slot />
+    </main>
+    <Pie foto={fotoPie} />
+    <script>
+      // Motor de movimiento (GSAP): en todas las páginas; cada una declara
+      // sus escenas y revelados en el marcado.
+      import "../scripts/motion";
+    </script>
+  </body>
+</html>

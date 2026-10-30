@@ -1,0 +1,3 @@
+# Demo de un negocio ficticio: no debe indexarse.
+User-agent: *
+Disallow: /

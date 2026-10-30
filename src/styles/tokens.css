@@ -1,0 +1,37 @@
+/* Tokens de Aurea. Dark Luxury tomado del propio cabo: basalto (fondo),
+   cal bajo la luz de la tarde (tinta) y el oro de la hora áurea (acento, solo
+   en la acción principal). Un único campo claro, la cal, rompe la sala oscura. */
+:root {
+  color-scheme: dark;
+
+  --bg: #100e0c;
+  --surface: #1b1815;
+  --ink: #ebe8e2;
+  --muted: #b0aaa0;
+  --accent: #d9a24e;
+  --accent-ink: #100e0c;
+
+  /* Campo claro: la cal */
+  --field: #e4e1db;
+  --field-ink: #16130f;
+  --field-muted: #545049;
+
+  /* Tipografía: Bodoni Moda para mostrar, Jost para leer */
+  --display: "Bodoni Moda Variable", "Bodoni Moda", Didot, "Bodoni 72", Georgia, serif;
+  --text: "Jost Variable", Jost, "Century Gothic", system-ui, sans-serif;
+
+  /* Cinco tamaños, ni uno más */
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --step-display: clamp(2.5rem, 1rem + 6vw, 6.5rem);
+
+  /* Marco: un par de márgenes iguales en todo el sitio */
+  --margen: clamp(1.25rem, 3.2vw, 3rem);
+  --seccion: clamp(6rem, 12vw, 13rem);
+  --columna: 36rem;
+
+  /* Fotografías en la sala oscura: algo más bajas de luz que el original */
+  --foto: brightness(0.86) contrast(1.05);
+}

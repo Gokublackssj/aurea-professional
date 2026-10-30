@@ -1,0 +1,269 @@
+---
+import Base from "../../layouts/Base.astro";
+import Foto from "../../components/Foto.astro";
+import Pregunta from "../../components/Pregunta.astro";
+import { habitaciones, totalLlaves, euros } from "../../data/habitaciones";
+import { ruta } from "../../lib/ruta";
+
+const incluido = [
+  ["Desayuno", "Hasta las doce, en la habitación, la terraza o la Mesa de Lumbre."],
+  ["Termas", "Piscina de agua de mar templada, sauna de piedra y baño de vapor, de 8:00 a 21:00."],
+  ["La poza", "Acceso por los 112 escalones a la poza de marea y a la cala de arena negra."],
+  ["Traslado", "Desde el aeropuerto, incluido a partir de tres noches."],
+  ["Hoja de la tarde", "Cada día, bajo la puerta: la hora del sol, las mareas y lo que hay en la lonja."],
+  ["Silencio", "No hay televisores. Hay discos, libros y un ventanal al poniente."],
+];
+---
+
+<Base title="Habitaciones" description="Veintidós llaves en cuatro formas de mirar el mar: estudios, suites y la Residencia Aurea.">
+  <section class="cabeza marco" aria-labelledby="titulo">
+    <h1 id="titulo">Habitaciones</h1>
+    <div class="cabeza-fila">
+      <p class="entradilla">
+        {totalLlaves} llaves en cuatro formas de mirar el mar. Todas con desayuno, termas y la misma puesta de sol delante.
+      </p>
+      <ul class="indice">
+        {
+          habitaciones.map((h) => (
+            <li>
+              <a href={`#${h.slug}`}>{h.nombre}</a>
+              <span>desde {euros(h.precio)}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {
+    habitaciones.map((h, i) => (
+      <section id={h.slug} class:list={["habitacion", "marco", { invertida: i % 2 === 1 }]} aria-labelledby={`${h.slug}-titulo`}>
+        <a class="habitacion-foto" href={ruta(`habitaciones/${h.slug}`)} tabindex="-1" aria-hidden="true">
+          <Foto foto={h.fotos[0]} sizes="(min-width: 48rem) 58vw, 100vw" anchos={[640, 960, 1280, 1600, 2000]} />
+        </a>
+        <div class="habitacion-texto">
+          <h2 id={`${h.slug}-titulo`}>{h.nombre}</h2>
+          <p class="habitacion-resumen">{h.resumen}</p>
+          <dl>
+            <div>
+              <dt>Superficie</dt>
+              <dd>{h.metros} m²</dd>
+            </div>
+            <div>
+              <dt>Huéspedes</dt>
+              <dd>Hasta {h.huespedes}</dd>
+            </div>
+            <div>
+              <dt>Cama</dt>
+              <dd>{h.cama}</dd>
+            </div>
+            <div>
+              <dt>Llaves</dt>
+              <dd>{h.llaves}</dd>
+            </div>
+          </dl>
+          <p class="habitacion-precio">
+            Desde <strong>{euros(h.precio)}</strong> la noche
+          </p>
+          <a class="enlace" href={ruta(`habitaciones/${h.slug}`)}>
+            Ver {h.conArticulo}
+          </a>
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="incluido marco" aria-labelledby="incluido-titulo">
+    <h2 id="incluido-titulo">Siempre incluido</h2>
+    <dl>
+      {
+        incluido.map(([t, d]) => (
+          <div>
+            <dt>{t}</dt>
+            <dd>{d}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <Pregunta arriba="¿Qué noche" abajo="te esperamos?" />
+</Base>
+
+<style>
+  .cabeza {
+    padding-block: clamp(3rem, 8vw, 7rem) var(--seccion);
+  }
+
+  h1 {
+    font-size: 15.5vw;
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+  }
+
+  .cabeza-fila {
+    display: grid;
+    grid-template-columns: minmax(0, 32rem) minmax(0, 26rem);
+    justify-content: space-between;
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .entradilla {
+    font-size: var(--step-lead);
+    line-height: 1.4;
+  }
+
+  .indice li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.4rem;
+  }
+
+  .indice a {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    text-decoration: none;
+  }
+
+  .indice a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+  }
+
+  .indice span {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .habitacion {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: clamp(2rem, 5vw, 6rem);
+    align-items: end;
+    scroll-margin-top: 2rem;
+  }
+
+  .habitacion + .habitacion {
+    margin-top: var(--seccion);
+  }
+
+  .habitacion-foto :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .invertida {
+    grid-template-columns: 5fr 6fr;
+    align-items: start;
+  }
+
+  .invertida .habitacion-foto {
+    order: 2;
+  }
+
+  .invertida .habitacion-foto :global(img) {
+    aspect-ratio: 4 / 5;
+  }
+
+  .habitacion-texto {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+    max-width: 30rem;
+  }
+
+  .invertida .habitacion-texto {
+    padding-top: 12vh;
+  }
+
+  .habitacion-texto h2 {
+    font-size: var(--step-head);
+  }
+
+  .habitacion-resumen {
+    font-size: var(--step-lead);
+    line-height: 1.4;
+  }
+
+  .habitacion-texto dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+    width: 100%;
+  }
+
+  dt {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .habitacion-precio {
+    font-size: var(--step-body);
+  }
+
+  .habitacion-precio strong {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    font-weight: 500;
+  }
+
+  .incluido {
+    display: grid;
+    grid-template-columns: 4fr 8fr;
+    gap: 2rem clamp(2rem, 5vw, 6rem);
+    margin-top: var(--seccion);
+    padding-block: clamp(4rem, 8vw, 7rem);
+    background: var(--surface);
+  }
+
+  .incluido h2 {
+    font-size: var(--step-head);
+  }
+
+  .incluido dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem clamp(2rem, 4vw, 4rem);
+  }
+
+  .incluido dt {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 47.99rem) {
+    h1 {
+      font-size: 15vw;
+    }
+
+    .cabeza-fila,
+    .habitacion,
+    .invertida,
+    .incluido,
+    .incluido dl {
+      grid-template-columns: 1fr;
+    }
+
+    .invertida .habitacion-foto {
+      order: 0;
+    }
+
+    .invertida .habitacion-texto {
+      padding-top: 0;
+    }
+
+    .habitacion-foto {
+      margin-inline: calc(-1 * var(--margen));
+    }
+  }
+</style>

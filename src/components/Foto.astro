@@ -1,0 +1,38 @@
+---
+// Una fotografía del sitio: AVIF y WebP a varios anchos, con sus dimensiones
+// para que no haya saltos de maquetación. `prioridad` solo para la imagen
+// principal de cada página (LCP). `transicion` da nombre a la foto para las
+// transiciones entre páginas (View Transitions): la misma foto en dos páginas
+// con el mismo nombre viaja de una posición a otra al navegar.
+import { Picture } from "astro:assets";
+import { fotos, type ClaveFoto } from "../data/fotos";
+
+interface Props {
+  foto: ClaveFoto;
+  sizes: string;
+  anchos?: number[];
+  prioridad?: boolean;
+  class?: string;
+  alt?: string;
+  transicion?: string;
+}
+
+const { foto, sizes, anchos = [480, 800, 1200, 1600, 2000], prioridad = false, class: clase, alt, transicion } = Astro.props;
+const { src, alt: altPorDefecto } = fotos[foto];
+const widths = anchos.filter((a) => a <= src.width);
+---
+
+<Picture
+  src={src}
+  alt={alt ?? altPorDefecto}
+  formats={["avif", "webp"]}
+  fallbackFormat="webp"
+  widths={widths.length ? widths : [src.width]}
+  sizes={sizes}
+  quality={72}
+  loading={prioridad ? "eager" : "lazy"}
+  fetchpriority={prioridad ? "high" : undefined}
+  decoding={prioridad ? "sync" : "async"}
+  class:list={["foto", clase]}
+  style={transicion ? `view-transition-name: ${transicion}` : undefined}
+/>

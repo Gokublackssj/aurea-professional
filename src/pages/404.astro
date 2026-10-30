@@ -1,0 +1,30 @@
+---
+import Base from "../layouts/Base.astro";
+import { ruta } from "../lib/ruta";
+---
+
+<Base title="Página no encontrada" description="Esta página no existe.">
+  <section class="nada marco">
+    <h1>Esta puerta no lleva a ninguna parte</h1>
+    <p>Pero la casa sigue aquí, y el sol se pone a la hora de siempre.</p>
+    <a class="boton boton-principal" href={ruta("")}>Volver al inicio</a>
+  </section>
+</Base>
+
+<style>
+  .nada {
+    display: grid;
+    justify-items: start;
+    gap: 2rem;
+    padding-block: clamp(4rem, 12vw, 10rem) 0;
+  }
+
+  h1 {
+    font-size: var(--step-display);
+    max-width: 14ch;
+  }
+
+  p {
+    font-size: var(--step-lead);
+  }
+</style>

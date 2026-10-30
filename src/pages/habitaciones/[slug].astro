@@ -1,0 +1,310 @@
+---
+import type { GetStaticPaths } from "astro";
+import Base from "../../layouts/Base.astro";
+import Foto from "../../components/Foto.astro";
+import Pregunta from "../../components/Pregunta.astro";
+import { habitaciones, euros, type Habitacion } from "../../data/habitaciones";
+import { ruta } from "../../lib/ruta";
+
+export const getStaticPaths = (() =>
+  habitaciones.map((habitacion) => ({ params: { slug: habitacion.slug }, props: { habitacion } }))) satisfies GetStaticPaths;
+
+interface Props {
+  habitacion: Habitacion;
+}
+
+const { habitacion: h } = Astro.props;
+const otras = habitaciones.filter((o) => o.slug !== h.slug);
+const reservar = ruta(`reservas?habitacion=${h.slug}`);
+
+const datos = [
+  ["Superficie", `${h.metros} m²`],
+  ...(h.exterior ? [["Exterior", h.exterior]] : []),
+  ["Huéspedes", `Hasta ${h.huespedes}`],
+  ["Cama", h.cama],
+  ["Vista", h.vista],
+  ["En la casa", `${h.llaves} ${h.llaves === 1 ? "llave" : "llaves"}`],
+];
+---
+
+<Base title={h.nombre} description={`${h.nombre} en Aurea: ${h.resumen}`}>
+  <section class="portada" aria-labelledby="titulo">
+    <div class="portada-foto">
+      <Foto foto={h.fotos[0]} sizes="100vw" prioridad anchos={[640, 960, 1280, 1920]} />
+    </div>
+    <div class="portada-fila marco">
+      <div class="portada-titulo">
+        <h1 id="titulo">{h.nombre}</h1>
+        <p>{h.resumen}</p>
+      </div>
+      <div class="portada-reserva">
+        <p>
+          Desde <strong>{euros(h.precio)}</strong> la noche
+        </p>
+        <a class="boton boton-principal" href={reservar}>Reservar</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="relato marco" aria-labelledby="relato-titulo">
+    <h2 id="relato-titulo" class="solo-lector">La habitación</h2>
+    <div class="relato-texto">
+      <p class="primero">{h.entradilla}</p>
+      {h.descripcion.map((p) => <p>{p}</p>)}
+    </div>
+    <dl class="datos">
+      {
+        datos.map(([t, d]) => (
+          <div>
+            <dt>{t}</dt>
+            <dd>{d}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="detalles marco" aria-labelledby="detalles-titulo">
+    <h2 id="detalles-titulo" class="solo-lector">Detalles</h2>
+    <Foto foto={h.fotos[1]} sizes="(min-width: 48rem) 54vw, 100vw" anchos={[640, 960, 1280, 1600]} class="detalle-a" />
+    <Foto foto={h.fotos[2]} sizes="(min-width: 48rem) 30vw, 70vw" anchos={[480, 800, 1000]} class="detalle-b" />
+  </section>
+
+  <section class="equipo marco" aria-labelledby="equipo-titulo">
+    <h2 id="equipo-titulo">En la habitación</h2>
+    <ul>
+      {h.equipamiento.map((e) => <li>{e}</li>)}
+    </ul>
+    <p class="equipo-nota">Desayuno, termas y acceso a la poza incluidos. Traslado desde el aeropuerto a partir de tres noches.</p>
+  </section>
+
+  <section class="otras marco" aria-labelledby="otras-titulo">
+    <h2 id="otras-titulo">Las otras habitaciones</h2>
+    <ul>
+      {
+        otras.map((o) => (
+          <li>
+            <a href={ruta(`habitaciones/${o.slug}`)}>
+              <Foto foto={o.fotos[0]} sizes="(min-width: 48rem) 30vw, 100vw" anchos={[480, 800, 1000]} />
+              <span class="otra-nombre">{o.nombre}</span>
+              <span class="otra-datos">
+                {o.metros} m² · desde {euros(o.precio)}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <Pregunta arriba="¿Cuándo" abajo="llegas?" reservar={reservar} />
+</Base>
+
+<style>
+  .portada-foto {
+    height: 60svh;
+    overflow: hidden;
+  }
+
+  .portada-foto :global(picture),
+  .portada-foto :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .portada-foto :global(img) {
+    object-fit: cover;
+  }
+
+  .portada-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem 3rem;
+    padding-top: 1.5rem;
+  }
+
+  .portada-titulo {
+    display: grid;
+    gap: 1rem;
+  }
+
+  h1 {
+    font-size: clamp(3rem, 1rem + 8vw, 9.5rem);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+  }
+
+  .portada-titulo p {
+    font-size: var(--step-lead);
+    line-height: 1.35;
+  }
+
+  .portada-reserva {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .portada-reserva strong {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    font-weight: 500;
+  }
+
+  .relato {
+    display: grid;
+    grid-template-columns: 7fr 4fr;
+    gap: 2rem clamp(2rem, 6vw, 8rem);
+    margin-top: var(--seccion);
+  }
+
+  .relato-texto {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 40rem;
+  }
+
+  .primero {
+    font-family: var(--display);
+    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  .datos {
+    display: grid;
+    gap: 1.25rem;
+    align-content: start;
+  }
+
+  dt {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .detalles {
+    display: grid;
+    grid-template-columns: 7fr 4fr;
+    gap: clamp(1rem, 3vw, 3rem);
+    align-items: start;
+    margin-top: var(--seccion);
+  }
+
+  .detalles :global(.detalle-a) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .detalles :global(.detalle-b) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    margin-top: 30%;
+  }
+
+  .equipo {
+    display: grid;
+    grid-template-columns: 4fr 8fr;
+    gap: 2rem clamp(2rem, 5vw, 6rem);
+    margin-top: var(--seccion);
+    padding-block: clamp(4rem, 8vw, 7rem);
+    background: var(--surface);
+  }
+
+  .equipo h2,
+  .otras h2 {
+    font-size: var(--step-head);
+  }
+
+  .equipo ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 3rem;
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    line-height: 1.25;
+  }
+
+  .equipo-nota {
+    grid-column: 2;
+    color: var(--muted);
+  }
+
+  .otras {
+    margin-top: var(--seccion);
+  }
+
+  .otras ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 2rem 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .otras a {
+    display: grid;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .otras a :global(picture) {
+    margin-bottom: 0.5rem;
+  }
+
+  .otras a :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .otra-nombre {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    line-height: 1.1;
+  }
+
+  .otras a:hover .otra-nombre {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+  }
+
+  .otra-datos {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  @media (max-width: 47.99rem) {
+    .portada-foto {
+      height: 56svh;
+    }
+
+    .portada-reserva {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .relato,
+    .detalles,
+    .equipo,
+    .equipo ul {
+      grid-template-columns: 1fr;
+    }
+
+    .detalles :global(.detalle-b) {
+      width: 70%;
+      margin: 0 0 0 auto;
+    }
+
+    .equipo-nota {
+      grid-column: 1;
+    }
+  }
+</style>

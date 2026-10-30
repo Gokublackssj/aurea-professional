@@ -1,0 +1,504 @@
+---
+import Base from "../layouts/Base.astro";
+import Foto from "../components/Foto.astro";
+import Pregunta from "../components/Pregunta.astro";
+import type { ClaveFoto } from "../data/fotos";
+import { euros } from "../data/habitaciones";
+
+const termas = [
+  ["Piscina de agua de mar", "Templada a 30 °C, bajo una bóveda de madera de tea."],
+  ["Sauna de piedra", "Basalto del propio cabo, calentado con leña de almendro."],
+  ["Baño de vapor", "Con hierbas del barranco: romero, poleo y salvia."],
+  ["Horario", "Todos los días de 8:00 a 21:00. Incluido en la estancia."],
+];
+
+const tratamientos = [
+  ["Piedra volcánica", "60 min", 140],
+  ["Sal y aceite de almendra", "75 min", 165],
+  ["Masaje a cuatro manos", "90 min", 260],
+  ["Ritual de la hora áurea, en la terraza", "120 min", 320],
+] as const;
+
+const menu = [
+  ["Lapas del cabo", "a la plancha, con mantequilla de algas"],
+  ["Tomates del valle", "con queso de cabra curado en ceniza"],
+  ["Cherne a la brasa", "con mojo de cilantro y papas de la ladera"],
+  ["Cabrito de la cumbre", "asado ocho horas en el horno de leña"],
+  ["Gofio y miel de palma", "helado, con almendras tostadas"],
+];
+
+interface Momento {
+  titulo: string;
+  texto: string;
+  dato: string;
+  foto: ClaveFoto;
+  aire: number;
+}
+
+// `aire`: espacio en px entre el texto y la foto; varía para que las fotos
+// suban y bajen a lo largo de la fila.
+const carta: Momento[] = [
+  { titulo: "La poza al amanecer", texto: "Baño en la poza de marea antes del desayuno, con toallas y café esperando arriba.", dato: "7:30 · Incluido", foto: "diaPoza", aire: 96 },
+  { titulo: "En kayak, a la cueva", texto: "Dos horas bordeando el acantilado hasta una cueva marina que solo se alcanza por agua.", dato: "2 h · 60 € por persona", foto: "costaRoca", aire: 136 },
+  { titulo: "Con los pescadores", texto: "Salida al alba en la barca del puerto. Lo que se pesca, se cocina al mediodía.", dato: "4 h · 90 € por persona", foto: "costaBarca", aire: 80 },
+  { titulo: "Cena en la cala", texto: "Una mesa en la arena negra, faroles y el menú de la Mesa de Lumbre servido abajo.", dato: "Bajo petición · 220 € por persona", foto: "costaPlayaNegra", aire: 120 },
+  { titulo: "Vinos de ceniza", texto: "Cata de cinco vinos de viñedos plantados en hoyos sobre la lava.", dato: "1 h · 45 € por persona", foto: "materialBasalto", aire: 88 },
+  { titulo: "Los 112 escalones", texto: "Paseo guiado por el sendero del cabo, de la casa al faro viejo y vuelta por la cala.", dato: "90 min · Incluido", foto: "casaEscalera", aire: 140 },
+  { titulo: "Noche de estrellas", texto: "Los viernes en la azotea, con telescopio y una astrónoma de la isla.", dato: "Viernes, 22:00 · Incluido", foto: "nocheCielo", aire: 104 },
+];
+---
+
+<Base title="Experiencias" description="Termas de agua de mar, la Mesa de Lumbre, la cala de arena negra y el cielo del cabo." fotoPie="costaCabo">
+  <section class="cabeza marco" aria-labelledby="titulo">
+    <h1 id="titulo">Experiencias</h1>
+    <p class="entradilla">Termas de agua de mar, la Mesa de Lumbre, la cala y el cielo del cabo: todo a menos de 112 escalones.</p>
+    <figure>
+      <Foto foto="spaPiscina" sizes="(min-width: 48rem) 56vw, 100vw" prioridad anchos={[640, 960, 1280, 1600]} />
+      <figcaption>La piscina de las termas, bajo la bóveda de madera de tea.</figcaption>
+    </figure>
+  </section>
+
+  <section class="termas marco" aria-labelledby="termas-titulo">
+    <Foto foto="spaTumbonas" sizes="(min-width: 48rem) 50vw, 100vw" anchos={[640, 960, 1280, 1600]} class="termas-foto" />
+    <div class="termas-texto">
+      <h2 id="termas-titulo">Las termas</h2>
+      <p class="termas-entrada">Agua del Atlántico, filtrada y templada, bajo la roca del cabo. Se baja desde el vestíbulo por una escalera de basalto.</p>
+      <dl>
+        {
+          termas.map(([t, d]) => (
+            <div>
+              <dt>{t}</dt>
+              <dd>{d}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <h3>Tratamientos</h3>
+      <table>
+        <caption class="solo-lector">Tratamientos de las termas, con su duración y precio</caption>
+        <tbody>
+          {
+            tratamientos.map(([n, d, p]) => (
+              <tr>
+                <th scope="row">{n}</th>
+                <td>{d}</td>
+                <td class="precio">{euros(p)}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mesa marco" aria-labelledby="mesa-titulo">
+    <div class="mesa-texto">
+      <h2 id="mesa-titulo">Mesa de Lumbre</h2>
+      <p>
+        Nueve mesas frente al ventanal y una cocina de leña. El menú cambia cada día según lo que entra en la lonja del puerto y lo que da la
+        huerta de la ladera. Cena de 19:30 a 22:30; los huéspedes tienen mesa garantizada.
+      </p>
+      <h3>Lo que hay esta semana</h3>
+      <ul class="menu">
+        {
+          menu.map(([plato, detalle]) => (
+            <li>
+              <span class="plato">{plato}</span>
+              <span class="detalle">{detalle}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mesa-precio">Menú de cinco pasos, 95 € por persona. Maridaje de vinos de la isla, 55&nbsp;€.</p>
+    </div>
+    <div class="mesa-fotos">
+      <Foto foto="mesaPlato" sizes="(min-width: 48rem) 30vw, 60vw" anchos={[480, 800, 1000]} class="mesa-a" />
+      <Foto foto="mesaVino" sizes="(min-width: 48rem) 22vw, 50vw" anchos={[400, 640, 800]} class="mesa-b" />
+    </div>
+  </section>
+
+  <section class="carta" aria-labelledby="carta-titulo">
+    <div class="carta-cabeza marco">
+      <h2 id="carta-titulo">A la carta</h2>
+      <div class="carta-botones">
+        <button class="boton" type="button" data-fila="atras" aria-label="Ver las anteriores" aria-controls="carta-fila">←</button>
+        <button class="boton" type="button" data-fila="adelante" aria-label="Ver las siguientes" aria-controls="carta-fila">→</button>
+      </div>
+    </div>
+    <div class="carta-barra marco" aria-hidden="true"><span></span></div>
+    <ul id="carta-fila" class="carta-fila" tabindex="0" aria-label="Experiencias a la carta">
+      {
+        carta.map((m) => (
+          <li style={`--aire:${m.aire}px`}>
+            <h3>{m.titulo}</h3>
+            <p>{m.texto}</p>
+            <p class="dato">{m.dato}</p>
+            <Foto foto={m.foto} sizes="280px" anchos={[280, 560]} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="cielo" aria-labelledby="cielo-titulo">
+    <Foto foto="nocheCielo" sizes="100vw" anchos={[800, 1200, 1600, 2000]} alt="" class="cielo-foto" />
+    <div class="cielo-texto marco">
+      <h2 id="cielo-titulo">El cielo del cabo</h2>
+      <p>
+        No hay una farola en nueve kilómetros. Las noches despejadas, la Vía Láctea se ve a simple vista desde la azotea, y los viernes una
+        astrónoma de la isla trae el telescopio grande y una carta del cielo de esa misma noche.
+      </p>
+    </div>
+  </section>
+
+  <Pregunta arriba="¿Qué día" abajo="vienes?" />
+</Base>
+
+<script>
+  import "../scripts/fila";
+</script>
+
+<style>
+  h2 {
+    font-size: var(--step-head);
+  }
+
+  h3 {
+    font-size: var(--step-lead);
+  }
+
+  dt {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  /* Cabeza: una sola foto encendida en la sala oscura */
+  .cabeza {
+    display: grid;
+    justify-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-top: clamp(3rem, 7vw, 6rem);
+    text-align: center;
+  }
+
+  h1 {
+    font-size: var(--step-display);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+
+  .entradilla {
+    max-width: 34rem;
+    margin-top: -1rem;
+    font-size: var(--step-lead);
+    line-height: 1.4;
+  }
+
+  .cabeza figure {
+    display: grid;
+    gap: 1.25rem;
+    width: min(56vw, 64rem);
+  }
+
+  .cabeza :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  figcaption {
+    font-size: var(--step-body);
+  }
+
+  /* Termas: foto a la izquierda a media página, texto a la derecha */
+  .termas {
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: clamp(2rem, 6vw, 7rem);
+    margin-top: var(--seccion);
+    align-items: start;
+  }
+
+  .termas :global(.termas-foto) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    position: sticky;
+    top: 2rem;
+  }
+
+  .termas-texto {
+    display: grid;
+    gap: 2rem;
+    padding-top: 4rem;
+  }
+
+  .termas-entrada {
+    font-size: var(--step-lead);
+    line-height: 1.4;
+  }
+
+  .termas dl {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th,
+  td {
+    padding: 0.6rem 0;
+    text-align: left;
+    font-weight: 400;
+    vertical-align: baseline;
+  }
+
+  td {
+    color: var(--muted);
+    padding-left: 1rem;
+    white-space: nowrap;
+  }
+
+  .precio {
+    text-align: right;
+    color: var(--ink);
+  }
+
+  /* Mesa: texto ancho y dos fotos escalonadas */
+  .mesa {
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: clamp(2rem, 6vw, 7rem);
+    margin-top: var(--seccion);
+    padding-block: clamp(4rem, 8vw, 7rem);
+    background: var(--surface);
+  }
+
+  .mesa-texto {
+    display: grid;
+    gap: 1.75rem;
+    align-content: start;
+    max-width: 38rem;
+  }
+
+  .menu {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .menu li {
+    display: grid;
+  }
+
+  .plato {
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    line-height: 1.2;
+  }
+
+  .detalle {
+    color: var(--muted);
+  }
+
+  .mesa-precio {
+    color: var(--muted);
+  }
+
+  .mesa-fotos {
+    position: relative;
+  }
+
+  .mesa-fotos :global(.mesa-a) {
+    width: 78%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .mesa-fotos :global(.mesa-b) {
+    width: 56%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    margin: -22% 0 0 auto;
+    position: relative;
+  }
+
+  /* A la carta: fila de momentos que se desplaza en horizontal */
+  .carta {
+    margin-top: var(--seccion);
+  }
+
+  .carta-cabeza {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .carta-botones {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .carta-botones .boton {
+    width: 3rem;
+    min-height: 3rem;
+    padding: 0;
+    font-size: var(--step-lead);
+  }
+
+  .carta-botones .boton:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  :global(html:not(.js)) .carta-botones {
+    display: none;
+  }
+
+  .carta-barra {
+    margin-top: 1.5rem;
+  }
+
+  .carta-barra span {
+    display: block;
+    height: 6px;
+    background: var(--surface);
+  }
+
+  .carta-barra span::after {
+    content: "";
+    display: block;
+    width: var(--avance, 25%);
+    height: 100%;
+    background: var(--ink);
+  }
+
+  .carta-fila {
+    display: flex;
+    gap: 2rem;
+    margin: 2.5rem var(--margen) 0;
+    padding: 0 0 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .carta-fila::-webkit-scrollbar {
+    display: none;
+  }
+
+  .carta-fila li {
+    flex: 0 0 280px;
+    display: flex;
+    flex-direction: column;
+    scroll-snap-align: start;
+  }
+
+  .carta-fila h3 {
+    font-family: var(--text);
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+
+  .carta-fila p {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .carta-fila .dato {
+    color: var(--ink);
+  }
+
+  .carta-fila :global(picture) {
+    margin-top: var(--aire);
+  }
+
+  .carta-fila :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  /* Cielo: foto a sangre con el texto abajo, sobre un velo neutro */
+  .cielo {
+    position: relative;
+    display: grid;
+    align-items: end;
+    min-height: 100svh;
+    margin-top: var(--seccion);
+  }
+
+  .cielo > :global(picture) {
+    position: absolute;
+    inset: 0;
+  }
+
+  .cielo :global(.cielo-foto) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cielo::after {
+    content: "";
+    position: absolute;
+    inset: 45% 0 0;
+    background: linear-gradient(rgb(16 14 12 / 0), rgb(16 14 12 / 0.85)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
+  }
+
+  .cielo-texto {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1.25rem;
+    max-width: calc(var(--columna) + 6rem);
+    padding-bottom: clamp(3rem, 7vw, 6rem);
+  }
+
+  @media (max-width: 47.99rem) {
+    .cabeza figure {
+      width: 100%;
+    }
+
+    .termas,
+    .mesa {
+      grid-template-columns: 1fr;
+    }
+
+    .termas :global(.termas-foto) {
+      position: static;
+    }
+
+    .termas-texto {
+      padding-top: 0;
+    }
+
+    .carta-botones {
+      display: none;
+    }
+
+    .carta-fila {
+      gap: 1rem;
+    }
+
+    .carta-fila li {
+      flex-basis: 72vw;
+    }
+
+    .carta-fila :global(picture) {
+      margin-top: calc(var(--aire) / 2.5);
+    }
+  }
+</style>

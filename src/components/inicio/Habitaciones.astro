@@ -1,0 +1,191 @@
+---
+// Las habitaciones como un cartel de una sola talla: nombre, vista, superficie
+// y precio en columnas fijas, sobre el único campo claro de la página (la cal).
+// Debajo, las cuatro habitaciones en fotografía, cada una con su enlace.
+import Foto from "../Foto.astro";
+import { habitaciones, totalLlaves, euros } from "../../data/habitaciones";
+import { ruta } from "../../lib/ruta";
+---
+
+<section class="cartel marco" aria-labelledby="cartel-titulo">
+  <h2 id="cartel-titulo" class="cartel-titulo">Habitaciones · {totalLlaves} llaves</h2>
+  <table>
+    <caption class="solo-lector">Las cuatro habitaciones de Aurea, con su vista, superficie y precio por noche</caption>
+    <thead class="solo-lector">
+      <tr>
+        <th scope="col">Habitación</th>
+        <th scope="col">Vista</th>
+        <th scope="col">Superficie</th>
+        <th scope="col">Desde, por noche</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        habitaciones.map((h) => (
+          <tr>
+            <th scope="row">
+              <a href={ruta(`habitaciones/${h.slug}`)}>{h.nombre}</a>
+            </th>
+            <td class="vista">{h.vista}</td>
+            <td>{h.metros} m²</td>
+            <td class="precio">{euros(h.precio)}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+  <ul class="tira">
+    {
+      habitaciones.map((h) => (
+        <li>
+          <a href={ruta(`habitaciones/${h.slug}`)}>
+            <Foto foto={h.fotos[0]} sizes="(min-width: 48rem) 23vw, 46vw" anchos={[400, 640, 900]} />
+            <span>
+              {h.llaves} {h.llaves === 1 ? "llave" : "llaves"} · hasta {h.huespedes} huéspedes
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="cartel-pie">
+    Precios por noche para dos personas, con desayuno y termas incluidos.
+    <a class="enlace" href={ruta("habitaciones")}>Ver las habitaciones</a>
+  </p>
+</section>
+
+<style>
+  .cartel {
+    margin-top: var(--seccion);
+    padding-block: clamp(4rem, 9vw, 8rem);
+    background: var(--field);
+    color: var(--field-ink);
+    font-size: clamp(1.375rem, 0.8rem + 2vw, 2.75rem);
+    font-family: var(--display);
+  }
+
+  .cartel-titulo {
+    font-size: inherit;
+    line-height: 1.5;
+    color: var(--field-muted);
+    margin-bottom: 0.5em;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th,
+  td {
+    padding: 0;
+    font-weight: 500;
+    text-align: left;
+    line-height: 1.5;
+    vertical-align: baseline;
+  }
+
+  tbody th {
+    width: 33%;
+  }
+
+  .vista {
+    width: 40%;
+    padding-right: 1em;
+    font-family: var(--text);
+    font-size: var(--step-body);
+    font-weight: 400;
+    color: var(--field-muted);
+  }
+
+  .precio {
+    text-align: right;
+  }
+
+  tbody a {
+    text-decoration: none;
+  }
+
+  tbody a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  .tira {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: clamp(3rem, 6vw, 5rem);
+    font-family: var(--text);
+    font-size: var(--step-small);
+  }
+
+  .tira a {
+    display: grid;
+    gap: 0.75rem;
+    text-decoration: none;
+  }
+
+  .tira :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .tira span {
+    color: var(--field-muted);
+  }
+
+  .cartel-pie {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-top: 2.5rem;
+    font-family: var(--text);
+    font-size: var(--step-body);
+  }
+
+  .cartel-pie .enlace:hover {
+    color: inherit;
+  }
+
+  @media (max-width: 47.99rem) {
+    table,
+    tbody,
+    tr,
+    th,
+    td {
+      display: block;
+      width: auto !important;
+    }
+
+    tr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: 1rem;
+      padding-block: 0.6rem;
+    }
+
+    tbody th {
+      grid-column: 1 / -1;
+      font-size: 1.375rem;
+    }
+
+    td {
+      font-family: var(--text);
+      font-size: var(--step-small);
+      color: var(--field-muted);
+    }
+
+    .vista {
+      grid-column: 1 / -1;
+      padding: 0;
+    }
+
+    .tira {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

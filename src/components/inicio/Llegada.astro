@@ -1,0 +1,209 @@
+---
+// Banda de paneles desiguales: el camino desde la carretera hasta el agua,
+// contado en cuatro cortes de una misma vista.
+// Movimiento (src/scripts/motion/llegada.ts): en escritorio la escena se fija
+// y el primer panel crece hasta ocupar la pantalla; la «lente», el «marco» y
+// la frase final solo existen para esa escena y no se muestran sin ella.
+import Foto from "../Foto.astro";
+
+const paneles = [
+  { foto: "costaCabo", crece: 5 },
+  { foto: "casaEscalera", crece: 2 },
+  { foto: "casaArco", crece: 3 },
+  { foto: "casaPiscina", crece: 2 },
+] as const;
+---
+
+<section class="llegada" aria-labelledby="llegada-titulo" data-escena="llegada">
+  <div class="llegada-escena">
+    <h2 id="llegada-titulo" class="llegada-titulo marco">La llegada</h2>
+    <div class="banda">
+      {
+        paneles.map((p, i) => (
+          <figure class="panel" style={`--crece:${p.crece}`}>
+            <Foto foto={p.foto} sizes={i === 0 ? "(min-width: 48rem) 42vw, 64vw" : "(min-width: 48rem) 25vw, 64vw"} anchos={[480, 800, 1200, 1600]} />
+            {i === 0 && <figcaption class="panel-titulo">La carretera termina en la puerta</figcaption>}
+          </figure>
+        ))
+      }
+    </div>
+    <p class="llegada-pie marco">
+      Cincuenta minutos por la carretera de la costa desde el aeropuerto. El último kilómetro es nuestro: una pista de picón negro
+      entre tabaibas que acaba en un portón de madera.
+    </p>
+    <div class="llegada-lente" aria-hidden="true">
+      <Foto foto="costaCabo" sizes="100vw" alt="" anchos={[960, 1280, 1600, 2000]} />
+      <div class="llegada-velo"></div>
+    </div>
+    <div class="llegada-marco" aria-hidden="true"></div>
+    <p class="llegada-frase" aria-hidden="true">El último kilómetro<br />es nuestro</p>
+  </div>
+</section>
+
+<style>
+  .llegada {
+    padding-top: var(--seccion);
+  }
+
+  .llegada-escena {
+    position: relative;
+  }
+
+  .llegada-titulo {
+    padding-left: calc(var(--margen) + 16.66vw);
+    margin-bottom: 4rem;
+    font-size: var(--step-head);
+  }
+
+  .banda {
+    display: flex;
+    height: 68svh;
+  }
+
+  .panel {
+    position: relative;
+    flex: var(--crece) 1 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .panel :global(picture),
+  .panel :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .panel :global(img) {
+    object-fit: cover;
+  }
+
+  .panel-titulo {
+    position: absolute;
+    inset: 0 auto auto 0;
+    max-width: 16ch;
+    padding: 1.5rem 2rem 2.5rem var(--margen);
+    font-family: var(--display);
+    font-size: var(--step-lead);
+    line-height: 1.05;
+    /* Velo neutro solo en la esquina del texto */
+    background: radial-gradient( /* taste-skill-ignore: velo neutro bajo texto sobre foto */
+      120% 100% at 0 0,
+      rgb(16 14 12 / 0.7),
+      rgb(16 14 12 / 0) 75%
+    );
+  }
+
+  .llegada-pie {
+    max-width: calc(var(--columna) + 2 * var(--margen));
+    margin-top: 1.5rem;
+  }
+
+  /* Piezas de la escena: no existen fuera de ella */
+  .llegada-lente,
+  .llegada-marco,
+  .llegada-frase {
+    display: none;
+  }
+
+  /* Escena activa (escritorio con movimiento): una pantalla exacta, fijada */
+  .llegada.es-escena .llegada-escena {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .llegada.es-escena .banda {
+    height: 58svh;
+  }
+
+  .llegada.es-escena .llegada-titulo {
+    margin-bottom: 3rem;
+  }
+
+  /* El primer panel lo sustituye la lente, que es la que crece */
+  .llegada.es-escena .panel:first-child :global(picture) {
+    visibility: hidden;
+  }
+
+  .llegada.es-escena .llegada-lente {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .llegada-lente :global(picture),
+  .llegada-lente :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .llegada-lente :global(img) {
+    object-fit: cover;
+    object-position: 30% 50%;
+  }
+
+  .llegada-velo {
+    position: absolute;
+    inset: 0;
+    background: #050403;
+    opacity: 0;
+  }
+
+  .llegada.es-escena .llegada-marco {
+    display: block;
+    position: absolute;
+    z-index: 3;
+    border: 1px solid rgb(217 162 78 / 0.85);
+    pointer-events: none;
+  }
+
+  .llegada.es-escena .llegada-frase {
+    display: block;
+    position: absolute;
+    z-index: 4;
+    inset: 50% var(--margen) auto;
+    transform: translateY(-50%);
+    font-family: var(--display);
+    font-size: var(--step-display);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  @media (max-width: 47.99rem) {
+    .llegada-titulo {
+      padding-left: var(--margen);
+      margin-bottom: 2rem;
+    }
+
+    /* Dos por dos: la primera fila 64/36 y la segunda 36/64 */
+    .banda {
+      flex-wrap: wrap;
+      height: 84svh;
+    }
+
+    .panel {
+      flex: none;
+      height: 50%;
+    }
+
+    .panel:nth-child(1),
+    .panel:nth-child(4) {
+      width: 64%;
+    }
+
+    .panel:nth-child(2),
+    .panel:nth-child(3) {
+      width: 36%;
+    }
+
+    .panel-titulo {
+      padding: 1rem 1.5rem 2rem var(--margen);
+    }
+  }
+</style>
