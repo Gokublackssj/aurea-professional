@@ -1,9 +1,11 @@
 ---
 // Mapa dibujado del cabo (ficticio): la costa, la carretera que termina en la
 // casa, el sendero de los 112 escalones y la cala. Colores de la paleta.
+// Movimiento: src/scripts/motion/mapa.ts (la carretera se dibuja hasta la
+// casa, aparece el punto de Aurea y luego los nombres).
 ---
 
-<figure class="mapa">
+<figure class="mapa" data-escena="mapa">
   <svg viewBox="0 0 600 520" role="img" aria-labelledby="mapa-titulo mapa-desc">
     <title id="mapa-titulo">Mapa de Cabo Lumbre</title>
     <desc id="mapa-desc">
@@ -19,14 +21,21 @@
     <!-- Cala de arena negra -->
     <path d="M186 360 C180 380 196 404 226 418 C206 400 196 382 196 362 Z" fill="#2c2722"></path>
     <!-- Carretera -->
-    <path d="M600 214 C520 220 470 250 420 248 C370 246 330 230 286 236" fill="none" stroke="#b3a998" stroke-width="3"></path>
+    <path class="mapa-carretera" d="M600 214 C520 220 470 250 420 248 C370 246 330 230 286 236" fill="none" stroke="#b3a998" stroke-width="3"></path>
     <!-- Sendero de los escalones -->
-    <path d="M276 244 C250 268 236 300 214 322 C202 336 196 348 194 358" fill="none" stroke="#b3a998" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"></path>
+    <path
+      class="mapa-sendero"
+      d="M276 244 C250 268 236 300 214 322 C202 336 196 348 194 358"
+      fill="none"
+      stroke="#b3a998"
+      stroke-width="2"
+      stroke-dasharray="2 6"
+      stroke-linecap="round"></path>
     <!-- Faro -->
     <circle cx="300" cy="438" r="5" fill="#b3a998"></circle>
     <!-- Aurea -->
-    <circle cx="276" cy="238" r="9" fill="#d9a24e"></circle>
-    <g font-family="Jost Variable, Jost, sans-serif" font-size="17" fill="#eee7da">
+    <circle class="mapa-aurea" cx="276" cy="238" r="9" fill="#d9a24e"></circle>
+    <g class="mapa-rotulos" font-family="Jost Variable, Jost, sans-serif" font-size="17" fill="#eee7da">
       <text x="296" y="226">Aurea</text>
       <text x="420" y="282">Carretera de la costa</text>
       <text x="222" y="452">Cala</text>

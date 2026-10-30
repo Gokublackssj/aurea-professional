@@ -26,28 +26,38 @@ export function hero(raiz: HTMLElement, c: Condiciones) {
   // Lo que el CSS ocultaba antes del primer pintado pasa a manos de GSAP.
   gsap.set([nombre, fila, cabecera], { visibility: "visible" });
 
+  // La entrada se ve una vez por visita. Si el motor se reconstruye (cambio de
+  // modo, o de escritorio a móvil al girar o redimensionar), el hero ya está
+  // en su sitio y solo se vuelve a crear su reacción al scroll.
+  const yaEntro = raiz.dataset.entrada === "hecha";
+  raiz.dataset.entrada = "hecha";
+
   if (c.reducido) {
     gsap.set([foto, linea], { clearProps: "clipPath,transform" });
-    gsap
-      .timeline({ defaults: { ease: "power1.out" } })
-      .fromTo(nombre, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.2 }, 0.1)
-      .fromTo([fila, ...enlaces], { autoAlpha: 0 }, { autoAlpha: 1, duration: 1, stagger: 0.06 }, 0.4);
+    if (!yaEntro) {
+      gsap
+        .timeline({ defaults: { ease: "power1.out" } })
+        .fromTo(nombre, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.2 }, 0.1)
+        .fromTo([fila, ...enlaces], { autoAlpha: 0 }, { autoAlpha: 1, duration: 1, stagger: 0.06 }, 0.4);
+    }
     gsap.fromTo(velo, { opacity: 0 }, { opacity: 0.6, ease: "none", scrollTrigger: { trigger: raiz, start: "top top", end: "bottom top", scrub: true } });
     return;
   }
 
-  const letras = SplitText.create(nombreTexto, { type: "chars", mask: "chars", aria: "auto" });
-  const lineas = SplitText.create(frase, { type: "lines", mask: "lines", aria: "auto" });
+  if (!yaEntro) {
+    const letras = SplitText.create(nombreTexto, { type: "chars", mask: "chars", aria: "auto" });
+    const lineas = SplitText.create(frase, { type: "lines", mask: "lines", aria: "auto" });
 
-  gsap
-    .timeline({ defaults: { ease: salida } })
-    .fromTo(foto, { clipPath: c.escritorio ? "inset(44% 9% 44% 9%)" : "inset(40% 6% 40% 6%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.8, ease: travesia }, 0)
-    .fromTo(imagen, { scale: 1.32 }, { scale: 1, duration: 2.6 }, 0)
-    .fromTo(linea, { scaleX: 0 }, { scaleX: 1, duration: 1.4, ease: travesia }, 0.75)
-    .fromTo(letras.chars, { yPercent: 130 }, { yPercent: 0, duration: 1.5, stagger: 0.075 }, 0.95)
-    .fromTo(lineas.lines, { yPercent: 150 }, { yPercent: 0, duration: 1.1, stagger: 0.09 }, 1.35)
-    .fromTo(boton, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.9 }, 1.55)
-    .fromTo(enlaces, { autoAlpha: 0, y: -14 }, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.07 }, 1.6);
+    gsap
+      .timeline({ defaults: { ease: salida } })
+      .fromTo(foto, { clipPath: c.escritorio ? "inset(44% 9% 44% 9%)" : "inset(40% 6% 40% 6%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.8, ease: travesia }, 0)
+      .fromTo(imagen, { scale: 1.32 }, { scale: 1, duration: 2.6 }, 0)
+      .fromTo(linea, { scaleX: 0 }, { scaleX: 1, duration: 1.4, ease: travesia }, 0.75)
+      .fromTo(letras.chars, { yPercent: 130 }, { yPercent: 0, duration: 1.5, stagger: 0.075 }, 0.95)
+      .fromTo(lineas.lines, { yPercent: 150 }, { yPercent: 0, duration: 1.1, stagger: 0.09 }, 1.35)
+      .fromTo(boton, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.9 }, 1.55)
+      .fromTo(enlaces, { autoAlpha: 0, y: -14 }, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.07 }, 1.6);
+  }
 
   // Al desplazarse: la foto se acerca, se apaga y el nombre se queda atrás.
   gsap

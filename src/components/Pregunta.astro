@@ -1,6 +1,8 @@
 ---
 // Pregunta a los dos bordes: un campo oscuro de una pantalla, la pregunta
 // partida arriba y abajo, y entre ambas las dos respuestas posibles.
+// Movimiento: src/scripts/motion/pregunta.ts (las dos mitades llegan desde
+// lados opuestos y se encuentran).
 import { sitio } from "../data/sitio";
 import { ruta } from "../lib/ruta";
 
@@ -17,7 +19,7 @@ const letras = Math.max(arriba.length, abajo.length);
 const asunto = encodeURIComponent("Consulta sobre una estancia en Aurea");
 ---
 
-<section class="pregunta marco" aria-labelledby="pregunta-titulo" style={`--letras:${letras}`}>
+<section class="pregunta marco" aria-labelledby="pregunta-titulo" style={`--letras:${letras}`} data-escena="pregunta">
   <h2 id="pregunta-titulo" class="solo-lector">{arriba} {abajo}</h2>
   <p class="linea-arriba" aria-hidden="true">{arriba}</p>
   <p class="linea-abajo" aria-hidden="true">{abajo}</p>
@@ -40,6 +42,8 @@ const asunto = encodeURIComponent("Consulta sobre una estancia en Aurea");
     padding-block: 2rem 1.5rem;
     background: #0a0908;
     text-align: center;
+    /* Las dos mitades entran desde fuera de la pantalla */
+    overflow: hidden;
   }
 
   .linea-arriba,

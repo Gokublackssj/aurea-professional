@@ -17,9 +17,9 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
 ---
 
 <Base title="Reservas" description="Solicita tu estancia en Aurea: fechas, habitación y huéspedes." fotoPie="costaAcantilado">
-  <section class="cabeza marco" aria-labelledby="titulo">
+  <section class="cabeza marco" aria-labelledby="titulo" data-entrada>
     <h1 id="titulo">Reservas</h1>
-    <p class="entradilla">
+    <p class="entradilla" data-entrada-paso>
       Elige fechas y habitación y te respondemos en menos de un día, con la estancia confirmada o la alternativa más cercana.
     </p>
   </section>
@@ -123,7 +123,7 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
   <section class="llegar marco" aria-labelledby="llegar-titulo">
     <Mapa />
     <div class="llegar-texto">
-      <h2 id="llegar-titulo">Cómo llegar</h2>
+      <h2 id="llegar-titulo" data-revelar="titulo">Cómo llegar</h2>
       <p>
         Desde el aeropuerto son cincuenta minutos por la carretera de la costa. El último kilómetro es una pista de picón que termina en el
         portón: ahí te esperamos.
@@ -138,8 +138,8 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
   </section>
 
   <section class="politicas marco" aria-labelledby="politicas-titulo">
-    <h2 id="politicas-titulo">Antes de reservar</h2>
-    <dl>
+    <h2 id="politicas-titulo" data-revelar="titulo">Antes de reservar</h2>
+    <dl data-revelar="grupo">
       {
         politicas.map(([t, d]) => (
           <div>
@@ -276,6 +276,23 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     padding: 0 0 1.25rem;
     background: var(--surface);
     cursor: pointer;
+    overflow: hidden;
+    transition:
+      background-color 300ms ease-out,
+      color 300ms ease-out;
+  }
+
+  .opcion :global(picture) {
+    display: block;
+    overflow: hidden;
+  }
+
+  .opcion :global(img) {
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  :global(html[data-movimiento="completo"]) .opcion:hover :global(img) {
+    transform: scale(1.05);
   }
 
   .opcion :global(picture) {

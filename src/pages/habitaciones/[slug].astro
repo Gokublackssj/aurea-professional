@@ -30,14 +30,16 @@ const datos = [
 <Base title={h.nombre} description={`${h.nombre} en Aurea: ${h.resumen}`}>
   <section class="portada" aria-labelledby="titulo">
     <div class="portada-foto">
-      <Foto foto={h.fotos[0]} sizes="100vw" prioridad anchos={[640, 960, 1280, 1920]} />
+      <!-- Mismo nombre de transición que la foto de esta habitación en la lista
+           y en el inicio: al llegar desde allí, la foto viaja hasta aquí. -->
+      <Foto foto={h.fotos[0]} sizes="100vw" prioridad anchos={[640, 960, 1280, 1920]} transicion={`foto-${h.slug}`} />
     </div>
-    <div class="portada-fila marco">
+    <div class="portada-fila marco" data-entrada>
       <div class="portada-titulo">
         <h1 id="titulo">{h.nombre}</h1>
-        <p>{h.resumen}</p>
+        <p data-entrada-paso>{h.resumen}</p>
       </div>
-      <div class="portada-reserva">
+      <div class="portada-reserva" data-entrada-paso>
         <p>
           Desde <strong>{euros(h.precio)}</strong> la noche
         </p>
@@ -48,11 +50,11 @@ const datos = [
 
   <section class="relato marco" aria-labelledby="relato-titulo">
     <h2 id="relato-titulo" class="solo-lector">La habitación</h2>
-    <div class="relato-texto">
+    <div class="relato-texto" data-revelar="grupo">
       <p class="primero">{h.entradilla}</p>
       {h.descripcion.map((p) => <p>{p}</p>)}
     </div>
-    <dl class="datos">
+    <dl class="datos" data-revelar="grupo">
       {
         datos.map(([t, d]) => (
           <div>
@@ -64,28 +66,42 @@ const datos = [
     </dl>
   </section>
 
-  <section class="detalles marco" aria-labelledby="detalles-titulo">
-    <h2 id="detalles-titulo" class="solo-lector">Detalles</h2>
-    <Foto foto={h.fotos[1]} sizes="(min-width: 48rem) 54vw, 100vw" anchos={[640, 960, 1280, 1600]} class="detalle-a" />
-    <Foto foto={h.fotos[2]} sizes="(min-width: 48rem) 30vw, 70vw" anchos={[480, 800, 1000]} class="detalle-b" />
+  <!-- Galería: cada foto abre el visor a pantalla completa (src/scripts/motion/galeria.ts) -->
+  <section class="detalles marco" aria-labelledby="detalles-titulo" data-escena="galeria">
+    <h2 id="detalles-titulo" class="solo-lector">Fotografías de {h.conArticulo}</h2>
+    <button type="button" class="ampliar detalle-a" data-ampliar data-revelar="foto" aria-label={`Ampliar: ${h.nombre}, foto 1 de 2`}>
+      <Foto foto={h.fotos[1]} sizes="(min-width: 48rem) 54vw, 100vw" anchos={[640, 960, 1280, 1600]} />
+    </button>
+    <button type="button" class="ampliar detalle-b" data-ampliar data-revelar="foto" data-revelar-desde="izquierda" aria-label={`Ampliar: ${h.nombre}, foto 2 de 2`}>
+      <Foto foto={h.fotos[2]} sizes="(min-width: 48rem) 30vw, 70vw" anchos={[480, 800, 1000]} />
+    </button>
+    <dialog class="visor" aria-label={`Fotografías de ${h.conArticulo}`}>
+      <div class="visor-foto"></div>
+      <p class="visor-pie"></p>
+      <div class="visor-controles">
+        <button type="button" class="boton visor-anterior" aria-label="Foto anterior">←</button>
+        <button type="button" class="boton visor-siguiente" aria-label="Foto siguiente">→</button>
+        <button type="button" class="boton visor-cerrar">Cerrar</button>
+      </div>
+    </dialog>
   </section>
 
   <section class="equipo marco" aria-labelledby="equipo-titulo">
-    <h2 id="equipo-titulo">En la habitación</h2>
-    <ul>
+    <h2 id="equipo-titulo" data-revelar="titulo">En la habitación</h2>
+    <ul data-revelar="grupo">
       {h.equipamiento.map((e) => <li>{e}</li>)}
     </ul>
     <p class="equipo-nota">Desayuno, termas y acceso a la poza incluidos. Traslado desde el aeropuerto a partir de tres noches.</p>
   </section>
 
   <section class="otras marco" aria-labelledby="otras-titulo">
-    <h2 id="otras-titulo">Las otras habitaciones</h2>
-    <ul>
+    <h2 id="otras-titulo" data-revelar="titulo">Las otras habitaciones</h2>
+    <ul data-revelar="grupo">
       {
         otras.map((o) => (
           <li>
             <a href={ruta(`habitaciones/${o.slug}`)}>
-              <Foto foto={o.fotos[0]} sizes="(min-width: 48rem) 30vw, 100vw" anchos={[480, 800, 1000]} />
+              <Foto foto={o.fotos[0]} sizes="(min-width: 48rem) 30vw, 100vw" anchos={[480, 800, 1000]} transicion={`foto-${o.slug}`} />
               <span class="otra-nombre">{o.nombre}</span>
               <span class="otra-datos">
                 {o.metros} m² · desde {euros(o.precio)}
@@ -197,17 +213,107 @@ const datos = [
     margin-top: var(--seccion);
   }
 
-  .detalles :global(.detalle-a) {
+  /* Fotos que se amplían: botón sin aspecto de botón, con lupa al pasar */
+  .ampliar {
+    display: block;
     width: 100%;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
+    padding: 0;
+    border: 0;
+    background: none;
+    overflow: hidden;
+    cursor: zoom-in;
   }
 
-  .detalles :global(.detalle-b) {
+  .ampliar :global(picture),
+  .ampliar :global(img) {
+    display: block;
     width: 100%;
-    aspect-ratio: 4 / 5;
+  }
+
+  .ampliar :global(img) {
     object-fit: cover;
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  :global(html[data-movimiento="completo"]) .ampliar:hover :global(img) {
+    transform: scale(1.04);
+  }
+
+  .ampliar:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  .detalle-a :global(img) {
+    aspect-ratio: 3 / 2;
+  }
+
+  .detalle-b {
     margin-top: 30%;
+  }
+
+  .detalle-b :global(img) {
+    aspect-ratio: 4 / 5;
+  }
+
+  /* Visor a pantalla completa */
+  .visor {
+    width: 100vw;
+    max-width: none;
+    height: 100svh;
+    max-height: none;
+    margin: 0;
+    padding: clamp(1rem, 3vw, 2.5rem);
+    border: 0;
+    background: rgb(8 7 6 / 0.96);
+    color: var(--ink);
+  }
+
+  .visor[open] {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 1rem;
+  }
+
+  .visor::backdrop {
+    background: rgb(8 7 6 / 0.7);
+  }
+
+  .visor-foto {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+  }
+
+  .visor-foto :global(picture) {
+    display: contents;
+  }
+
+  .visor-foto :global(img) {
+    max-width: 100%;
+    max-height: calc(100svh - 9rem);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .visor-pie {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  .visor-controles {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: -3.25rem;
+  }
+
+  .visor-anterior,
+  .visor-siguiente {
+    width: 3.25rem;
+    padding: 0;
+    font-size: var(--step-lead);
   }
 
   .equipo {
@@ -256,13 +362,20 @@ const datos = [
   }
 
   .otras a :global(picture) {
+    display: block;
     margin-bottom: 0.5rem;
+    overflow: hidden;
   }
 
   .otras a :global(img) {
     width: 100%;
     aspect-ratio: 3 / 2;
     object-fit: cover;
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  :global(html[data-movimiento="completo"]) .otras a:hover :global(img) {
+    transform: scale(1.05);
   }
 
   .otra-nombre {

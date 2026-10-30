@@ -49,21 +49,25 @@ const carta: Momento[] = [
 ---
 
 <Base title="Experiencias" description="Termas de agua de mar, la Mesa de Lumbre, la cala de arena negra y el cielo del cabo." fotoPie="costaPlayaNegra">
-  <section class="cabeza marco" aria-labelledby="titulo">
+  <section class="cabeza marco" aria-labelledby="titulo" data-entrada>
     <h1 id="titulo">Experiencias</h1>
-    <p class="entradilla">Termas de agua de mar, la Mesa de Lumbre, la cala y el cielo del cabo: todo a menos de 112 escalones.</p>
+    <p class="entradilla" data-entrada-paso>Termas de agua de mar, la Mesa de Lumbre, la cala y el cielo del cabo: todo a menos de 112 escalones.</p>
     <figure>
-      <Foto foto="spaPiscina" sizes="(min-width: 48rem) 56vw, 100vw" prioridad anchos={[640, 960, 1280, 1600]} />
-      <figcaption>La piscina de las termas, bajo la bóveda de madera de tea.</figcaption>
+      <div class="cabeza-foto" data-entrada-foto>
+        <Foto foto="spaPiscina" sizes="(min-width: 48rem) 56vw, 100vw" prioridad anchos={[640, 960, 1280, 1600]} />
+      </div>
+      <figcaption data-entrada-paso>La piscina de las termas, bajo la bóveda de madera de tea.</figcaption>
     </figure>
   </section>
 
   <section class="termas marco" aria-labelledby="termas-titulo">
-    <Foto foto="spaTumbonas" sizes="(min-width: 48rem) 50vw, 100vw" anchos={[640, 960, 1280, 1600]} class="termas-foto" />
+    <div class="termas-foto" data-revelar="foto">
+      <Foto foto="spaTumbonas" sizes="(min-width: 48rem) 50vw, 100vw" anchos={[640, 960, 1280, 1600]} />
+    </div>
     <div class="termas-texto">
-      <h2 id="termas-titulo">Las termas</h2>
-      <p class="termas-entrada">Agua del Atlántico, filtrada y templada, bajo la roca del cabo. Se baja desde el vestíbulo por una escalera de basalto.</p>
-      <dl>
+      <h2 id="termas-titulo" data-revelar="titulo">Las termas</h2>
+      <p class="termas-entrada" data-revelar="texto">Agua del Atlántico, filtrada y templada, bajo la roca del cabo. Se baja desde el vestíbulo por una escalera de basalto.</p>
+      <dl data-revelar="grupo">
         {
           termas.map(([t, d]) => (
             <div>
@@ -76,7 +80,7 @@ const carta: Momento[] = [
       <h3>Tratamientos</h3>
       <table>
         <caption class="solo-lector">Tratamientos de las termas, con su duración y precio</caption>
-        <tbody>
+        <tbody data-revelar="grupo">
           {
             tratamientos.map(([n, d, p]) => (
               <tr>
@@ -93,13 +97,13 @@ const carta: Momento[] = [
 
   <section class="mesa marco" aria-labelledby="mesa-titulo">
     <div class="mesa-texto">
-      <h2 id="mesa-titulo">Mesa de Lumbre</h2>
-      <p>
+      <h2 id="mesa-titulo" data-revelar="titulo">Mesa de Lumbre</h2>
+      <p data-revelar="texto">
         Nueve mesas frente al ventanal y una cocina de leña. El menú cambia cada día según lo que entra en la lonja del puerto y lo que da la
         huerta de la ladera. Cena de 19:30 a 22:30; los huéspedes tienen mesa garantizada.
       </p>
       <h3>Lo que hay esta semana</h3>
-      <ul class="menu">
+      <ul class="menu" data-revelar="grupo">
         {
           menu.map(([plato, detalle]) => (
             <li>
@@ -112,21 +116,25 @@ const carta: Momento[] = [
       <p class="mesa-precio">Menú de cinco pasos, 95 € por persona. Maridaje de vinos de la isla, 55&nbsp;€.</p>
     </div>
     <div class="mesa-fotos">
-      <Foto foto="mesaPlato" sizes="(min-width: 48rem) 30vw, 60vw" anchos={[480, 800, 1000]} class="mesa-a" />
-      <Foto foto="mesaVino" sizes="(min-width: 48rem) 22vw, 50vw" anchos={[400, 640, 800]} class="mesa-b" />
+      <div class="mesa-a" data-revelar="foto">
+        <Foto foto="mesaPlato" sizes="(min-width: 48rem) 30vw, 60vw" anchos={[480, 800, 1000]} />
+      </div>
+      <div class="mesa-b" data-paralaje="0.08">
+        <Foto foto="mesaVino" sizes="(min-width: 48rem) 22vw, 50vw" anchos={[400, 640, 800]} />
+      </div>
     </div>
   </section>
 
   <section class="carta" aria-labelledby="carta-titulo">
     <div class="carta-cabeza marco">
-      <h2 id="carta-titulo">A la carta</h2>
+      <h2 id="carta-titulo" data-revelar="titulo">A la carta</h2>
       <div class="carta-botones">
         <button class="boton" type="button" data-fila="atras" aria-label="Ver las anteriores" aria-controls="carta-fila">←</button>
         <button class="boton" type="button" data-fila="adelante" aria-label="Ver las siguientes" aria-controls="carta-fila">→</button>
       </div>
     </div>
     <div class="carta-barra marco" aria-hidden="true"><span></span></div>
-    <ul id="carta-fila" class="carta-fila" tabindex="0" aria-label="Experiencias a la carta">
+    <ul id="carta-fila" class="carta-fila" tabindex="0" aria-label="Experiencias a la carta" data-revelar="grupo">
       {
         carta.map((m) => (
           <li style={`--aire:${m.aire}px`}>
@@ -143,8 +151,8 @@ const carta: Momento[] = [
   <section class="cielo" aria-labelledby="cielo-titulo">
     <Foto foto="nocheCielo" sizes="100vw" anchos={[800, 1200, 1600, 2000]} alt="" class="cielo-foto" />
     <div class="cielo-texto marco">
-      <h2 id="cielo-titulo">El cielo del cabo</h2>
-      <p>
+      <h2 id="cielo-titulo" data-revelar="titulo">El cielo del cabo</h2>
+      <p data-revelar="texto">
         No hay una farola en nueve kilómetros. Las noches despejadas, la Vía Láctea se ve a simple vista desde la azotea, y los viernes una
         astrónoma de la isla trae el telescopio grande y una carta del cielo de esa misma noche.
       </p>
@@ -205,7 +213,12 @@ const carta: Momento[] = [
     width: min(56vw, 64rem);
   }
 
+  .cabeza-foto {
+    overflow: hidden;
+  }
+
   .cabeza :global(img) {
+    display: block;
     width: 100%;
     aspect-ratio: 16 / 10;
     object-fit: cover;
@@ -224,12 +237,17 @@ const carta: Momento[] = [
     align-items: start;
   }
 
-  .termas :global(.termas-foto) {
+  .termas-foto {
+    position: sticky;
+    top: 2rem;
+    overflow: hidden;
+  }
+
+  .termas-foto :global(img) {
+    display: block;
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
-    position: sticky;
-    top: 2rem;
   }
 
   .termas-texto {
@@ -317,18 +335,30 @@ const carta: Momento[] = [
     position: relative;
   }
 
-  .mesa-fotos :global(.mesa-a) {
+  .mesa-a {
     width: 78%;
-    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  .mesa-b {
+    position: relative;
+    width: 56%;
+    margin: -22% 0 0 auto;
+  }
+
+  .mesa-a :global(img),
+  .mesa-b :global(img) {
+    display: block;
+    width: 100%;
     object-fit: cover;
   }
 
-  .mesa-fotos :global(.mesa-b) {
-    width: 56%;
+  .mesa-a :global(img) {
+    aspect-ratio: 4 / 5;
+  }
+
+  .mesa-b :global(img) {
     aspect-ratio: 1;
-    object-fit: cover;
-    margin: -22% 0 0 auto;
-    position: relative;
   }
 
   /* A la carta: fila de momentos que se desplaza en horizontal */
@@ -422,13 +452,30 @@ const carta: Momento[] = [
   }
 
   .carta-fila :global(picture) {
+    display: block;
     margin-top: var(--aire);
+    overflow: hidden;
   }
 
   .carta-fila :global(img) {
+    display: block;
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Cada experiencia responde al pasar: la foto se acerca y el título toma el oro */
+  .carta-fila h3 {
+    transition: color 250ms ease-out;
+  }
+
+  .carta-fila li:hover h3 {
+    color: var(--accent);
+  }
+
+  :global(html[data-movimiento="completo"]) .carta-fila li:hover :global(img) {
+    transform: scale(1.06);
   }
 
   /* Cielo: foto a sangre con el texto abajo, sobre un velo neutro */
@@ -477,7 +524,7 @@ const carta: Momento[] = [
       grid-template-columns: 1fr;
     }
 
-    .termas :global(.termas-foto) {
+    .termas-foto {
       position: static;
     }
 

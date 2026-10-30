@@ -136,11 +136,16 @@ ol {
   cursor: pointer;
   transition:
     background-color 160ms ease-out,
-    color 160ms ease-out;
+    color 160ms ease-out,
+    transform 120ms ease-out;
 }
 
 .boton:hover {
   background: #2a2520;
+}
+
+.boton:active {
+  transform: scale(0.98);
 }
 
 .boton-principal {
@@ -158,19 +163,107 @@ img.foto {
   filter: var(--foto);
 }
 
+/* Enlace de texto: el subrayado dorado se dibuja de izquierda a derecha */
 .enlace {
   font-weight: 500;
-  text-decoration-color: var(--accent);
+  text-decoration: none;
+  padding-bottom: 0.15em;
+  background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 100% / 100% 1px; /* taste-skill-ignore: subrayado, no un degradado */
+  transition:
+    background-size 350ms ease-out,
+    color 200ms ease-out;
 }
 
-.enlace:hover {
+.enlace:hover,
+.enlace:focus-visible {
   color: var(--accent);
+  background-size: 100% 2px;
 }
 
+/* Revelados del motor (src/scripts/motion/revelar.ts): esperan ocultos a que
+   el motor los prepare, para no verse un instante y desaparecer. Si el motor
+   no arranca, «motion» se quita a los 4 s y todo aparece. */
+html.motion [data-revelar],
+html.motion [data-entrada] {
+  visibility: hidden;
+}
+
+/* Transiciones entre páginas (View Transitions, mismo documento de origen):
+   la página que se va se funde y sube un poco; la que llega, al revés. La
+   cabecera se queda quieta. Las fotos con el mismo nombre en dos páginas
+   (la habitación en la lista y en su ficha) viajan de un sitio a otro. */
+@view-transition {
+  navigation: auto;
+}
+
+.cabecera {
+  view-transition-name: cabecera;
+}
+
+::view-transition-old(root) {
+  animation: 360ms cubic-bezier(0.7, 0, 0.84, 0) both vt-salida;
+}
+
+::view-transition-new(root) {
+  animation: 620ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both vt-entrada;
+}
+
+::view-transition-group(*) {
+  animation-duration: 700ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes vt-salida {
+  to {
+    opacity: 0;
+    transform: translateY(-1.5rem);
+  }
+}
+
+@keyframes vt-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+}
+
+/* Movimiento reducido (elegido en la web o heredado del sistema con
+   «Automático»): sin transiciones de posición ni de escala; las páginas solo
+   se funden, muy rápido. */
+html[data-movimiento="reducido"] *,
+html[data-movimiento="reducido"] *::before,
+html[data-movimiento="reducido"] *::after {
+  scroll-behavior: auto !important;
+}
+
+html[data-movimiento="reducido"] .boton:active {
+  transform: none;
+}
+
+html[data-movimiento="reducido"]::view-transition-old(root),
+html[data-movimiento="reducido"]::view-transition-new(root) {
+  animation: 180ms linear both vt-fundido;
+}
+
+html[data-movimiento="reducido"]::view-transition-group(*) {
+  animation-duration: 0s;
+}
+
+@keyframes vt-fundido {
+  from {
+    opacity: 0;
+  }
+}
+
+html[data-movimiento="reducido"]::view-transition-old(root) {
+  animation-direction: reverse;
+}
+
+/* Sin JavaScript no hay preferencia guardada: se respeta el ajuste del sistema */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html:not(.js) *,
+  html:not(.js) *::before,
+  html:not(.js) *::after {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }

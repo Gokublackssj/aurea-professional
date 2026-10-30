@@ -9,10 +9,13 @@ const sincronizar = () => {
   opciones.forEach((o) => (o.checked = o.value === p));
   const nota = document.querySelector<HTMLElement>("[data-movimiento-nota]");
   if (nota) {
+    const reducido = document.documentElement.dataset.movimiento === "reducido";
     nota.textContent =
-      document.documentElement.dataset.movimiento === "reducido"
-        ? "Ahora: movimiento reducido, solo fundidos."
-        : "Ahora: movimiento completo.";
+      p === "auto"
+        ? `Sigue a tu sistema: ahora, ${reducido ? "movimiento reducido (solo fundidos)" : "movimiento completo"}.`
+        : reducido
+          ? "Movimiento reducido: solo fundidos."
+          : "Movimiento completo.";
   }
 };
 

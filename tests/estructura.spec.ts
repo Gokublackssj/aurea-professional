@@ -67,9 +67,10 @@ test("la navegación principal lleva a las cuatro páginas", async ({ page }) =>
   }
 });
 
-test("cada habitación de la lista abre su página de detalle", async ({ page }) => {
+test("cada habitación del selector abre su página de detalle", async ({ page }) => {
   for (const h of habitaciones) {
     await page.goto("habitaciones/");
+    await page.getByRole("tab", { name: new RegExp(h.nombre) }).click();
     await page.getByRole("link", { name: `Ver ${h.conArticulo}` }).click();
     await expect(page).toHaveURL(new RegExp(`/habitaciones/${h.slug}/?$`));
     await expect(page.locator("h1")).toHaveText(h.nombre);

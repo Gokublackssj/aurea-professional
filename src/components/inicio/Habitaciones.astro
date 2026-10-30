@@ -2,13 +2,18 @@
 // Las habitaciones como un cartel de una sola talla: nombre, vista, superficie
 // y precio en columnas fijas, sobre el único campo claro de la página (la cal).
 // Debajo, las cuatro habitaciones en fotografía, cada una con su enlace.
+// Movimiento (src/scripts/motion/cartel.ts): las filas aparecen una tras otra
+// y, en escritorio con ratón, al pasar por una fila aparece junto al cursor
+// otra vista de esa habitación (la segunda foto, distinta de la de la tira).
+// Las fotos de la tira comparten nombre de transición con la portada de cada
+// habitación: al entrar en su página, la foto viaja hasta allí.
 import Foto from "../Foto.astro";
 import { habitaciones, totalLlaves, euros } from "../../data/habitaciones";
 import { ruta } from "../../lib/ruta";
 ---
 
-<section class="cartel marco" aria-labelledby="cartel-titulo">
-  <h2 id="cartel-titulo" class="cartel-titulo">Habitaciones · {totalLlaves} llaves</h2>
+<section class="cartel marco" aria-labelledby="cartel-titulo" data-escena="cartel">
+  <h2 id="cartel-titulo" class="cartel-titulo" data-revelar="titulo">Habitaciones · {totalLlaves} llaves</h2>
   <table>
     <caption class="solo-lector">Las cuatro habitaciones de Aurea, con su vista, superficie y precio por noche</caption>
     <thead class="solo-lector">
@@ -22,7 +27,7 @@ import { ruta } from "../../lib/ruta";
     <tbody>
       {
         habitaciones.map((h) => (
-          <tr>
+          <tr data-slug={h.slug}>
             <th scope="row">
               <a href={ruta(`habitaciones/${h.slug}`)}>{h.nombre}</a>
             </th>
@@ -39,9 +44,9 @@ import { ruta } from "../../lib/ruta";
       habitaciones.map((h) => (
         <li>
           <a href={ruta(`habitaciones/${h.slug}`)}>
-            <Foto foto={h.fotos[0]} sizes="(min-width: 48rem) 23vw, 46vw" anchos={[400, 640, 900]} />
+            <Foto foto={h.fotos[0]} sizes="(min-width: 48rem) 23vw, 46vw" anchos={[400, 640, 900]} transicion={`foto-${h.slug}`} />
             <span>
-              {h.llaves} {h.llaves === 1 ? "llave" : "llaves"} · hasta {h.huespedes} huéspedes
+              {h.nombre} · {h.llaves} {h.llaves === 1 ? "llave" : "llaves"} · hasta {h.huespedes} huéspedes
             </span>
           </a>
         </li>
@@ -52,10 +57,20 @@ import { ruta } from "../../lib/ruta";
     Precios por noche para dos personas, con desayuno y termas incluidos.
     <a class="enlace" href={ruta("habitaciones")}>Ver las habitaciones</a>
   </p>
+  <div class="cartel-vista" aria-hidden="true">
+    {
+      habitaciones.map((h) => (
+        <div class="cartel-capa" data-slug={h.slug}>
+          <Foto foto={h.fotos[1]} sizes="18rem" anchos={[320, 640]} alt="" />
+        </div>
+      ))
+    }
+  </div>
 </section>
 
 <style>
   .cartel {
+    position: relative;
     margin-top: var(--seccion);
     padding-block: clamp(4rem, 9vw, 8rem);
     background: var(--field);
@@ -107,9 +122,20 @@ import { ruta } from "../../lib/ruta";
     text-decoration: none;
   }
 
-  tbody a:hover {
+  /* La fila entera responde: el nombre se subraya y el resto se oscurece un poco */
+  tbody tr {
+    transition: color 250ms ease-out;
+  }
+
+  tbody tr:hover a,
+  tbody a:focus-visible {
     text-decoration: underline;
     text-decoration-thickness: 2px;
+    text-underline-offset: 0.15em;
+  }
+
+  tbody:hover tr:not(:hover) {
+    color: var(--field-muted);
   }
 
   .tira {
@@ -127,14 +153,66 @@ import { ruta } from "../../lib/ruta";
     text-decoration: none;
   }
 
+  .tira :global(picture) {
+    display: block;
+    overflow: hidden;
+  }
+
   .tira :global(img) {
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  :global(html[data-movimiento="completo"]) .tira a:hover :global(img) {
+    transform: scale(1.05);
   }
 
   .tira span {
     color: var(--field-muted);
+  }
+
+  .tira a:hover span {
+    color: var(--field-ink);
+  }
+
+  /* Vista flotante que sigue al cursor por las filas (cartel.ts). Solo
+     existe en escritorio con ratón; empieza oculta. */
+  .cartel-vista {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: 18rem;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  .cartel-capa {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+
+  .cartel-capa :global(picture),
+  .cartel-capa :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .cartel-capa :global(img) {
+    object-fit: cover;
+  }
+
+  @media (hover: none), (max-width: 47.99rem) {
+    .cartel-vista {
+      display: none;
+    }
   }
 
   .cartel-pie {

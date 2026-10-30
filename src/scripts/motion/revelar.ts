@@ -16,9 +16,16 @@ import type { Condiciones } from "./index";
 const aparecer = { start: "top 86%", toggleActions: "play none none none" } as const;
 
 export function revelar(raiz: HTMLElement, c: Condiciones) {
+  // Lo ya revelado se queda como está cuando el motor se reconstruye (cambio
+  // de modo o de escritorio a móvil): ni se oculta ni se vuelve a animar.
+  const revelado = (el: HTMLElement) => el.dataset.revelado === "si";
+  const marcar = (el: HTMLElement) => () => (el.dataset.revelado = "si");
+
   // Cabeceras de página (al cargar, sin scroll)
   raiz.querySelectorAll<HTMLElement>("[data-entrada]").forEach((cabeza) => {
     gsap.set(cabeza, { visibility: "visible" });
+    if (revelado(cabeza)) return;
+    marcar(cabeza)();
     const titulo = cabeza.querySelector<HTMLElement>("h1");
     const pasos = cabeza.querySelectorAll<HTMLElement>("[data-entrada-paso]");
     const fotos = cabeza.querySelectorAll<HTMLElement>("[data-entrada-foto]");
@@ -42,8 +49,9 @@ export function revelar(raiz: HTMLElement, c: Condiciones) {
   // Revelados al llegar con el scroll
   raiz.querySelectorAll<HTMLElement>("[data-revelar]").forEach((el) => {
     gsap.set(el, { visibility: "visible" });
+    if (revelado(el)) return;
     const tipo = el.dataset.revelar;
-    const scrollTrigger = { trigger: el, ...aparecer };
+    const scrollTrigger = { trigger: el, ...aparecer, onEnter: marcar(el) };
 
     if (c.reducido) {
       const objetivos = tipo === "grupo" ? [...el.children] : el;

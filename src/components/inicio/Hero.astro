@@ -98,10 +98,13 @@ import { ruta } from "../../lib/ruta";
     margin-bottom: -0.02em;
   }
 
-  /* Antes del primer pintado, con movimiento permitido: la foto empieza en una
-     franja (que ya se pinta: es la imagen principal) y el resto espera a GSAP.
+  /* Antes del primer pintado. En los dos modos, nombre, frase y navegación
+     esperan al motor (en reducido solo aparecen con un fundido). Con
+     movimiento completo, además, la foto empieza en una franja (que ya se
+     pinta: es la imagen principal) y la línea dorada sin dibujar; en modo
+     reducido la foto se ve entera desde el principio.
      Si el motor no arranca, el script de la cabecera quita «motion» a los 4 s. */
-  :global(html.motion) .hero-foto {
+  :global(html.motion[data-movimiento="completo"]) .hero-foto {
     clip-path: inset(44% 9% 44% 9%);
   }
 
@@ -111,7 +114,7 @@ import { ruta } from "../../lib/ruta";
     visibility: hidden;
   }
 
-  :global(html.motion) .hero-linea {
+  :global(html.motion[data-movimiento="completo"]) .hero-linea {
     transform: scaleX(0);
   }
 
@@ -129,7 +132,7 @@ import { ruta } from "../../lib/ruta";
       padding-bottom: 0.75rem;
     }
 
-    :global(html.motion) .hero-foto {
+    :global(html.motion[data-movimiento="completo"]) .hero-foto {
       clip-path: inset(40% 6% 40% 6%);
     }
   }
