@@ -1,33 +1,39 @@
 ---
 // Fotografías reunidas alrededor de un título: lo que hay fuera de la
-// habitación. Es el único descanso deliberado de la página; en la fase 4 cada
-// foto se desplazará a su propio ritmo (parallax).
+// habitación. Es el único descanso deliberado de la página. Son fotos de las
+// experiencias (termas, cala, kayak, viñas, barca) que no aparecen en ninguna
+// otra sección del inicio.
+// Movimiento (src/scripts/motion/fuera.ts): se abren al llegar y cada una
+// flota a su ritmo (data-velocidad) con el scroll.
 import Foto from "../Foto.astro";
 import type { ClaveFoto } from "../../data/fotos";
 import { ruta } from "../../lib/ruta";
 
-// Posición en porcentaje de la banda (x, y) y ancho en px. Las marcadas con
-// `movil` son las cinco que se quedan en pantallas estrechas.
-const fotosBanda: { foto: ClaveFoto; x: number; y: number; ancho: number; movil?: boolean }[] = [
-  { foto: "spaPiscina", x: 23, y: 6, ancho: 200, movil: true },
-  { foto: "costaPlayaNegra", x: 44, y: 0, ancho: 170 },
-  { foto: "mesaVino", x: 63, y: 9, ancho: 190, movil: true },
-  { foto: "spaTumbonas", x: 20, y: 62, ancho: 170, movil: true },
-  { foto: "nocheCielo", x: 40, y: 76, ancho: 190, movil: true },
-  { foto: "costaRoca", x: 61, y: 66, ancho: 160 },
-  { foto: "diaPoza", x: 70, y: 38, ancho: 180, movil: true },
+// Posición en porcentaje de la banda (x, y), ancho en px y velocidad de
+// flotación. Las marcadas con `movil` son las que se quedan en pantallas estrechas.
+const fotosBanda: { foto: ClaveFoto; x: number; y: number; ancho: number; velocidad: number; movil?: boolean }[] = [
+  { foto: "spaPiscina", x: 22, y: 5, ancho: 210, velocidad: 0.18, movil: true },
+  { foto: "costaPlayaNegra", x: 45, y: 0, ancho: 170, velocidad: 0.3 },
+  { foto: "expKayak", x: 64, y: 8, ancho: 190, velocidad: 0.12, movil: true },
+  { foto: "spaTumbonas", x: 19, y: 62, ancho: 175, velocidad: 0.26, movil: true },
+  { foto: "expVina", x: 41, y: 76, ancho: 200, velocidad: 0.1, movil: true },
+  { foto: "expBarca", x: 66, y: 58, ancho: 180, velocidad: 0.22, movil: true },
 ];
 ---
 
-<section class="fuera" aria-labelledby="fuera-titulo">
+<section class="fuera" aria-labelledby="fuera-titulo" data-escena="fuera">
   <div class="fuera-centro">
-    <h2 id="fuera-titulo">Fuera de<br />la habitación</h2>
-    <p>Termas de agua de mar, la Mesa de Lumbre, una cala de arena negra y un cielo sin farolas.</p>
-    <a class="enlace" href={ruta("experiencias")}>Ver las experiencias</a>
+    <h2 id="fuera-titulo" data-revelar="titulo">Fuera de<br />la habitación</h2>
+    <p data-revelar="texto">Termas de agua de mar, kayak hasta la cueva, vinos de ceniza y una cala de arena negra.</p>
+    <a class="enlace" href={ruta("experiencias")} data-revelar="texto">Ver las experiencias</a>
   </div>
   {
     fotosBanda.map((f) => (
-      <div class:list={["suelta", { "solo-escritorio": !f.movil }]} style={`--x:${f.x}%;--y:${f.y}%;--ancho:${f.ancho}px`}>
+      <div
+        class:list={["suelta", { "solo-escritorio": !f.movil }]}
+        style={`--x:${f.x}%;--y:${f.y}%;--ancho:${f.ancho}px`}
+        data-velocidad={f.velocidad}
+      >
         <Foto foto={f.foto} sizes={`${f.ancho}px`} anchos={[f.ancho, f.ancho * 2]} />
       </div>
     ))

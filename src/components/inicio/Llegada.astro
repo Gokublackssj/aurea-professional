@@ -1,16 +1,17 @@
 ---
-// Banda de paneles desiguales: el camino desde la carretera hasta el agua,
-// contado en cuatro cortes de una misma vista.
+// Banda de paneles desiguales: el camino desde la costa hasta la casa, en
+// cuatro cortes (la costa de roca al amanecer, los escalones, el arco encalado
+// y la terraza con su piscina).
 // Movimiento (src/scripts/motion/llegada.ts): en escritorio la escena se fija
 // y el primer panel crece hasta ocupar la pantalla; la «lente», el «marco» y
 // la frase final solo existen para esa escena y no se muestran sin ella.
 import Foto from "../Foto.astro";
 
 const paneles = [
-  { foto: "costaCabo", crece: 5 },
+  { foto: "llegadaCosta", crece: 5 },
   { foto: "casaEscalera", crece: 2 },
   { foto: "casaArco", crece: 3 },
-  { foto: "casaPiscina", crece: 2 },
+  { foto: "terrazaPiscina", crece: 2 },
 ] as const;
 ---
 
@@ -32,7 +33,7 @@ const paneles = [
       entre tabaibas que acaba en un portón de madera.
     </p>
     <div class="llegada-lente" aria-hidden="true">
-      <Foto foto="costaCabo" sizes="100vw" alt="" anchos={[960, 1280, 1600, 2000]} />
+      <Foto foto="llegadaCosta" sizes="100vw" alt="" anchos={[960, 1280, 1600, 2000, 2400]} />
       <div class="llegada-velo"></div>
     </div>
     <div class="llegada-marco" aria-hidden="true"></div>

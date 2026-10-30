@@ -18,10 +18,11 @@ async function inicioPin(page: Page, selector: string) {
 test.describe("Movimiento en escritorio", () => {
   test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "no-preference" });
 
-  test("arranca el motor con sus cuatro escenas y dos secciones fijadas", async ({ page }) => {
+  test("arranca el motor con las escenas del inicio y dos secciones fijadas", async ({ page }) => {
     await page.goto("");
     await motorListo(page);
-    await expect(page.locator("html")).toHaveAttribute("data-escenas", "hero manifiesto llegada dia");
+    const escenas = ((await page.locator("html").getAttribute("data-escenas")) ?? "").split(" ");
+    for (const e of ["hero", "manifiesto", "llegada", "dia", "fuera"]) expect(escenas).toContain(e);
     await expect(page.locator(".pin-spacer")).toHaveCount(2);
     await expect(page.locator("html")).not.toHaveClass(/(^|\s)motion(\s|$)/);
   });
@@ -58,7 +59,7 @@ test.describe("Movimiento en escritorio", () => {
     // scrollTo programático no interrumpe ese ajuste; la rueda del usuario sí).
     await page.waitForTimeout(1600);
     await page.evaluate((y) => scrollTo(0, y), top + recorrido);
-    await expect(page.locator(".progreso li.activo")).toHaveText("22:00", { timeout: 5000 });
+    await expect(page.locator(".progreso li.activo")).toHaveText("21:30", { timeout: 5000 });
   });
 });
 

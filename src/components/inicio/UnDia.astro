@@ -1,6 +1,6 @@
 ---
 // Una escena, frases que avanzan: la foto del horizonte se queda fija mientras
-// el día pasa por encima, del baño de las 7:30 al cielo de las 22:00. La hora
+// el día pasa por encima, del baño de las 7:30 al cielo de las 21:30. La hora
 // áurea y la luna se calculan para hoy en el cabo (src/scripts/hoja.ts); sin
 // JavaScript queda la frase general.
 // Movimiento (src/scripts/motion/dia.ts): en escritorio la sección se fija y
@@ -20,42 +20,45 @@ interface Momento {
   vivo?: "sol" | "luna";
 }
 
-// La hora va en el propio título: el día se lee de arriba abajo.
+// La hora va en el propio título: el día se lee de arriba abajo. Cada momento
+// tiene un fondo (la escena) y dos fotos secundarias de esa misma luz: el
+// alba fría, la mañana en la habitación, el mediodía blanco, el oro de la
+// tarde y la noche sin farolas. Ninguna se repite en otra sección del inicio.
 const momentos: Momento[] = [
   {
     titulo: "La poza, a las 7:30",
     rotulo: "7:30",
     texto: "Al pie de los escalones, la marea llena una poza tallada en la roca. Agua quieta a veinte grados, antes que nadie.",
-    fotos: ["diaPoza", "costaRoca"],
+    fotos: ["diaOrilla", "diaRocas"],
     fondo: "diaPoza",
   },
   {
     titulo: "Desayuno sin reloj",
     rotulo: "9:00",
     texto: "De nueve a doce, en la habitación o en la terraza: pan de leña, queso de cabra de la ladera y fruta del valle.",
-    fotos: ["diaDesayuno", "materialLino"],
+    fotos: ["diaDesayuno", "estudioLuz"],
     fondo: "materialLino",
   },
   {
     titulo: "La mesa, a las 13:30",
     rotulo: "13:30",
-    texto: "Nueve mesas en la Mesa de Lumbre y un menú que cambia según lo que entra por la mañana en la lonja del puerto.",
-    fotos: ["mesaPlato", "mesaVino"],
-    fondo: "mesaVino",
+    texto: "Mesa al aire libre frente al mar, con lo que entró por la mañana en la lonja del puerto y limones del valle.",
+    fotos: ["mesaPescado", "mesaLimones"],
+    fondo: "diaMediodia",
   },
   {
     titulo: "La hora áurea",
     rotulo: "Hora áurea",
     texto: "El sol se pone delante de las veintidós habitaciones: hacia las 18:20 en invierno y las 21:10 en verano.",
-    fotos: ["nocheHorizonte", "materialCal"],
-    fondo: "costaAcantilado",
+    fotos: ["diaCopa", "diaVentanaOcaso"],
+    fondo: "diaAzotea",
     vivo: "sol",
   },
   {
-    titulo: "El cielo, a las 22:00",
-    rotulo: "22:00",
+    titulo: "El cielo, a las 21:30",
+    rotulo: "21:30",
     texto: "Sin una farola en nueve kilómetros. Arriba espera un telescopio y alguien que sabe dónde mirar.",
-    fotos: ["nocheCielo", "nocheAgua"],
+    fotos: ["expEstrellas", "nocheFarol"],
     fondo: "nocheCielo",
     vivo: "luna",
   },

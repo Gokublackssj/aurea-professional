@@ -93,8 +93,8 @@ test("una ruta inexistente devuelve la página 404", async ({ page, errores }) =
   errores.splice(0, errores.length, ...errores.filter((e) => e !== esperado));
 });
 
-// Las 31 fotografías de src/assets/fotos, una por fila (como en CREDITS.md).
-const totalFotos = 31;
+// Las 43 fotografías de src/assets/fotos, una por fila (como en CREDITS.md).
+const totalFotos = 43;
 
 test("la página de créditos nombra a los autores de todas las fotografías", async ({ page }) => {
   await page.goto("creditos/");
