@@ -93,7 +93,7 @@
   opciones.innerHTML = habitaciones
     .map(
       (h) => `<label class="opcion-hab"><input type="radio" name="habitacion" value="${h.slug}" />
-      <img class="foto" src="fotos/${h.fotos[0][0]}.webp" alt="" loading="lazy" /><b>${h.nombre}</b><span>${h.metros} m² · hasta ${h.huespedes} · desde ${euros(h.precio)}</span></label>`,
+      <img class="foto" src="fotos/${h.fotos[0].n}.webp" alt="" loading="lazy" style="object-position: ${h.fotos[0].foco}" /><b>${h.nombre}</b><span>${h.metros} m² · hasta ${h.huespedes} · desde ${euros(h.precio)}</span></label>`,
     )
     .join("");
   opciones.addEventListener("change", (e) => {

@@ -82,6 +82,19 @@ body.en-noche .barra { background: rgb(6 29 30 / 0.92); color: var(--marfil); }
 .barra nav a { text-decoration: none; position: relative; padding-block: 0.4rem; }
 .barra nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--laton); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .barra nav a:hover::after, .barra nav a.activo::after { transform: scaleX(1); }
+.abrir-menu { display: none; }
+
+/* Menú móvil a pantalla completa */
+.menu-movil { width: 100vw; max-width: none; height: 100svh; max-height: none; margin: 0; padding: 1.25rem var(--margen) 2rem; border: 0; background: var(--teal-noche); color: var(--marfil); }
+.menu-movil[open] { display: flex; flex-direction: column; gap: 2rem; }
+.menu-movil::backdrop { background: rgb(6 29 30 / 0.6); }
+.menu-cabeza { display: flex; justify-content: space-between; align-items: center; }
+.menu-cabeza .marca { font: 400 1.5rem / 1 var(--display); }
+.menu-movil nav { flex: 1; display: grid; align-content: center; }
+.menu-movil ol { display: grid; gap: 0.25rem; }
+.menu-movil a:not(.boton) { display: flex; align-items: baseline; gap: 1rem; padding: 0.7rem 0; border-bottom: 1px solid rgb(242 240 234 / 0.14); text-decoration: none; font: 380 clamp(1.9rem, 1.2rem + 3vw, 2.6rem) / 1.1 var(--display); }
+.menu-movil a b { font: 600 var(--t-etiqueta) / 1 var(--texto); letter-spacing: 0.12em; color: var(--laton-claro); }
+.menu-movil > .boton { align-self: stretch; }
 
 /* ——— 1. Hero ——— */
 .hero { position: relative; height: 100svh; min-height: 620px; overflow: hidden; background: var(--marfil); }
@@ -127,14 +140,35 @@ body.en-noche .barra { background: rgb(6 29 30 / 0.92); color: var(--marfil); }
 .llegada-frase { position: absolute; inset: auto var(--margen) 12vh; color: var(--marfil); font-size: var(--t-h2); opacity: 0; }
 .llegada-velo { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(6 29 30 / 0) 40%, rgb(6 29 30 / 0.65)); opacity: 0; }
 
+/* Escenas largas con CSS sticky (escritorio, movimiento completo). El navegador
+   fija el escenario en el mismo hilo que desplaza la página: sin huecos ni saltos.
+   La altura de la sección es el recorrido: 100svh + lo que dura la escena. */
+@media (min-width: 768px) {
+  html[data-movimiento="completo"] .llegada { height: 210svh; }
+  html[data-movimiento="completo"] .llegada-escena { position: sticky; top: 0; }
+}
+
 /* ——— 4. Habitaciones ——— */
 .habitaciones { padding: var(--seccion) 0 0; }
 .selector { display: grid; grid-template-columns: 7fr 5fr; gap: 0 clamp(2rem, 5vw, 5rem); padding-inline: var(--margen); }
-.escenario { position: relative; overflow: hidden; min-height: 36rem; }
-.escenario figure { position: absolute; inset: 0; visibility: hidden; }
-.escenario figure.actual { visibility: visible; z-index: 2; }
-.escenario img { width: 100%; height: 100%; object-fit: cover; }
-.escenario .marca-hab { position: absolute; left: 1.5rem; bottom: 1.25rem; z-index: 3; color: var(--marfil); font: 400 var(--t-h3) / 1 var(--display); text-shadow: 0 1px 12px rgb(0 0 0 / 0.35); }
+.visor-hab { display: grid; gap: 1rem; align-content: start; }
+.escenario { position: relative; overflow: hidden; aspect-ratio: 4 / 3; background: var(--lino); touch-action: pan-y; }
+.escenario .capa { position: absolute; inset: 0; }
+.escenario .capa img { width: 100%; height: 100%; object-fit: cover; }
+.escenario::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(180deg, rgb(6 29 30 / 0) 55%, rgb(6 29 30 / 0.55)); }
+.escenario .marca-hab { position: absolute; left: 1.5rem; right: 6rem; bottom: 1.25rem; z-index: 4; display: grid; gap: 0.3rem; color: var(--marfil); }
+.marca-nombre { font: 400 var(--t-h3) / 1 var(--display); }
+.marca-foto { font-size: var(--t-pequeno); color: rgb(242 240 234 / 0.82); }
+.ampliar-hab { position: absolute; right: 1rem; bottom: 1rem; z-index: 4; min-height: 2.75rem; padding: 0 1rem; border: 0; border-radius: var(--radio); background: rgb(242 240 234 / 0.9); color: var(--tinta); font: 600 var(--t-etiqueta) / 1 var(--texto); letter-spacing: 0.08em; text-transform: uppercase; cursor: zoom-in; }
+.tira { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 0.75rem; }
+.tira-fotos { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; padding: 3px; }
+.tira-fotos button { display: block; width: 5rem; padding: 0; border: 0; border-radius: 0.35rem; overflow: hidden; cursor: pointer; background: var(--lino); opacity: 0.5; transition: opacity 0.3s, box-shadow 0.3s; }
+.tira-fotos button:hover { opacity: 0.85; }
+.tira-fotos button[aria-current="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--teal); }
+.tira-fotos img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.tira-paso { width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 1px solid var(--piedra); background: none; cursor: pointer; font-size: 1.05rem; }
+.tira-paso:hover { border-color: var(--tinta); }
+.tira-contador { min-width: 3.5rem; text-align: right; font: 400 1.1rem / 1 var(--display); font-variant-numeric: tabular-nums; color: var(--grafito); }
 .panel-hab { display: grid; align-content: start; gap: 1.5rem; }
 .pestanas { display: grid; }
 .pestanas button { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.75rem 0; border: 0; border-bottom: 1px solid var(--lino); background: none; color: var(--piedra); cursor: pointer; text-align: left; transition: color 0.3s; }
@@ -149,10 +183,6 @@ body.en-noche .barra { background: rgb(6 29 30 / 0.92); color: var(--marfil); }
 .datos dd { margin-top: 0.35rem; font: 400 var(--t-h3) / 1 var(--display); }
 .servicios { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .servicios li { padding: 0.45rem 0.85rem; border-radius: var(--radio); background: var(--lino); font-size: var(--t-pequeno); }
-.miniaturas { display: flex; gap: 0.6rem; }
-.miniaturas button { width: 5.5rem; padding: 0; border: 0; border-radius: 0.4rem; overflow: hidden; cursor: pointer; opacity: 0.55; transition: opacity 0.3s, transform 0.3s; background: none; }
-.miniaturas button[aria-pressed="true"], .miniaturas button:hover { opacity: 1; }
-.miniaturas img { width: 100%; aspect-ratio: 1; object-fit: cover; }
 .acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem; }
 .comparador { margin: clamp(3rem, 6vw, 5rem) var(--margen) 0; }
 .comparador table { width: 100%; border-collapse: collapse; font-size: var(--t-pequeno); }
@@ -186,17 +216,37 @@ body.en-noche .exp-indice a.activo { color: var(--laton-claro); }
 .menu li { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: 0.9rem; border-bottom: 1px solid var(--lino); }
 .menu b { font: 400 1.25rem / 1.2 var(--display); }
 .menu span { color: var(--grafito); font-size: var(--t-pequeno); text-align: right; }
-.exp-mar { grid-template-columns: 1fr 1fr; }
-.mar-grande { grid-column: 1 / -1; overflow: hidden; }
-.mar-grande img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; }
-.mar-pequenas { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+/* Mar: vídeo que ocupa todo el artículo, texto marfil encima */
+.exp-mar { grid-template-columns: 1fr; }
+.mar-escena { position: relative; height: min(80svh, 46rem); overflow: hidden; background: #2a1a12 url("video/mar-ocaso-1280.webp") center / cover; color: var(--marfil); }
+.mar-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mar-velo { position: absolute; inset: 0; background: linear-gradient(200deg, rgb(6 29 30 / 0) 35%, rgb(6 29 30 / 0.7)); }
+.mar-texto { position: absolute; left: clamp(1.5rem, 4vw, 3.5rem); right: clamp(1.5rem, 4vw, 3.5rem); bottom: clamp(1.5rem, 5vh, 3.5rem); display: grid; gap: 1rem; max-width: 34rem; }
+.mar-texto .etiqueta { color: var(--laton-claro); }
+.mar-texto p { color: rgb(242 240 234 / 0.9); }
+.mar-pausa { position: absolute; top: 1rem; right: 1rem; min-height: 2.75rem; padding: 0 1rem; border: 1px solid rgb(242 240 234 / 0.6); border-radius: var(--radio); background: rgb(6 29 30 / 0.35); color: var(--marfil); font: 600 var(--t-etiqueta) / 1 var(--texto); letter-spacing: 0.06em; cursor: pointer; }
+.mar-pausa[hidden] { display: none; }
+.mar-pequenas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .mar-pequenas figure { overflow: hidden; }
 .mar-pequenas img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
 .mar-pequenas figcaption { margin-top: 0.6rem; font-size: var(--t-pequeno); color: var(--grafito); }
-.exp-cielo { grid-template-columns: 5fr 6fr; align-items: center; color: var(--marfil); }
-.exp-cielo .circulo { overflow: hidden; border-radius: 50%; aspect-ratio: 1; }
-.exp-cielo .circulo img { width: 100%; height: 100%; object-fit: cover; }
-.exp-cielo p { color: var(--teal-texto); }
+
+/* Cielo: escena a pantalla completa con expansión circular */
+.cielo { position: relative; color: var(--marfil); }
+.cielo-escena { position: relative; height: 100svh; overflow: hidden; background: var(--teal-noche); }
+.cielo-foto { position: absolute; inset: 0; }
+.cielo-foto img { width: 100%; height: 100%; object-fit: cover; }
+.cielo-aro { position: absolute; left: 50%; top: 50%; width: 44vmin; height: 44vmin; margin: -22vmin 0 0 -22vmin; border: 1px solid var(--laton-claro); border-radius: 50%; pointer-events: none; opacity: 0; }
+.cielo-velo { position: absolute; inset: 0; background: linear-gradient(90deg, rgb(6 29 30 / 0.78), rgb(6 29 30 / 0.2) 55%, rgb(6 29 30 / 0)); }
+.cielo-texto { position: absolute; left: var(--margen); bottom: clamp(3rem, 12vh, 8rem); display: grid; gap: 1.25rem; max-width: 32rem; }
+.cielo-texto .etiqueta { color: var(--laton-claro); }
+.cielo-texto p { color: var(--teal-texto); font-size: var(--t-entrada); line-height: 1.45; }
+html[data-movimiento="completo"] .cielo { height: 190svh; }
+html[data-movimiento="completo"] .cielo-escena { position: sticky; top: 0; }
+/* Máscara circular por transformaciones: el círculo mide la diagonal (--diam, desde
+   JS) y la foto, del tamaño de la pantalla, va centrada dentro */
+html[data-movimiento="completo"] .cielo-foto { inset: auto; left: 50%; top: 50%; width: var(--diam, 150vmax); height: var(--diam, 150vmax); margin: calc(var(--diam, 150vmax) / -2) 0 0 calc(var(--diam, 150vmax) / -2); border-radius: 50%; overflow: hidden; will-change: transform; }
+html[data-movimiento="completo"] .cielo-foto img { position: absolute; left: 50%; top: 50%; width: 100vw; height: 100svh; margin: -50svh 0 0 -50vw; will-change: transform; }
 .exp-texto { display: grid; gap: 1.25rem; align-content: start; }
 .exp-texto .etiqueta { color: var(--laton); }
 body.en-noche .exp-texto .etiqueta { color: var(--laton-claro); }
@@ -204,6 +254,25 @@ body.en-noche .exp-texto .etiqueta { color: var(--laton-claro); }
 /* ——— 6. Un día en Aurea ——— */
 .dia { position: relative; background: var(--teal-noche); color: var(--marfil); }
 .dia-escena { position: relative; display: grid; grid-template-columns: 5fr 7fr; height: 100svh; overflow: hidden; }
+/* Escritorio con movimiento completo: escenario sticky, 3 pantallas (media por momento) */
+@media (min-width: 768px) {
+  html[data-movimiento="completo"] .dia { height: 300svh; }
+  html[data-movimiento="completo"] .dia-escena { position: sticky; top: 0; }
+  html[data-movimiento="completo"] .dia-lista { display: none; }
+}
+/* Móvil y modo reducido: bloques normales con reloj fijo en la cabecera */
+@media (max-width: 767px) { .dia-escena { display: none; } }
+html[data-movimiento="reducido"] .dia-escena { display: none; }
+.dia-lista { padding: 0 0 var(--seccion); }
+.dia-cabecera { position: sticky; top: 0; z-index: 3; display: flex; justify-content: space-between; align-items: baseline; padding: 1rem var(--margen); background: rgb(6 29 30 / 0.94); border-bottom: 1px solid rgb(242 240 234 / 0.12); }
+.dia-cabecera .etiqueta { color: var(--laton-claro); }
+.dia-hora { display: inline-block; font: 300 1.9rem / 1 var(--display); font-variant-numeric: tabular-nums; }
+.dia-bloque { display: grid; grid-template-columns: 7fr 5fr; gap: 2rem 4vw; align-items: center; padding: clamp(2.5rem, 6vw, 5rem) var(--margen) 0; }
+.dia-bloque-foto { overflow: hidden; }
+.dia-bloque-foto img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.dia-bloque-texto { display: grid; gap: 0.75rem; }
+.dia-bloque-hora { font: 300 clamp(2.5rem, 1.5rem + 3vw, 4rem) / 1 var(--display); color: var(--laton-claro); font-variant-numeric: tabular-nums; }
+.dia-bloque-texto p { color: var(--teal-texto); max-width: 28rem; }
 .dia-texto { position: relative; z-index: 2; display: grid; align-content: center; gap: 1.75rem; padding: 6rem var(--margen); }
 .dia-texto .etiqueta { color: var(--laton-claro); }
 .reloj { display: flex; font: 300 clamp(4rem, 2rem + 6vw, 8rem) / 1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; height: 1em; overflow: hidden; align-items: flex-start; }
@@ -213,8 +282,10 @@ body.en-noche .exp-texto .etiqueta { color: var(--laton-claro); }
 .dia-momentos { display: grid; }
 .dia-momento { grid-area: 1 / 1; display: grid; gap: 0.75rem; align-content: start; }
 .dia-momento p { color: var(--teal-texto); max-width: 28rem; }
-.dia-progreso { display: flex; gap: 0.5rem; }
-.dia-progreso i { width: 2.5rem; height: 2px; background: rgb(242 240 234 / 0.2); position: relative; overflow: hidden; }
+.dia-progreso { display: flex; gap: 0.25rem; }
+.dia-progreso button { padding: 1rem 0.15rem; border: 0; background: none; cursor: pointer; }
+.dia-progreso i { display: block; width: 2.5rem; height: 2px; background: rgb(242 240 234 / 0.2); position: relative; overflow: hidden; transition: height 0.2s; }
+.dia-progreso button:hover i { height: 4px; }
 .dia-progreso i::after { content: ""; position: absolute; inset: 0; background: var(--laton-claro); transform: scaleX(var(--p, 0)); transform-origin: left; }
 .dia-fotos { position: relative; overflow: hidden; }
 .dia-foto { position: absolute; inset: 0; }
@@ -318,9 +389,10 @@ body.en-noche .exp-texto .etiqueta { color: var(--laton-claro); }
 
 /* ——— Móvil: composiciones propias, no el escritorio encogido ——— */
 @media (max-width: 767px) {
-  .barra nav, .hero-nav nav { display: none; }
+  .barra nav, .hero-nav nav, .barra-reservar, .hero-reservar { display: none; }
+  .abrir-menu { display: inline-flex; }
   .hero-pie { grid-template-columns: 1fr; gap: 1.25rem; }
-  .cabeza-seccion, .manifiesto, .selector, .exp-rejilla, .exp-termas, .exp-mesa, .exp-mar, .exp-cielo, .ubicacion, .reserva, .calendarios { grid-template-columns: 1fr; }
+  .cabeza-seccion, .manifiesto, .selector, .exp-rejilla, .exp-termas, .exp-mesa, .exp-mar, .ubicacion, .reserva, .calendarios { grid-template-columns: 1fr; }
   .cifras { grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
   .cifra b { font-size: 2.25rem; }
   .arco:nth-child(2) { margin-bottom: 2rem; }
@@ -331,18 +403,29 @@ body.en-noche .exp-texto .etiqueta { color: var(--laton-claro); }
   .llegada-frase, .llegada-velo { display: none; }
   .pasos-nav li { font-size: 0; }
   .pasos-nav li.actual { flex: 3; font-size: var(--t-etiqueta); }
-  .escenario { min-height: 0; aspect-ratio: 4 / 3.4; margin-inline: calc(-1 * var(--margen)); }
+  .escenario { aspect-ratio: 4 / 4.4; margin-inline: calc(-1 * var(--margen)); }
+  .escenario .marca-hab { left: var(--margen); }
+  .tira { grid-template-columns: auto 1fr auto; }
+  .tira-contador { grid-column: 1 / -1; grid-row: 1; text-align: left; }
+  .tira-fotos button { width: 4rem; }
   .panel-hab { padding-top: 1.5rem; }
-  .pestanas { display: flex; overflow-x: auto; gap: 1.25rem; margin-inline: calc(-1 * var(--margen)); padding-inline: var(--margen); scrollbar-width: none; }
-  .pestanas button { flex: none; border: 0; flex-direction: column; gap: 0.2rem; }
+  /* Habitaciones en fila deslizable; el degradado del borde indica que hay más */
+  .pestanas { display: flex; overflow-x: auto; gap: 1.25rem; margin-inline: calc(-1 * var(--margen)); padding-inline: var(--margen); scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding-inline: var(--margen); mask-image: linear-gradient(90deg, #000 82%, transparent); }
+  .pestanas button { flex: none; border: 0; flex-direction: column; gap: 0.2rem; scroll-snap-align: start; min-height: 2.75rem; }
+  .mar-escena { height: 72svh; }
+  .mar-pequenas { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 72%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .mar-pequenas figure { scroll-snap-align: start; }
+  html[data-movimiento="completo"] .cielo { height: 150svh; }
+  .cielo-aro { width: 60vmin; height: 60vmin; margin: -30vmin 0 0 -30vmin; }
+  .cielo-velo { background: linear-gradient(180deg, rgb(6 29 30 / 0) 35%, rgb(6 29 30 / 0.85)); }
+  .cielo-texto { right: var(--margen); bottom: 2.5rem; }
+  .dia-bloque { grid-template-columns: 1fr; gap: 1.25rem; }
+  .dia-bloque-foto { margin-inline: calc(-1 * var(--margen)); }
+  .dia-bloque-foto img { aspect-ratio: 4 / 4.4; }
   .comparador { overflow-x: auto; }
   .comparador table { min-width: 40rem; }
   .exp-indice { display: none; }
   .mesa-fotos { min-height: 26rem; }
-  .dia-escena { grid-template-columns: 1fr; height: auto; }
-  .dia-fotos { order: -1; height: 62svh; }
-  .dia-texto { padding: 2.5rem var(--margen) 4rem; }
-  .dia-foto .secundarias img { width: 5.5rem; }
   .mosaico { grid-template-columns: 1fr 1fr; grid-auto-rows: 38vw; }
   .mosaico button:nth-child(n) { grid-column: auto; grid-row: span 1; }
   .mosaico button:nth-child(1) { grid-column: 1 / -1; grid-row: span 2; }

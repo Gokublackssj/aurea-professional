@@ -31,8 +31,25 @@
       <nav>
         <a href="#habitaciones">Habitaciones</a><a href="#experiencias">Experiencias</a><a href="#dia">Un día</a><a href="#galeria">Galería</a><a href="#reservar">Reservas</a>
       </nav>
-      <a class="boton boton-teal" href="#reservar">Reservar</a>
+      <a class="boton boton-teal barra-reservar" href="#reservar">Reservar</a>
+      <button type="button" class="boton boton-linea abrir-menu" aria-haspopup="dialog" aria-controls="menu-movil">Menú</button>
     </header>
+
+    <!-- Menú móvil a pantalla completa (por debajo de 768 px la navegación se recoge aquí) -->
+    <dialog class="menu-movil" id="menu-movil" aria-label="Menú">
+      <div class="menu-cabeza"><span class="marca">Aurea</span><button type="button" class="boton boton-linea cerrar-menu">Cerrar</button></div>
+      <nav aria-label="Secciones">
+        <ol>
+          <li><a href="#habitaciones"><b>01</b>Habitaciones</a></li>
+          <li><a href="#experiencias"><b>02</b>Experiencias</a></li>
+          <li><a href="#dia"><b>03</b>Un día en Aurea</a></li>
+          <li><a href="#galeria"><b>04</b>Galería</a></li>
+          <li><a href="#ubicacion"><b>05</b>Ubicación</a></li>
+          <li><a href="#reservar"><b>06</b>Reservas</a></li>
+        </ol>
+      </nav>
+      <a class="boton boton-laton" href="#reservar">Ver disponibilidad <span class="flecha">→</span></a>
+    </dialog>
 
     <main>
       <!-- 1. HERO -->
@@ -43,7 +60,8 @@
         <div class="hero-nav">
           <span class="marca">Aurea</span>
           <nav aria-label="Secciones"><a href="#habitaciones">Habitaciones</a><a href="#experiencias">Experiencias</a><a href="#dia">Un día</a><a href="#reservar">Reservas</a></nav>
-          <a class="boton boton-claro" href="#reservar">Reservar</a>
+          <a class="boton boton-claro hero-reservar" href="#reservar">Reservar</a>
+          <button type="button" class="boton boton-claro abrir-menu" aria-haspopup="dialog" aria-controls="menu-movil">Menú</button>
         </div>
         <div class="hero-pie">
           <div>
@@ -95,7 +113,22 @@
           <p class="suave">Elige una para ver su luz, lo que incluye y cómo se diferencia de las demás. Precios de ejemplo, por noche y para dos personas.</p>
         </div>
         <div class="selector">
-          <div class="escenario" aria-live="polite"></div>
+          <div class="visor-hab">
+            <!-- Dos capas: la foto nueva se carga y decodifica en la de atrás antes de
+                 mostrarse, así el escenario nunca queda vacío -->
+            <div class="escenario">
+              <figure class="capa"><img class="foto" alt="" /></figure>
+              <figure class="capa"><img class="foto" alt="" /></figure>
+              <p class="marca-hab"><span class="marca-nombre"></span><span class="marca-foto"></span></p>
+              <button type="button" class="ampliar-hab" aria-label="Ver la foto a pantalla completa">Ampliar</button>
+            </div>
+            <div class="tira">
+              <button type="button" class="tira-paso" data-paso="-1" aria-label="Foto anterior">←</button>
+              <ol class="tira-fotos" aria-label="Fotos de la habitación"></ol>
+              <button type="button" class="tira-paso" data-paso="1" aria-label="Foto siguiente">→</button>
+              <span class="tira-contador" aria-live="polite"></span>
+            </div>
+          </div>
           <div class="panel-hab">
             <div class="pestanas" role="tablist" aria-label="Elige una habitación"></div>
             <div class="ficha"></div>
@@ -149,27 +182,43 @@
               </div>
             </article>
             <article class="exp exp-mar" id="exp-mar">
-              <figure class="mar-grande"><img class="foto" src="fotos/exp-kayak.webp" alt="Kayak a la entrada de una cueva marina" loading="lazy" /></figure>
-              <div class="exp-texto">
-                <span class="etiqueta">03 · Salidas cada mañana</span>
-                <h3 class="titulo">El mar</h3>
-                <p class="suave">Kayak hasta la cueva que solo se alcanza por agua, o salida al alba con los pescadores del puerto: lo que se pesca se cocina al mediodía.</p>
+              <!-- Vídeo decorativo: el texto está en el HTML. Sin vídeo (modo reducido,
+                   ahorro de datos o conexión lenta) queda el póster. -->
+              <div class="mar-escena">
+                <video class="mar-video" muted playsinline loop preload="none" disablepictureinpicture aria-hidden="true"
+                  poster="video/mar-ocaso-1280.webp"
+                  data-escritorio="video/mar-ocaso-1280.mp4" data-movil="video/mar-ocaso-movil.mp4"
+                  data-poster-movil="video/mar-ocaso-movil.webp"></video>
+                <div class="mar-velo"></div>
+                <div class="mar-texto">
+                  <span class="etiqueta">03 · Salidas cada mañana</span>
+                  <h3 class="titulo">El mar</h3>
+                  <p>Kayak hasta la cueva que solo se alcanza por agua, o salida al alba con los pescadores del puerto: lo que se pesca se cocina al mediodía.</p>
+                </div>
+                <button type="button" class="mar-pausa" hidden>Pausar vídeo</button>
               </div>
               <div class="mar-pequenas">
+                <figure><img class="foto" src="fotos/exp-kayak.webp" alt="Kayak a la entrada de una cueva marina" loading="lazy" /><figcaption>La cueva en kayak · 2 h</figcaption></figure>
                 <figure><img class="foto" src="fotos/exp-barca.webp" alt="Barca de pesca a la hora dorada" loading="lazy" /><figcaption>Con los pescadores · 4 h</figcaption></figure>
                 <figure><img class="foto" src="fotos/exp-bano.webp" alt="Bañistas entre rocas al atardecer" loading="lazy" /><figcaption>Baño entre rocas · incluido</figcaption></figure>
               </div>
             </article>
-            <article class="exp exp-cielo" id="exp-cielo">
-              <figure class="circulo"><img class="foto" src="fotos/noche-cielo.webp" alt="La Vía Láctea sobre rocas en el agua" loading="lazy" /></figure>
-              <div class="exp-texto">
-                <span class="etiqueta">04 · Viernes, 21:30</span>
-                <h3 class="titulo">El cielo</h3>
-                <p>No hay una farola en nueve kilómetros. Los viernes, una astrónoma de la isla sube el telescopio a la azotea con la carta del cielo de esa noche.</p>
-              </div>
-            </article>
           </div>
         </div>
+        <!-- El cielo: escena a pantalla completa. Un círculo se abre desde el centro
+             hasta ocupar toda la pantalla; después aparece el texto. -->
+        <article class="cielo" id="exp-cielo" aria-labelledby="cielo-titulo">
+          <div class="cielo-escena">
+            <div class="cielo-foto"><img class="foto" src="fotos/noche-cielo.webp" alt="La Vía Láctea sobre rocas en el agua" loading="lazy" /></div>
+            <div class="cielo-aro" aria-hidden="true"></div>
+            <div class="cielo-velo"></div>
+            <div class="cielo-texto">
+              <span class="etiqueta">04 · Viernes, 21:30</span>
+              <h3 class="titulo" id="cielo-titulo">El cielo</h3>
+              <p>No hay una farola en nueve kilómetros. Los viernes, una astrónoma de la isla sube el telescopio a la azotea con la carta del cielo de esa noche.</p>
+            </div>
+          </div>
+        </article>
       </section>
 
       <!-- 6. UN DÍA EN AUREA -->
@@ -179,9 +228,14 @@
             <span class="etiqueta" id="dia-titulo">Un día en Aurea</span>
             <div class="reloj" aria-hidden="true"></div>
             <div class="dia-momentos"></div>
-            <div class="dia-progreso" aria-hidden="true"></div>
+            <div class="dia-progreso" role="group" aria-label="Ir a un momento del día"></div>
           </div>
           <div class="dia-fotos"></div>
+        </div>
+        <!-- Móvil y modo reducido: los cinco momentos en bloques normales, con
+             un reloj pequeño fijo en la cabecera de la sección -->
+        <div class="dia-lista">
+          <div class="dia-cabecera" aria-hidden="true"><span class="etiqueta">Un día en Aurea</span><span class="dia-hora">07:30</span></div>
         </div>
       </section>
 
