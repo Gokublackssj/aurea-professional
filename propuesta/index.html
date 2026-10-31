@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Aurea · Propuesta de sistema visual</title>
+    <title>Aurea · Prototipo de experiencia</title>
     <link rel="icon" href="data:," />
-    <!-- Prototipo de la fase 2: fuera del sitio. Las fuentes vienen de Google
+    <!-- Prototipo de la nueva dirección, fuera del sitio. Fuentes de Google
          Fonts solo para evaluarlas; en el sitio se servirían localmente. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,267 +13,312 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..600,0..100;1,9..144,300..600,0..100&family=Manrope:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <style>
-      :root {
-        /* Superficies claras (editorial) */
-        --marfil: #f2f0ea;
-        --blanco: #fbfaf7;
-        --lino: #e4e0d6;
-        --arena: #d6cdbb;
-        --piedra: #a39c8e;
-        /* Tinta */
-        --tinta: #141412;
-        --grafito: #57574f;
-        /* Escena oscura (cinematográfica) */
-        --teal: #0b2e2f;
-        --teal-noche: #061d1e;
-        --teal-claro: #2f5a58;
-        /* Acento */
-        --laton: #a8844a;
-        --laton-claro: #c9a66b;
-
-        --display: "Fraunces", Georgia, serif;
-        --texto: "Manrope", system-ui, sans-serif;
-
-        /* Escala tipográfica: siete pasos, ni uno más */
-        --t-etiqueta: 0.75rem;
-        --t-pequeno: 0.875rem;
-        --t-cuerpo: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
-        --t-entrada: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
-        --t-h3: clamp(1.5rem, 1.25rem + 1vw, 2rem);
-        --t-h2: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
-        --t-display: clamp(3.5rem, 1rem + 10vw, 11rem);
-
-        --margen: clamp(1.25rem, 4vw, 4rem);
-        /* Tratamiento fotográfico común: algo menos de saturación y contraste suave */
-        --grado: saturate(0.86) contrast(1.03) brightness(0.97);
-      }
-
-      * { box-sizing: border-box; }
-      body { margin: 0; background: var(--marfil); color: var(--tinta); font: 400 var(--t-cuerpo) / 1.6 var(--texto); -webkit-font-smoothing: antialiased; }
-      h1, h2, h3, p { margin: 0; }
-      img { display: block; max-width: 100%; }
-      .foto { filter: var(--grado); }
-      .etiqueta { font: 600 var(--t-etiqueta) / 1 var(--texto); letter-spacing: 0.16em; text-transform: uppercase; color: var(--grafito); }
-      .display { font-family: var(--display); font-variation-settings: "SOFT" 50, "opsz" 144; font-weight: 340; letter-spacing: -0.03em; line-height: 0.9; }
-      .titulo { font-family: var(--display); font-variation-settings: "SOFT" 30, "opsz" 96; font-weight: 380; letter-spacing: -0.02em; line-height: 1; }
-      .lamina { padding: 6rem var(--margen); }
-      .lamina + .lamina { border-top: 0; }
-      .rotulo { display: flex; justify-content: space-between; gap: 2rem; margin-bottom: 3rem; }
-
-      /* ——— HERO ——— */
-      .hero { position: relative; height: 100vh; min-height: 640px; overflow: hidden; background: var(--marfil); }
-      .hero-foto { position: absolute; inset: 0; clip-path: inset(50% 50% 50% 50% round 999px); }
-      .hero-foto img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); }
-      .hero-foto::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(6 29 30 / 0.35), rgb(6 29 30 / 0) 30%, rgb(6 29 30 / 0) 55%, rgb(6 29 30 / 0.7)); opacity: 0; }
-      .hero.oscuro .hero-foto::after { opacity: 1; transition: opacity 0.8s; }
-      .hero-linea { position: absolute; left: 50%; top: 50%; width: 38vw; height: 1px; margin-left: -19vw; background: var(--laton); transform: scaleX(0); }
-      .hero-nombre { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 0; pointer-events: none; }
-      .hero-nombre span { display: inline-block; font-size: var(--t-display); color: var(--tinta); }
-      .hero-nav { position: absolute; inset: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 1.75rem var(--margen); color: var(--marfil); opacity: 0; }
-      .hero-nav nav { display: flex; gap: 2.25rem; font: 500 var(--t-pequeno) / 1 var(--texto); }
-      .hero-nav .marca { font: 400 1.5rem / 1 var(--display); }
-      .boton { display: inline-flex; align-items: center; min-height: 3rem; padding: 0 1.4rem; border-radius: 999px; font: 600 var(--t-pequeno) / 1 var(--texto); letter-spacing: 0.02em; text-decoration: none; }
-      .boton-claro { background: var(--marfil); color: var(--tinta); }
-      .boton-teal { background: var(--teal); color: var(--marfil); }
-      .boton-laton { background: var(--laton-claro); color: var(--teal-noche); }
-      .hero-pie { position: absolute; inset: auto 0 0; display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 2rem; padding: 0 var(--margen) 2.25rem; color: var(--marfil); opacity: 0; }
-      .hero-pie p { max-width: 26rem; font-size: var(--t-entrada); line-height: 1.35; }
-      .hero-pie .etiqueta { color: var(--laton-claro); margin-bottom: 1rem; display: block; }
-
-      /* ——— Paleta ——— */
-      .muestras { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
-      .muestra { aspect-ratio: 1 / 1.15; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; font-size: var(--t-pequeno); }
-      .muestra b { font: 400 var(--t-h3) / 1 var(--display); }
-      .contraste { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.5rem 2rem; margin-top: 2.5rem; font-size: var(--t-pequeno); color: var(--grafito); }
-      .contraste span b { color: var(--tinta); }
-
-      /* ——— Tipografía ——— */
-      .escala { display: grid; gap: 1.75rem; }
-      .escala div { display: grid; grid-template-columns: 9rem 1fr; align-items: baseline; gap: 2rem; }
-      .escala small { font-size: var(--t-etiqueta); color: var(--grafito); letter-spacing: 0.08em; }
-
-      /* ——— Muestra editorial clara ——— */
-      .editorial { display: grid; grid-template-columns: 5fr 7fr; gap: 5vw; align-items: end; padding: 7rem var(--margen); background: var(--blanco); }
-      .editorial-texto { display: grid; gap: 1.5rem; align-content: end; }
-      .editorial-texto p { color: var(--grafito); max-width: 30rem; }
-      .datos { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 0.5rem 2.5rem; font-size: var(--t-pequeno); }
-      .datos dt { color: var(--grafito); font-size: var(--t-etiqueta); letter-spacing: 0.12em; text-transform: uppercase; }
-      .datos dd { margin: 0.35rem 0 0; font: 400 var(--t-h3) / 1 var(--display); }
-      .editorial-fotos { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; align-items: end; }
-      .editorial-fotos img { width: 100%; object-fit: cover; }
-      .editorial-fotos img:first-child { aspect-ratio: 4 / 5; border-radius: 999px 999px 0 0; }
-      .editorial-fotos img:last-child { aspect-ratio: 3 / 4; }
-
-      /* ——— Muestra cinematográfica oscura ——— */
-      .escena { position: relative; display: grid; grid-template-columns: 1fr 1fr; min-height: 92vh; background: var(--teal); color: var(--marfil); }
-      .escena-foto img { width: 100%; height: 100%; object-fit: cover; }
-      .escena-texto { display: grid; align-content: center; gap: 1.75rem; padding: 5rem var(--margen); }
-      .escena-texto .etiqueta { color: var(--laton-claro); }
-      .escena-texto p { color: #c9d3cf; max-width: 28rem; }
-      .horas { display: flex; gap: 1.75rem; margin-top: 1rem; font-size: var(--t-pequeno); color: #8fa6a2; }
-      .horas b { color: var(--laton-claro); font-weight: 600; }
-
-      /* Selector de modo del prototipo (fuera del diseño) */
-      /* En el lateral, centrado en vertical: no tapa la navegación ni los botones del hero */
-      .modos { position: fixed; right: 0.75rem; top: 50%; transform: translateY(-50%); z-index: 10; display: flex; flex-direction: column; gap: 0.2rem; background: rgb(20 20 18 / 0.85); border-radius: 1.25rem; padding: 0.3rem; font: 600 0.75rem / 1 var(--texto); }
-      .modos a { padding: 0.55rem 0.9rem; border-radius: 999px; color: #f2f0ea; text-decoration: none; }
-      .modos a.activo { background: #f2f0ea; color: #141412; }
-
-      @media (max-width: 767px) {
-        .hero-nav nav { display: none; }
-        .hero-pie { grid-template-columns: 1fr; gap: 1.25rem; }
-        .editorial, .escena { grid-template-columns: 1fr; }
-        .escena-foto img { aspect-ratio: 4 / 3; }
-        .escala div { grid-template-columns: 1fr; gap: 0.5rem; }
-      }
-    </style>
+    <link rel="stylesheet" href="estilos.css" />
+    <script>
+      // Modo de movimiento antes del primer pintado: sigue al sistema, o se
+      // fuerza con ?movimiento=reducido / ?movimiento=completo.
+      (function () {
+        var pedido = new URLSearchParams(location.search).get("movimiento");
+        var reducido = pedido === "reducido" || (pedido !== "completo" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+        document.documentElement.dataset.movimiento = reducido ? "reducido" : "completo";
+      })();
+    </script>
   </head>
   <body>
-    <!-- 1. HERO: apertura cinematográfica -->
-    <section class="hero" id="hero">
-      <div class="hero-foto"><img class="foto" src="fotos/casa-piscina.webp" alt="Piscina desbordante del hotel al anochecer, frente al mar" /></div>
-      <div class="hero-linea"></div>
-      <div class="hero-nombre display" aria-label="Aurea"><span class="mitad-a">Au</span><span class="mitad-b">rea</span></div>
-      <header class="hero-nav">
-        <span class="marca">Aurea</span>
-        <nav><span>Habitaciones</span><span>Experiencias</span><span>Un día</span><span>Reservas</span></nav>
-        <a class="boton boton-claro" href="#">Reservar</a>
-      </header>
-      <div class="hero-pie">
-        <div>
-          <span class="etiqueta">Cabo Lumbre · Atlántico</span>
-          <p>Veintidós llaves sobre un cabo de basalto, frente al poniente.</p>
+    <!-- Barra: aparece al salir del hero, se esconde al bajar y vuelve al subir -->
+    <header class="barra" aria-label="Navegación">
+      <a class="marca" href="#hero">Aurea</a>
+      <nav>
+        <a href="#habitaciones">Habitaciones</a><a href="#experiencias">Experiencias</a><a href="#dia">Un día</a><a href="#galeria">Galería</a><a href="#reservar">Reservas</a>
+      </nav>
+      <a class="boton boton-teal" href="#reservar">Reservar</a>
+    </header>
+
+    <main>
+      <!-- 1. HERO -->
+      <section class="hero" id="hero" aria-label="Aurea">
+        <div class="hero-foto"><img class="foto" src="fotos/casa-piscina.webp" alt="Piscina desbordante del hotel al anochecer, frente al mar" /></div>
+        <div class="hero-linea"></div>
+        <h1 class="hero-nombre display" aria-label="Aurea, hotel en Cabo Lumbre"><span class="mitad-a" aria-hidden="true">Au</span><span class="mitad-b" aria-hidden="true">rea</span></h1>
+        <div class="hero-nav">
+          <span class="marca">Aurea</span>
+          <nav aria-label="Secciones"><a href="#habitaciones">Habitaciones</a><a href="#experiencias">Experiencias</a><a href="#dia">Un día</a><a href="#reservar">Reservas</a></nav>
+          <a class="boton boton-claro" href="#reservar">Reservar</a>
         </div>
-        <a class="boton boton-laton" href="#">Ver disponibilidad</a>
-      </div>
-    </section>
+        <div class="hero-pie">
+          <div>
+            <span class="etiqueta">Cabo Lumbre · Atlántico</span>
+            <p>Veintidós llaves sobre un cabo de basalto, frente al poniente.</p>
+          </div>
+          <a class="boton boton-laton" href="#reservar">Ver disponibilidad <span class="flecha">→</span></a>
+        </div>
+      </section>
 
-    <!-- 2. PALETA -->
-    <section class="lamina">
-      <div class="rotulo"><span class="etiqueta">Paleta · tonos del cabo</span><span class="etiqueta">Marfil, arena, piedra, grafito, verde azulado, latón</span></div>
-      <div class="muestras" id="muestras"></div>
-      <div class="contraste" id="contraste"></div>
-    </section>
+      <!-- 2. MANIFIESTO -->
+      <section class="manifiesto" id="manifiesto" aria-labelledby="manifiesto-titulo">
+        <div>
+          <span class="etiqueta" id="manifiesto-titulo">El cabo</span>
+          <p class="manifiesto-texto">Aquí el día se mide por la luz: basalto al alba, cal a mediodía y oro cuando el sol cae delante de cada habitación.</p>
+        </div>
+        <div class="arcos">
+          <figure class="arco"><img class="foto" src="fotos/material-basalto.webp" alt="Piedra de basalto de cerca" loading="lazy" /></figure>
+          <figure class="arco"><img class="foto" src="fotos/material-lino.webp" alt="Lino crudo con la sombra de una ventana" loading="lazy" /></figure>
+        </div>
+        <div class="cifras">
+          <div class="cifra"><b data-contar="38">38</b><span>metros sobre el Atlántico</span></div>
+          <div class="cifra"><b data-contar="112">112</b><span>escalones hasta la cala</span></div>
+          <div class="cifra"><b data-contar="22">22</b><span>llaves en toda la casa</span></div>
+        </div>
+      </section>
 
-    <!-- 3. TIPOGRAFÍA -->
-    <section class="lamina" style="background: var(--blanco)">
-      <div class="rotulo"><span class="etiqueta">Tipografía · Fraunces + Manrope</span><span class="etiqueta">Siete tamaños en todo el sitio</span></div>
-      <div class="escala">
-        <div><small>Display · Fraunces 340</small><span class="display" style="font-size: var(--t-display)">Aurea</span></div>
-        <div><small>H2 · Fraunces 380</small><span class="titulo" style="font-size: var(--t-h2)">Un día en el cabo</span></div>
-        <div><small>H3 · Fraunces 400</small><span class="titulo" style="font-size: var(--t-h3)">Suite Mirador</span></div>
-        <div><small>Entrada · Manrope 400</small><span style="font-size: var(--t-entrada); line-height: 1.4">La esquina donde el cabo gira hacia el oeste, con el ventanal abierto al poniente.</span></div>
-        <div><small>Cuerpo · Manrope 400</small><span style="color: var(--grafito); max-width: 38rem">Seis suites en la esquina del edificio. El ventanal ocupa dos paredes y el sol se pone justo delante de la cama durante la mayor parte del año.</span></div>
-        <div><small>Etiqueta · Manrope 600</small><span class="etiqueta">58 m² · Hasta 2 huéspedes · Desde 610 €</span></div>
-      </div>
-    </section>
+      <!-- 3. LLEGADA: formato cine que se abre -->
+      <section class="llegada" id="llegada" aria-labelledby="llegada-titulo">
+        <div class="llegada-escena">
+          <div class="llegada-foto"><img class="foto" src="fotos/llegada-costa.webp" alt="Costa de roca al amanecer, con el camino sobre el acantilado" loading="lazy" /><div class="llegada-velo"></div></div>
+          <div class="llegada-cabeza">
+            <h2 class="titulo" id="llegada-titulo">La llegada</h2>
+            <span class="etiqueta">50 minutos desde el aeropuerto</span>
+          </div>
+          <div class="llegada-pie">
+            <p>La carretera de la costa termina en un portón de madera. El último kilómetro es una pista de picón negro entre tabaibas.</p>
+            <span class="etiqueta">Traslado incluido desde 3 noches</span>
+          </div>
+          <p class="llegada-frase titulo" aria-hidden="true">El último kilómetro es nuestro</p>
+        </div>
+      </section>
 
-    <!-- 4. SECCIÓN EDITORIAL CLARA (habitación) -->
-    <section class="editorial">
-      <div class="editorial-texto">
-        <span class="etiqueta">Habitaciones · 02 de 04</span>
-        <h2 class="titulo" style="font-size: var(--t-h2)">Suite Mirador</h2>
-        <p>La esquina donde el cabo gira hacia el oeste. El ventanal ocupa dos paredes y la bañera mira al mar.</p>
-        <dl class="datos">
-          <div><dt>Superficie</dt><dd>58 m²</dd></div>
-          <div><dt>Huéspedes</dt><dd>2</dd></div>
-          <div><dt>Desde</dt><dd>610 €</dd></div>
-        </dl>
-        <div style="display: flex; gap: 1rem; margin-top: 0.5rem"><a class="boton boton-teal" href="#">Elegir esta suite</a><a class="boton" style="color: var(--tinta); padding: 0" href="#">Comparar →</a></div>
-      </div>
-      <div class="editorial-fotos">
-        <img class="foto" src="fotos/mirador-ventana.webp" alt="Ventanal de la Suite Mirador abierto al mar" />
-        <img class="foto" src="fotos/mirador-bano.webp" alt="Bañera frente a un arco abierto al mar" />
-      </div>
-    </section>
+      <!-- 4. HABITACIONES -->
+      <section class="habitaciones" id="habitaciones" aria-labelledby="hab-titulo">
+        <div class="cabeza-seccion marco">
+          <span class="etiqueta">Habitaciones · 22 llaves</span>
+          <h2 class="titulo" id="hab-titulo">Cuatro formas de mirar el mar</h2>
+          <p class="suave">Elige una para ver su luz, lo que incluye y cómo se diferencia de las demás. Precios de ejemplo, por noche y para dos personas.</p>
+        </div>
+        <div class="selector">
+          <div class="escenario" aria-live="polite"></div>
+          <div class="panel-hab">
+            <div class="pestanas" role="tablist" aria-label="Elige una habitación"></div>
+            <div class="ficha"></div>
+          </div>
+        </div>
+        <div class="comparador" aria-labelledby="comparar-titulo">
+          <h3 class="h3" id="comparar-titulo" style="margin-bottom: 1rem">Comparar</h3>
+          <table></table>
+        </div>
+      </section>
 
-    <!-- 5. ESCENA CINEMATOGRÁFICA OSCURA (Un día) -->
-    <section class="escena">
-      <div class="escena-foto"><img class="foto" src="fotos/dia-azotea.webp" alt="Terraza en lo alto frente al mar con el sol rozando el horizonte" /></div>
-      <div class="escena-texto">
-        <span class="etiqueta">Un día en Aurea · Hora áurea</span>
-        <h2 class="titulo" style="font-size: var(--t-h2)">La casa apaga las luces</h2>
-        <p>El sol se pone delante de las veintidós habitaciones. Desde ese momento la terraza se queda en silencio.</p>
-        <div class="horas"><span>7:30</span><span>9:00</span><span>13:30</span><b>Hora áurea</b><span>21:30</span></div>
+      <!-- 5. EXPERIENCIAS: cuatro composiciones distintas -->
+      <section class="experiencias" id="experiencias" aria-labelledby="exp-titulo">
+        <div class="cabeza-seccion marco">
+          <span class="etiqueta">Experiencias</span>
+          <h2 class="titulo" id="exp-titulo">Fuera de la habitación</h2>
+          <p class="suave">Cuatro cosas que pasan cada día en el cabo, a menos de 112 escalones.</p>
+        </div>
+        <div class="exp-rejilla">
+          <nav class="exp-indice" aria-label="Experiencias">
+            <a href="#exp-termas"><b>01</b><span>Las termas</span></a>
+            <a href="#exp-mesa"><b>02</b><span>Mesa de Lumbre</span></a>
+            <a href="#exp-mar"><b>03</b><span>El mar</span></a>
+            <a href="#exp-cielo"><b>04</b><span>El cielo</span></a>
+          </nav>
+          <div>
+            <article class="exp exp-termas" id="exp-termas">
+              <figure class="persiana"><img class="foto" src="fotos/spa-piscina.webp" alt="Piscina cubierta bajo un techo de madera iluminado" loading="lazy" /></figure>
+              <div class="exp-texto">
+                <span class="etiqueta">01 · De 8:00 a 21:00</span>
+                <h3 class="titulo">Las termas</h3>
+                <p class="suave">Agua del Atlántico, filtrada y templada a 30 °C bajo una bóveda de madera de tea. Sauna de basalto y baño de vapor con hierbas del barranco.</p>
+                <p class="entrada">Por qué merece la pena: es el único lugar del cabo donde el mar está quieto.</p>
+              </div>
+            </article>
+            <article class="exp exp-mesa" id="exp-mesa">
+              <div class="exp-texto">
+                <span class="etiqueta">02 · Cena de 19:30 a 22:30</span>
+                <h3 class="titulo">Mesa de Lumbre</h3>
+                <p class="suave">Nueve mesas frente al ventanal y una cocina de leña. El menú cambia según lo que entra cada mañana en la lonja del puerto.</p>
+                <ul class="menu">
+                  <li><b>Lapas del cabo</b><span>mantequilla de algas</span></li>
+                  <li><b>Cherne a la brasa</b><span>mojo de cilantro</span></li>
+                  <li><b>Cabrito de la cumbre</b><span>ocho horas de leña</span></li>
+                  <li><b>Gofio y miel de palma</b><span>helado, almendras</span></li>
+                </ul>
+              </div>
+              <div class="mesa-fotos">
+                <figure class="uno"><img class="foto" src="fotos/mesa-plato.webp" alt="Plato de cerámica negra con pescado y colmenillas" loading="lazy" /></figure>
+                <figure class="dos"><img class="foto" src="fotos/mesa-vino.webp" alt="Copa de vino blanco junto al plato, en penumbra" loading="lazy" /></figure>
+              </div>
+            </article>
+            <article class="exp exp-mar" id="exp-mar">
+              <figure class="mar-grande"><img class="foto" src="fotos/exp-kayak.webp" alt="Kayak a la entrada de una cueva marina" loading="lazy" /></figure>
+              <div class="exp-texto">
+                <span class="etiqueta">03 · Salidas cada mañana</span>
+                <h3 class="titulo">El mar</h3>
+                <p class="suave">Kayak hasta la cueva que solo se alcanza por agua, o salida al alba con los pescadores del puerto: lo que se pesca se cocina al mediodía.</p>
+              </div>
+              <div class="mar-pequenas">
+                <figure><img class="foto" src="fotos/exp-barca.webp" alt="Barca de pesca a la hora dorada" loading="lazy" /><figcaption>Con los pescadores · 4 h</figcaption></figure>
+                <figure><img class="foto" src="fotos/exp-bano.webp" alt="Bañistas entre rocas al atardecer" loading="lazy" /><figcaption>Baño entre rocas · incluido</figcaption></figure>
+              </div>
+            </article>
+            <article class="exp exp-cielo" id="exp-cielo">
+              <figure class="circulo"><img class="foto" src="fotos/noche-cielo.webp" alt="La Vía Láctea sobre rocas en el agua" loading="lazy" /></figure>
+              <div class="exp-texto">
+                <span class="etiqueta">04 · Viernes, 21:30</span>
+                <h3 class="titulo">El cielo</h3>
+                <p>No hay una farola en nueve kilómetros. Los viernes, una astrónoma de la isla sube el telescopio a la azotea con la carta del cielo de esa noche.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. UN DÍA EN AUREA -->
+      <section class="dia" id="dia" aria-labelledby="dia-titulo">
+        <div class="dia-escena">
+          <div class="dia-texto">
+            <span class="etiqueta" id="dia-titulo">Un día en Aurea</span>
+            <div class="reloj" aria-hidden="true"></div>
+            <div class="dia-momentos"></div>
+            <div class="dia-progreso" aria-hidden="true"></div>
+          </div>
+          <div class="dia-fotos"></div>
+        </div>
+      </section>
+
+      <!-- 7. GALERÍA Y UBICACIÓN -->
+      <section class="galeria" id="galeria" aria-labelledby="gal-titulo">
+        <div class="cabeza-seccion marco">
+          <span class="etiqueta">Galería</span>
+          <h2 class="titulo" id="gal-titulo">El cabo, de cerca</h2>
+          <p class="suave">Pulsa una foto para verla a pantalla completa. Se recorren con las flechas.</p>
+        </div>
+        <div class="mosaico">
+          <button type="button" data-ampliar><img class="foto" src="fotos/costa-playa-negra.webp" alt="Playa de arena negra desde lo alto" loading="lazy" /></button>
+          <button type="button" data-ampliar><img class="foto" src="fotos/casa-escalera.webp" alt="Escalones de piedra tallados en el acantilado" loading="lazy" /></button>
+          <button type="button" data-ampliar><img class="foto" src="fotos/exp-vina.webp" alt="Viñas entre muros de piedra en tierra volcánica" loading="lazy" /></button>
+          <button type="button" data-ampliar><img class="foto" src="fotos/spa-tumbonas.webp" alt="Tumbonas junto a una piscina de piedra" loading="lazy" /></button>
+          <button type="button" data-ampliar><img class="foto" src="fotos/costa-barca.webp" alt="El mar al anochecer con una barca lejana" loading="lazy" /></button>
+          <button type="button" data-ampliar><img class="foto" src="fotos/terraza-piscina.webp" alt="Piscina de inmersión en una terraza blanca" loading="lazy" /></button>
+        </div>
+        <dialog class="visor" aria-label="Galería a pantalla completa">
+          <div class="visor-foto"></div>
+          <div class="visor-pie"><span class="visor-texto"></span><div><button type="button" class="boton boton-linea visor-anterior" aria-label="Foto anterior">←</button><button type="button" class="boton boton-linea visor-siguiente" aria-label="Foto siguiente">→</button><button type="button" class="boton boton-claro visor-cerrar">Cerrar</button></div></div>
+        </dialog>
+      </section>
+
+      <section class="ubicacion" id="ubicacion" aria-labelledby="ubi-titulo">
+        <figure class="mapa">
+          <svg viewBox="0 0 600 460" role="img" aria-labelledby="mapa-t">
+            <title id="mapa-t">Mapa de Cabo Lumbre: la carretera llega desde el este hasta Aurea; el sendero baja a la cala</title>
+            <rect width="600" height="460" fill="#0b2e2f" />
+            <path d="M600 0 V460 H360 C330 420 300 400 250 392 C205 384 180 360 186 330 C192 300 160 278 120 274 C84 270 70 244 92 220 C112 198 150 196 170 174 C196 144 176 110 210 90 C246 68 300 74 330 48 C350 30 360 12 372 0 Z" fill="#e4e0d6" />
+            <path class="mapa-ruta" d="M600 200 C520 206 470 232 420 230 C370 228 330 214 286 220" fill="none" stroke="#a8844a" stroke-width="3" />
+            <path class="mapa-sendero" d="M276 228 C250 250 236 280 214 300 C202 312 196 322 194 330" fill="none" stroke="#57574f" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round" />
+            <circle class="mapa-punto" cx="276" cy="222" r="9" fill="#0b2e2f" stroke="#c9a66b" stroke-width="3" />
+            <g font-family="Manrope, sans-serif" font-size="16" fill="#141412" class="mapa-rotulos">
+              <text x="294" y="210">Aurea</text><text x="430" y="262">Carretera de la costa</text><text x="210" y="358">Cala</text>
+            </g>
+            <text x="30" y="420" font-family="Manrope, sans-serif" font-size="15" fill="#c9d3cf">Atlántico · poniente</text>
+          </svg>
+        </figure>
+        <div>
+          <span class="etiqueta">Ubicación</span>
+          <h2 class="titulo" id="ubi-titulo" style="margin: 1rem 0">Cabo Lumbre</h2>
+          <p class="suave">Una isla volcánica del Atlántico, en su costa de poniente. Lugar ficticio: las distancias son de ejemplo.</p>
+          <ul class="distancias">
+            <li><span>Aeropuerto</span><b><span data-contar="50">50</span> min</b></li>
+            <li><span>Puerto de pescadores</span><b><span data-contar="12">12</span> min</b></li>
+            <li><span>Cala de arena negra</span><b><span data-contar="112">112</span> escalones</b></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 8. RESERVAS (demostración) -->
+      <section class="reservas" id="reservar" aria-labelledby="res-titulo">
+        <div class="cabeza-seccion">
+          <span class="etiqueta">Reservas · demostración</span>
+          <h2 class="titulo" id="res-titulo">Prepara tu estancia</h2>
+          <p class="suave">Flujo de ejemplo para este portfolio: no comprueba disponibilidad real, no cobra nada y no envía datos a ningún sitio.</p>
+        </div>
+        <div class="reserva">
+          <form class="reserva-flujo" novalidate>
+            <ol class="pasos-nav" aria-label="Pasos de la reserva">
+              <li>Fechas</li><li>Huéspedes</li><li>Habitación</li><li>Datos</li><li>Confirmación</li>
+            </ol>
+            <div class="paso-panel" data-paso="0">
+              <h3 class="h3">¿Cuándo llegas?</h3>
+              <div class="calendarios"></div>
+            </div>
+            <div class="paso-panel" data-paso="1">
+              <h3 class="h3">¿Cuántos sois?</h3>
+              <div class="contador"><span>Adultos</span><div><button type="button" data-cambiar="adultos:-1" aria-label="Un adulto menos">−</button><output data-valor="adultos">2</output><button type="button" data-cambiar="adultos:1" aria-label="Un adulto más">+</button></div></div>
+              <div class="contador"><span>Mayores de 12 años</span><div><button type="button" data-cambiar="jovenes:-1" aria-label="Uno menos">−</button><output data-valor="jovenes">0</output><button type="button" data-cambiar="jovenes:1" aria-label="Uno más">+</button></div></div>
+            </div>
+            <div class="paso-panel" data-paso="2">
+              <h3 class="h3">Elige la habitación</h3>
+              <div class="opciones-hab"></div>
+            </div>
+            <div class="paso-panel" data-paso="3">
+              <h3 class="h3">Tus datos</h3>
+              <label class="campo"><span>Nombre</span><input name="nombre" autocomplete="name" /></label>
+              <label class="campo"><span>Correo electrónico</span><input name="correo" type="email" autocomplete="email" /></label>
+            </div>
+            <div class="paso-panel" data-paso="4">
+              <div class="confirmacion">
+                <span class="sello">Solo<br />demostración</span>
+                <h3 class="titulo">Solicitud preparada</h3>
+                <p class="codigo"></p>
+                <p class="suave">Esto es un ejemplo de portfolio: no se ha reservado nada, no hay ningún cargo y tus datos no han salido de esta página.</p>
+                <button type="button" class="boton boton-linea" data-reiniciar>Empezar de nuevo</button>
+              </div>
+            </div>
+            <p class="aviso-error" role="alert" aria-live="assertive"></p>
+            <div class="navegacion-pasos">
+              <button type="button" class="boton boton-linea" data-atras>← Atrás</button>
+              <button type="button" class="boton boton-teal" data-adelante>Continuar <span class="flecha">→</span></button>
+            </div>
+          </form>
+          <aside class="resumen" aria-labelledby="resumen-titulo" aria-live="polite">
+            <span class="etiqueta" id="resumen-titulo">Tu estancia</span>
+            <dl>
+              <div><dt>Fechas</dt><dd data-resumen="fechas">Elige en el calendario</dd></div>
+              <div><dt>Huéspedes</dt><dd data-resumen="huespedes">2 adultos</dd></div>
+              <div><dt>Habitación</dt><dd data-resumen="habitacion">Sin elegir</dd></div>
+              <div class="total"><dt>Total de ejemplo</dt><dd data-resumen="total">—</dd></div>
+            </dl>
+            <small>Precios de ejemplo para la demostración. No representan tarifas ni disponibilidad reales.</small>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <!-- 9. PIE -->
+    <footer class="pie">
+      <div class="pie-foto"><img class="foto" src="fotos/costa-acantilado.webp" alt="" loading="lazy" /></div>
+      <div class="pie-capa">
+        <div class="pie-fila">
+          <ul><li><a href="#habitaciones">Habitaciones</a></li><li><a href="#experiencias">Experiencias</a></li><li><a href="#dia">Un día en Aurea</a></li></ul>
+          <ul><li><a href="#galeria">Galería</a></li><li><a href="#ubicacion">Ubicación</a></li><li><a href="#reservar">Reservas</a></li></ul>
+          <ul><li>Carretera del Cabo, km 9</li><li>Cabo Lumbre</li><li>reservas@aurea-hotel.example</li></ul>
+        </div>
+        <div>
+          <p class="pie-nombre display" aria-hidden="true">Aurea</p>
+          <p class="pie-demo">Aurea es un hotel ficticio creado para un portfolio. Las fotografías son referencias visuales de Unsplash; los precios y la reserva son de demostración.</p>
+        </div>
       </div>
-    </section>
+    </footer>
 
     <nav class="modos" aria-label="Modo de movimiento del prototipo">
       <a href="?movimiento=completo" data-modo="completo">Completo</a>
       <a href="?movimiento=reducido" data-modo="reducido">Reducido</a>
     </nav>
 
-    <script src="../node_modules/gsap/dist/gsap.min.js"></script>
-    <script>
-      // Paleta y contrastes (WCAG)
-      const colores = [
-        ["Marfil", "--marfil"], ["Blanco galería", "--blanco"], ["Lino", "--lino"], ["Arena", "--arena"], ["Piedra", "--piedra"],
-        ["Grafito", "--grafito"], ["Tinta", "--tinta"], ["Verde azulado", "--teal"], ["Teal noche", "--teal-noche"], ["Latón", "--laton"], ["Latón claro", "--laton-claro"],
-      ];
-      const css = getComputedStyle(document.documentElement);
-      const valor = (v) => css.getPropertyValue(v).trim();
-      const lum = (hex) => {
-        const c = hex.replace("#", "").match(/../g).map((h) => parseInt(h, 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-      };
-      const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
-      const oscuro = (hex) => lum(hex) < 0.2;
-      document.getElementById("muestras").innerHTML = colores
-        .map(([n, v]) => `<div class="muestra" style="background:${valor(v)};color:${oscuro(valor(v)) ? "#f2f0ea" : "#141412"}"><b>${n}</b><span>${valor(v)}</span></div>`)
-        .join("");
-      const pares = [
-        ["Tinta sobre marfil", "--tinta", "--marfil"], ["Grafito sobre marfil", "--grafito", "--marfil"], ["Grafito sobre lino", "--grafito", "--lino"],
-        ["Marfil sobre verde azulado", "--marfil", "--teal"], ["Latón claro sobre teal noche", "--laton-claro", "--teal-noche"], ["Marfil sobre botón teal", "--marfil", "--teal"],
-        ["Latón sobre marfil (solo detalles)", "--laton", "--marfil"], ["Teal noche sobre latón claro (botón)", "--teal-noche", "--laton-claro"],
-      ];
-      document.getElementById("contraste").innerHTML = pares
-        .map(([n, a, b]) => { const r = ratio(valor(a), valor(b)); return `<span>${n}: <b>${r.toFixed(1)}:1</b> ${r >= 4.5 ? "AA" : r >= 3 ? "AA texto grande" : "no apto para texto"}</span>`; })
-        .join("");
-
-      // Modo de movimiento, como en el sitio: sigue al sistema, o se fuerza con
-      // ?movimiento=reducido / ?movimiento=completo.
-      const pedido = new URLSearchParams(location.search).get("movimiento");
-      const reducido = pedido === "reducido" || (pedido !== "completo" && matchMedia("(prefers-reduced-motion: reduce)").matches);
-      document.documentElement.dataset.movimiento = reducido ? "reducido" : "completo";
-      document.querySelectorAll("[data-modo]").forEach((a) => a.classList.toggle("activo", a.dataset.modo === (reducido ? "reducido" : "completo")));
-
-      // Hero: línea → abertura en píldora → foto a sangre; el nombre se abre y se asienta
-      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.inOut" } });
-      const vw = innerWidth, vh = innerHeight;
-      const movil = vw < 768;
-      tl.set(".hero-nombre", { opacity: 1 })
-        .to(".hero-linea", { scaleX: 1, duration: 1.1, ease: "power2.out" }, 0.3)
-        // La línea se convierte en abertura: el recorte pasa de una raya a una píldora
-        .set(".hero-foto", { clipPath: "inset(49.9% 31% 49.9% 31% round 999px)" }, 1.3)
-        .to(".hero-linea", { opacity: 0, duration: 0.2 }, 1.3)
-        // Origen y destino con la misma estructura (cuatro lados y radio): el
-        // navegador simplifica el valor calculado y GSAP interpola número a
-        // número, así que leerlo del estilo desalinearía los valores.
-        .fromTo(".hero-foto", { clipPath: "inset(49.9% 31% 49.9% 31% round 999px)" }, { clipPath: "inset(30% 31% 30% 31% round 999px)", duration: 1.1, immediateRender: false }, 1.3)
-        .to(".mitad-a", { x: -vw * (movil ? 0.2 : 0.24), duration: 1.1 }, 1.3)
-        .to(".mitad-b", { x: vw * (movil ? 0.2 : 0.24), duration: 1.1 }, 1.3)
-        // La píldora se abre hasta la pantalla entera y pierde la curva
-        .fromTo(".hero-foto", { clipPath: "inset(30% 31% 30% 31% round 999px)" }, { clipPath: "inset(0% 0% 0% 0% round 0px)", duration: 1.4, immediateRender: false }, 2.6)
-        .to(".hero-foto img", { scale: 1, duration: 2.2, ease: "power2.out" }, 1.3)
-        .to(".hero-nombre span", { color: "#f2f0ea", duration: 0.8 }, 2.6)
-        // El nombre se reúne y baja a su sitio, más pequeño, sobre la foto
-        .to(".mitad-a, .mitad-b", { x: 0, duration: 1.2 }, 3.4)
-        // En escritorio el nombre baja a la franja inferior; en móvil sube, para
-        // dejar abajo el texto y el botón.
-        .to(".hero-nombre", { y: movil ? -vh * 0.2 : vh * 0.24, scale: movil ? 0.8 : 0.62, duration: 1.2 }, 3.4)
-        .to(".hero-nav, .hero-pie", { opacity: 1, duration: 0.9, ease: "power2.out", stagger: 0.15 }, 4.1);
-      tl.call(() => document.getElementById("hero").classList.add("oscuro"), null, 2.9);
-      window.heroTl = tl;
-      window.reducido = reducido;
-
-      if (reducido) {
-        // Sin desplazamientos ni aberturas: el hero aparece ya compuesto, con un fundido.
-        tl.progress(1);
-        gsap.fromTo("#hero", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" });
-      } else if (!location.hash.includes("quieto")) {
-        tl.play();
-      }
-    </script>
+    <!-- defer: el primer pintado no espera a GSAP; el orden se mantiene -->
+    <script defer src="../node_modules/gsap/dist/gsap.min.js"></script>
+    <script defer src="../node_modules/gsap/dist/ScrollTrigger.min.js"></script>
+    <script defer src="../node_modules/gsap/dist/SplitText.min.js"></script>
+    <script defer src="datos.js"></script>
+    <script defer src="reserva.js"></script>
+    <script defer src="movimiento.js"></script>
   </body>
 </html>

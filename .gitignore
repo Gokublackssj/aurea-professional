@@ -11,3 +11,6 @@ verificacion/
 .env
 .env.*
 *.log
+
+# Fotos del prototipo: se generan con node propuesta/preparar-fotos.mjs
+propuesta/fotos/
