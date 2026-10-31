@@ -73,7 +73,14 @@ const fotosBanda: { foto: ClaveFoto; x: number; y: number; ancho: number; veloci
     width: var(--ancho);
   }
 
+  /* En bloque: el revelado recorta el <picture>, y en línea su caja mide una
+     línea de texto, no la foto. */
+  .suelta :global(picture) {
+    display: block;
+  }
+
   .suelta :global(img) {
+    display: block;
     width: 100%;
     aspect-ratio: 9 / 10;
     object-fit: cover;
