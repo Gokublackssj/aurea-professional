@@ -116,3 +116,15 @@ lugar y las distancias son ilustrativos.
 
 Fraunces y Manrope, bajo la SIL Open Font License, servidas desde el propio sitio
 mediante Fontsource (`@fontsource-variable/fraunces` y `@fontsource-variable/manrope`).
+
+## Código de terceros
+
+[GSAP](https://gsap.com) 3.15 (con ScrollTrigger, SplitText y CustomEase), bajo la
+[licencia estándar sin coste de GSAP](https://gsap.com/standard-license), que
+permite el uso comercial. Astro, bajo licencia MIT. Comprobado el 2 de noviembre
+de 2026; el vídeo de Pexels seguía publicado con licencia gratuita y la misma autora.
+
+## Imagen para enlaces compartidos
+
+`public/og-aurea.jpg` es una captura de la portada de esta web (foto del hero
+`costa-acantilado.jpg`, de Mohammed Imad en Unsplash).

@@ -58,6 +58,30 @@ modificado). Cada etapa es un commit que se puede revisar o revertir por separad
     (`aria-hidden`; el título accesible está aparte), que se funden con el scroll
     desde 0,15 de opacidad. Lighthouse las mide en reposo.
 
+## Después de la integración
+
+Correcciones tras las auditorías (Claude y Codex) y refinamientos pedidos al navegar
+por el sitio. Cada uno es un commit con su prueba de regresión.
+
+| Commit | Cambio |
+|---|---|
+| 4f0f160, e7b5736 | Póster del mar responsivo (un solo póster por pantalla, también sin JavaScript) |
+| 84924d3 | La build ya no copia 13 JPEG sin uso; sus créditos siguen en `fotosSinUso` |
+| 0c49a2b, 5c8ad55 | Zoom de las fotos solo con puntero que pasa por encima; el de la ficha vuelve a funcionar |
+| f529eac | La prueba del vídeo mira fotogramas reales (y quita un destello al llegar al mar) |
+| d3de99d | El primer cambio de habitación ya no enseña la nueva antes del barrido |
+| 2bd2136 | Con red lenta, el hero y las cabeceras no se ocultan después de verse |
+| 022a1e8 | La preferencia de movimiento, plegada en la línea legal del pie |
+| 51f0958 | Los nombres del cartel del inicio ya no abren fotos al pasar |
+| 806093d | Nueva frase final de La llegada |
+
+Pruebas: 171 en tres proyectos (escritorio 1440, móvil 390 y 320 px), sin omitidas.
+Codex propuso en `codex/auditoria-aurea` (506184f) que cada prueba use el tamaño de
+su proyecto, un recorrido de navegación móvil y un puerto propio por worktree
+(`docs/navegacion-movil.md` en esa rama). Integrado a prueba sobre `integracion`:
+un único conflicto, ya resuelto, y 163 pruebas superadas con 14 omitidas por no
+corresponder al dispositivo. Pendiente de autorización.
+
 ## Pendiente
 
 - **La llegada:** la foto `llegada-costa.jpg` muestra un aparcamiento con coches,
@@ -66,12 +90,9 @@ modificado). Cada etapa es un commit que se puede revisar o revertir por separad
   de Zanzíbar (terracota); la Residencia tiene aire de anuncio inmobiliario; la Suite
   Mirador está hecha con móvil. Son coherentes dentro de cada habitación, no entre
   habitaciones.
-- **Catálogo:** diez fotos antiguas de habitación ya no aparecen en ninguna página
-  (`estudio-dormitorio`, `estudio-bano`, `mirador-bano`, `mirador-noche`,
-  `terraza-mesa`, `terraza-piscina`, `terraza-ducha`, `residencia-salon`,
-  `residencia-azotea` y `residencia-bano`). Siguen en `src/assets/fotos/`, en
-  `fotos.ts` y en los créditos; no se han borrado. Quitarlas aligeraría la build.
-- **Vídeo en móvil:** el HTML anuncia el póster de escritorio y el script lo cambia
-  por el de móvil, así que en móvil se descargan los dos pósteres (unos 40 KB de
-  más).
-- **Integrar en `main`:** la rama `integracion` no se ha fusionado ni publicado.
+- **Navegación a 320 px:** el aviso «Transition was aborted… Viewport size changed»
+  de Chrome no se ha reproducido de forma natural; la cobertura de Codex lo vigila.
+- **Con red muy lenta** (el motor tarda más de 4 s) se ve la composición final del
+  hero, sin su animación de entrada.
+- **Integrar en `main` y publicar:** la rama `integracion` no se ha fusionado ni
+  publicado.
