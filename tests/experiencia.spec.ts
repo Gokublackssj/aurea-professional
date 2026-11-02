@@ -122,7 +122,30 @@ test.describe("El mar con movimiento reducido", () => {
     await page.waitForTimeout(1500);
     expect(videos).toEqual([]);
     await expect(page.locator(".mar-pausa")).toBeHidden();
-    await expect(page.locator(".mar-video")).toHaveAttribute("poster", /mar-ocaso/);
+    // La imagen fija se ve: cargada y sin vídeo encima con fotogramas
+    await expect(page.locator(".mar-poster img")).toBeVisible();
+    expect(await page.locator(".mar-poster img").evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+    await expect(page.locator(".mar-video")).toHaveJSProperty("readyState", 0);
+  });
+});
+
+test.describe("Póster del mar", () => {
+  test("se descarga un solo póster, el de su tamaño, y vídeo y póster se escalan juntos", async ({ page }) => {
+    const posteres: string[] = [];
+    page.on("request", (r) => /mar-ocaso.*\.webp$/.test(r.url()) && posteres.push(r.url().split("/video/")[1]));
+    await page.goto("experiencias/");
+    await motorListo(page);
+    const esperado = (page.viewportSize()?.width ?? 1440) < 768 ? "mar-ocaso-movil.webp" : "mar-ocaso-1280.webp";
+    const poster = page.locator(".mar-poster img");
+    await page.locator(".mar-escena").evaluate((e) => e.scrollIntoView({ block: "center" }));
+    // Antes del primer fotograma ya está la imagen: nunca se ve el fondo vacío
+    await expect.poll(() => poster.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+    expect(await poster.evaluate((i: HTMLImageElement) => i.currentSrc.split("/video/")[1])).toBe(esperado);
+    await page.waitForTimeout(1500);
+    expect(posteres).toEqual([esperado]);
+    // Mismo rectángulo para los dos: al pasar de la imagen al vídeo no hay salto
+    const caja = (sel: string) => page.locator(sel).evaluate((e) => JSON.stringify(e.getBoundingClientRect()));
+    expect(await caja(".mar-poster img")).toBe(await caja(".mar-video"));
   });
 });
 

@@ -8,8 +8,8 @@ const video = document.querySelector<HTMLVideoElement>(".mar-video");
 const pausa = document.querySelector<HTMLButtonElement>(".mar-pausa");
 
 if (video && pausa) {
+  // El póster lo elige el <picture> de debajo con la misma consulta
   const esMovil = matchMedia("(max-width: 47.99rem)").matches;
-  if (esMovil && video.dataset.posterMovil) video.poster = video.dataset.posterMovil;
 
   const red = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
   const soloPoster = () => modoActual() === "reducido" || !!red?.saveData || /2g|3g/.test(red?.effectiveType ?? "");

@@ -8,7 +8,8 @@ import type { Condiciones } from "./index";
 
 export function mar(raiz: HTMLElement, c: Condiciones) {
   const escena = raiz.querySelector<HTMLElement>(".mar-escena")!;
-  const video = raiz.querySelector<HTMLElement>(".mar-video")!;
+  // Vídeo y póster juntos, para que retrocedan a la vez
+  const medio = raiz.querySelector<HTMLElement>(".mar-medio")!;
   const texto = raiz.querySelector<HTMLElement>(".mar-texto")!;
   const titulo = texto.querySelector<HTMLElement>(".titulo")!;
   const resto = texto.querySelectorAll<HTMLElement>(".etiqueta, p");
@@ -21,7 +22,7 @@ export function mar(raiz: HTMLElement, c: Condiciones) {
   gsap
     .timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: escena, start: "top 92%", end: "top 25%", scrub: 0.3 } })
     .fromTo(escena, { clipPath: "inset(8% 8% 8% 8% round 24px)" }, { clipPath: "inset(0% 0% 0% 0% round 0px)" }, 0)
-    .fromTo(video, { scale: 1.12 }, { scale: 1 }, 0);
+    .fromTo(medio, { scale: 1.12 }, { scale: 1 }, 0);
 
   const aparecer = { trigger: escena, start: "top 45%" };
   gsap.fromTo(SplitText.create(titulo, { type: "lines", mask: "lines", aria: "auto" }).lines, { yPercent: 130 }, { yPercent: 0, duration: 1.4, ease: salida, scrollTrigger: aparecer });

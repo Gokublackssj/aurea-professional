@@ -133,21 +133,28 @@ const carta: Momento[] = [
   <!-- El mar: vídeo decorativo (el texto está en el HTML). Se carga al
        acercarse, se pausa fuera de pantalla y tiene botón de pausa; en modo
        reducido, con ahorro de datos o red lenta, solo el póster
-       (src/scripts/video.ts). Entrada: src/scripts/motion/mar.ts. -->
+       (src/scripts/video.ts). Entrada: src/scripts/motion/mar.ts.
+       El póster es una imagen responsiva bajo el vídeo (sin atributo poster):
+       el navegador descarga solo la de su tamaño, también sin JavaScript, y
+       el vídeo, transparente hasta su primer fotograma, la tapa al llegar. -->
   <section class="mar" aria-labelledby="mar-titulo" data-escena="mar">
     <div class="mar-escena noche">
-      <video
-        class="mar-video"
-        muted
-        playsinline
-        loop
-        preload="none"
-        disablepictureinpicture
-        aria-hidden="true"
-        poster={ruta("video/mar-ocaso-1280.webp")}
-        data-escritorio={ruta("video/mar-ocaso-1280.mp4")}
-        data-movil={ruta("video/mar-ocaso-movil.mp4")}
-        data-poster-movil={ruta("video/mar-ocaso-movil.webp")}></video>
+      <div class="mar-medio">
+        <picture class="mar-poster" aria-hidden="true">
+          <source media="(max-width: 47.99rem)" srcset={ruta("video/mar-ocaso-movil.webp")} width="540" height="720" />
+          <img src={ruta("video/mar-ocaso-1280.webp")} alt="" width="1280" height="720" decoding="async" />
+        </picture>
+        <video
+          class="mar-video"
+          muted
+          playsinline
+          loop
+          preload="none"
+          disablepictureinpicture
+          aria-hidden="true"
+          data-escritorio={ruta("video/mar-ocaso-1280.mp4")}
+          data-movil={ruta("video/mar-ocaso-movil.mp4")}></video>
+      </div>
       <div class="mar-velo" aria-hidden="true"></div>
       <div class="mar-texto marco">
         <span class="etiqueta">Salidas cada mañana</span>
@@ -534,11 +541,20 @@ const carta: Momento[] = [
     background: var(--noche);
   }
 
+  /* Póster y vídeo se escalan juntos (motion/mar.ts), así no hay salto al
+     pasar de la imagen al primer fotograma */
+  .mar-medio,
+  .mar-poster img,
   .mar-video {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+  }
+
+  .mar-poster img,
+  .mar-video {
+    display: block;
     object-fit: cover;
   }
 
