@@ -122,3 +122,20 @@ test("la build no copia imágenes originales que ninguna página usa", async () 
   const sinUso = imagenes.filter((a) => !texto.includes(a.split("/").pop()!));
   expect(sinUso, "imágenes de la build sin ninguna referencia").toEqual([]);
 });
+
+test("cada página se presenta como demo de un hotel ficticio, fuera de los buscadores y con vista previa para compartir", async ({ page }) => {
+  for (const ruta of [...paginas.map((p) => p.ruta), "creditos/"]) {
+    await page.goto(ruta);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /Hotel ficticio: demo/);
+    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /Hotel ficticio: demo/);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", /^https?:\/\//);
+    await expect(page.locator(".pie-demo")).toContainText("hotel ficticio");
+    const imagen = await page.locator('meta[property="og:image"]').getAttribute("content");
+    expect(imagen).toMatch(/^https?:\/\/.+\/og-aurea\.jpg$/);
+  }
+  // La imagen existe en el sitio servido (la dirección absoluta depende de SITE al construir)
+  const respuesta = await page.request.get("og-aurea.jpg");
+  expect(respuesta.status()).toBe(200);
+  expect(respuesta.headers()["content-type"]).toContain("image/jpeg");
+});

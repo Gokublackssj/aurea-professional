@@ -1,3 +1,7 @@
-# Demo de un negocio ficticio: no debe indexarse.
+# Demo de un negocio ficticio. Se puede rastrear para que los buscadores lean el
+# <meta name="robots" content="noindex, nofollow"> de cada página y no la indexen
+# (si el rastreo estuviera bloqueado, no verían esa orden). En una ruta de
+# proyecto (usuario.github.io/aurea-professional/) los buscadores leen el
+# robots.txt de la raíz del dominio, no este.
 User-agent: *
-Disallow: /
+Allow: /
