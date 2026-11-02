@@ -562,6 +562,12 @@ const carta: Momento[] = [
     object-fit: cover;
   }
 
+  /* Sin JavaScript el vídeo nunca recibe su fuente, y el navegador le pondría
+     sus controles (los muestra siempre que no hay scripts) encima del póster */
+  :global(html:not(.js)) .mar-video {
+    display: none;
+  }
+
   .mar-velo {
     position: absolute;
     inset: 0;

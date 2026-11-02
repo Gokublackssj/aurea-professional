@@ -1,5 +1,5 @@
 import { test, expect } from "./ayudas";
-import type { Page } from "@playwright/test";
+import type { Browser, Page } from "@playwright/test";
 
 // Piezas interactivas: control de movimiento (y la limpieza del motor al
 // cambiar de modo), explorador de habitaciones, visor de fotos, vídeo del mar,
@@ -169,6 +169,146 @@ test.describe("Póster del mar", () => {
     expect(await caja(".mar-poster img")).toBe(await caja(".mar-video"));
   });
 });
+
+// Lo que de verdad se ve en el mar, no lo que se descargó: color medio de una
+// franja del cielo en una captura de la escena. El póster y el vídeo tienen un
+// cielo naranja; una superficie oscura (vídeo vacío, controles) no.
+type Color = { r: number; g: number; b: number };
+async function cieloDelMar(page: Page, browser: Browser, nombre: string): Promise<Color> {
+  // complete no garantiza que el póster ya esté pintado (decoding="async")
+  await page.locator(".mar-poster img").evaluate((i: HTMLImageElement) => i.decode());
+  const captura = await page.locator(".mar-escena").screenshot();
+  await test.info().attach(nombre, { body: captura, contentType: "image/png" });
+  const lienzo = await browser.newPage();
+  const color = await lienzo.evaluate(async (png) => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${png}`;
+    await img.decode();
+    const c = document.createElement("canvas");
+    [c.width, c.height] = [img.width, img.height];
+    const ctx = c.getContext("2d")!;
+    ctx.drawImage(img, 0, 0);
+    // Centro horizontal, entre el 15 % y el 40 % de alto: cielo, sin texto ni botón
+    const d = ctx.getImageData(img.width * 0.25, img.height * 0.15, img.width * 0.5, img.height * 0.25).data;
+    const suma = [0, 0, 0];
+    for (let i = 0; i < d.length; i += 4) for (let k = 0; k < 3; k++) suma[k] += d[i + k];
+    const n = d.length / 4;
+    return { r: suma[0] / n, g: suma[1] / n, b: suma[2] / n };
+  }, captura.toString("base64"));
+  await lienzo.close();
+  return color;
+}
+const esCielo = (c: Color) => c.r > 140 && c.r - c.b > 60;
+
+/** Pósteres y vídeos del mar que pide la página */
+function pedidosDelMar(page: Page) {
+  const pedidos: string[] = [];
+  page.on("request", (r) => /mar-ocaso.*\.(webp|mp4)$/.test(r.url()) && pedidos.push(r.url().split("/video/")[1]));
+  return pedidos;
+}
+const posterDe = (page: Page) => ((page.viewportSize()?.width ?? 1440) < 768 ? "mar-ocaso-movil.webp" : "mar-ocaso-1280.webp");
+
+async function sinDesborde(page: Page) {
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+}
+
+test.describe("El mar sin JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("se ve el póster de su tamaño y el vídeo no lo tapa", async ({ page, browser }) => {
+    const pedidos = pedidosDelMar(page);
+    await page.goto("experiencias/");
+    await page.locator(".mar-escena").scrollIntoViewIfNeeded();
+    const poster = page.locator(".mar-poster img");
+    await expect(poster).toBeVisible();
+    await expect.poll(() => poster.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+    // Sin scripts el navegador mostraría los controles del vídeo encima
+    await expect(page.locator(".mar-video")).toBeHidden();
+    const cielo = await cieloDelMar(page, browser, "mar-sin-js");
+    expect(esCielo(cielo), `cielo del póster, no una superficie oscura: ${JSON.stringify(cielo)}`).toBe(true);
+    expect(pedidos).toEqual([posterDe(page)]);
+    await sinDesborde(page);
+  });
+});
+
+test.describe("El mar con JavaScript: el póster se ve hasta que llega el vídeo", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  test("movimiento completo y MP4 retrasado: póster, después vídeo, sin fotogramas vacíos", async ({ page, browser }) => {
+    await page.route(/\.mp4$/, async (r) => {
+      await new Promise((ok) => setTimeout(ok, 2500));
+      await r.continue();
+    });
+    const pedidos = pedidosDelMar(page);
+    await page.goto("experiencias/");
+    await motorListo(page);
+    const video = page.locator(".mar-video");
+    // Fotograma a fotograma mientras se acerca y espera al MP4: siempre hay imagen
+    const muestreo = page.evaluate(async () => {
+      const v = document.querySelector<HTMLVideoElement>(".mar-video")!;
+      const i = document.querySelector<HTMLImageElement>(".mar-poster img")!;
+      let vacios = 0;
+      const t0 = performance.now();
+      while (performance.now() - t0 < 6000 && !(v.readyState >= 2 && !v.paused)) {
+        await new Promise(requestAnimationFrame);
+        if (!(i.complete && i.naturalWidth > 0) && v.readyState < 2) vacios++;
+      }
+      return vacios;
+    });
+    await page.locator(".mar-escena").evaluate((e) => e.scrollIntoView({ block: "center" }));
+    await page.waitForTimeout(1200);
+    expect(await video.evaluate((v: HTMLVideoElement) => v.readyState)).toBeLessThan(2);
+    const esperando = await cieloDelMar(page, browser, "mar-esperando-mp4");
+    expect(esCielo(esperando), `póster mientras llega el vídeo: ${JSON.stringify(esperando)}`).toBe(true);
+    expect(await muestreo).toBe(0);
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused && v.currentTime > 0), { timeout: 10_000 }).toBe(true);
+    const reproduciendo = await cieloDelMar(page, browser, "mar-reproduciendo");
+    expect(esCielo(reproduciendo), `vídeo reproduciéndose: ${JSON.stringify(reproduciendo)}`).toBe(true);
+    expect(pedidos.filter((p) => p.endsWith(".webp"))).toEqual([posterDe(page)]);
+    expect(pedidos.filter((p) => p.endsWith(".mp4"))).toHaveLength(1);
+    await sinDesborde(page);
+  });
+});
+
+test.describe("El mar con movimiento reducido: imagen fija", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("se ve el póster de su tamaño y no se pide el vídeo", async ({ page, browser }) => {
+    const pedidos = pedidosDelMar(page);
+    await page.goto("experiencias/");
+    await motorListo(page);
+    await page.locator(".mar-escena").evaluate((e) => e.scrollIntoView({ block: "center" }));
+    await page.waitForTimeout(1500);
+    const cielo = await cieloDelMar(page, browser, "mar-reducido");
+    expect(esCielo(cielo), JSON.stringify(cielo)).toBe(true);
+    await expect(page.locator(".mar-pausa")).toBeHidden();
+    expect(pedidos).toEqual([posterDe(page)]);
+    await sinDesborde(page);
+  });
+});
+
+for (const [caso, conexion] of [
+  ["red lenta (3G)", { effectiveType: "3g", saveData: false }],
+  ["ahorro de datos", { effectiveType: "4g", saveData: true }],
+] as const) {
+  test.describe(`El mar con ${caso}: imagen fija`, () => {
+    test.use({ reducedMotion: "no-preference" });
+
+    test("se ve el póster de su tamaño y no se pide el vídeo", async ({ page, browser }) => {
+      await page.addInitScript((c) => Object.defineProperty(navigator, "connection", { value: c, configurable: true }), conexion);
+      const pedidos = pedidosDelMar(page);
+      await page.goto("experiencias/");
+      await motorListo(page);
+      await page.locator(".mar-escena").evaluate((e) => e.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(1500);
+      const cielo = await cieloDelMar(page, browser, `mar-${caso}`);
+      expect(esCielo(cielo), JSON.stringify(cielo)).toBe(true);
+      await expect(page.locator(".mar-pausa")).toBeHidden();
+      expect(pedidos).toEqual([posterDe(page)]);
+      await sinDesborde(page);
+    });
+  });
+}
 
 test.describe("Selector de habitaciones", () => {
   test("se elige con clic y con las flechas, y la dirección lo recuerda", async ({ page }) => {
