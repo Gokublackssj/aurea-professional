@@ -44,7 +44,7 @@
       <dl class="datos"><div><dt>Superficie</dt><dd>${h.metros} m²</dd></div><div><dt>Huéspedes</dt><dd>${h.huespedes}</dd></div><div><dt>Desde</dt><dd>${euros(h.precio)}</dd></div></dl>
       <ul class="servicios" aria-label="Servicios">${h.servicios.map((s) => `<li>${s}</li>`).join("")}</ul>
       <p class="suave"><b>En qué se diferencia:</b> ${h.diferencia}</p>
-      <div class="acciones"><a class="boton boton-teal" href="#reservar" data-elegir="${h.slug}">Elegir ${h.nombre} <span class="flecha">→</span></a><a class="enlace" href="#comparar-titulo">Comparar</a></div>
+      <div class="acciones"><a class="boton boton-teal" href="#reservar" data-elegir="${h.slug}" aria-label="Elegir ${h.nombre} y preparar la estancia">Elegir esta habitación <span class="flecha">→</span></a><a class="enlace" href="#comparar-titulo">Comparar las cuatro</a></div>
     </div>`,
     )
     .join("");
@@ -92,7 +92,7 @@
   const rotulo = () => {
     const h = habitaciones[mostrada];
     $(".marca-nombre").textContent = h.nombre;
-    $(".marca-foto").textContent = h.fotos[fotoHab].alt;
+    $(".marca-foto").textContent = h.fotos[fotoHab].pie || h.fotos[fotoHab].alt; // rótulo corto; el alt completo sigue en la imagen
     contador.textContent = `${fotoHab + 1} / ${h.fotos.length}`;
     $$("button", tira).forEach((b, i) => b.setAttribute("aria-current", String(i === fotoHab)));
   };

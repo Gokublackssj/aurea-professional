@@ -176,7 +176,8 @@
     });
     atras.hidden = nuevo === 0 || nuevo === 4;
     adelante.hidden = nuevo === 4;
-    adelante.firstChild.textContent = nuevo === 3 ? "Confirmar solicitud " : "Continuar ";
+    // Cada botón dice a qué paso lleva; el último solo prepara la solicitud (demostración)
+    adelante.firstChild.textContent = ["Elegir huéspedes ", "Elegir habitación ", "Añadir tus datos ", "Preparar solicitud "][nuevo] ?? "";
     const entrar = () => {
       viejo.classList.remove("actual");
       siguiente.classList.add("actual");
