@@ -148,6 +148,33 @@ test.describe("Zoom de las fotos al pasar", () => {
       expect(await escala()).toBe(1);
     }
   });
+
+  test("la galería de la ficha también amplía, con su encuadre, y el visor sigue abriéndose", async ({ page, hasTouch }) => {
+    await page.goto("habitaciones/suite-mirador/");
+    await motorListo(page);
+    const conHover = await page.evaluate(() => matchMedia("(hover: hover)").matches);
+    expect(conHover).toBe(!hasTouch);
+    const boton = page.locator(".ampliar").first();
+    await boton.scrollIntoViewIfNeeded();
+    // Tamaño que se ve de la foto respecto a su marco (incluye cualquier transform)
+    const escala = () => boton.evaluate((b) => b.querySelector("img")!.getBoundingClientRect().width / b.getBoundingClientRect().width);
+    const encuadre = () => boton.locator("img").evaluate((i) => getComputedStyle(i).objectPosition);
+    // Fin del revelado (la foto retrocede de 1,18 a 1): es el que deja un transform en línea en la foto
+    await expect.poll(escala, { timeout: 5000 }).toBeLessThan(1.001);
+    const antes = await encuadre();
+    await boton.hover();
+    if (conHover) {
+      await expect.poll(escala).toBeGreaterThan(1.03);
+    } else {
+      await page.waitForTimeout(1000);
+      expect(await escala()).toBeLessThan(1.001);
+    }
+    expect(await encuadre()).toBe(antes);
+    await boton.click();
+    await expect(page.locator("dialog.visor")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("dialog.visor")).toBeHidden();
+  });
 });
 
 test.describe("Póster del mar", () => {

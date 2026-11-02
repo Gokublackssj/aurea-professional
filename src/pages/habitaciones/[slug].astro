@@ -320,13 +320,18 @@ const [portada, ...galeria] = h.fotos;
 
   .ampliar :global(img) {
     object-fit: cover;
+  }
+
+  /* El zoom va en el <picture>, no en la foto: el revelado de GSAP
+     (data-revelar="foto") deja un transform en línea en la foto que lo anularía */
+  .ampliar :global(picture) {
     transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Solo con un puntero que pasa por encima: en pantallas táctiles el toque
      dejaría la foto ampliada */
   @media (hover: hover) {
-    :global(html[data-movimiento="completo"]) .ampliar:hover :global(img) {
+    :global(html[data-movimiento="completo"]) .ampliar:hover :global(picture) {
       transform: scale(1.04);
     }
   }
