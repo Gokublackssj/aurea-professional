@@ -5,11 +5,8 @@ import costaBarca from "../assets/fotos/costa-barca.jpg";
 import costaPlayaNegra from "../assets/fotos/costa-playa-negra.jpg";
 import llegadaCosta from "../assets/fotos/llegada-costa.jpg";
 import materialBasalto from "../assets/fotos/material-basalto.jpg";
-import materialLino from "../assets/fotos/material-lino.jpg";
 import materialCal from "../assets/fotos/material-cal.jpg";
-import casaArco from "../assets/fotos/casa-arco.jpg";
 import casaEscalera from "../assets/fotos/casa-escalera.jpg";
-import casaPiscina from "../assets/fotos/casa-piscina.jpg";
 import diaPoza from "../assets/fotos/dia-poza.jpg";
 import diaOrilla from "../assets/fotos/dia-orilla.jpg";
 import diaRocas from "../assets/fotos/dia-rocas.jpg";
@@ -31,18 +28,8 @@ import expKayak from "../assets/fotos/exp-kayak.jpg";
 import expBarca from "../assets/fotos/exp-barca.jpg";
 import expVina from "../assets/fotos/exp-vina.jpg";
 import expEstrellas from "../assets/fotos/exp-estrellas.jpg";
-import estudioDormitorio from "../assets/fotos/estudio-dormitorio.jpg";
-import estudioBano from "../assets/fotos/estudio-bano.jpg";
 import estudioLuz from "../assets/fotos/estudio-luz.jpg";
 import miradorVentana from "../assets/fotos/mirador-ventana.jpg";
-import miradorBano from "../assets/fotos/mirador-bano.jpg";
-import miradorNoche from "../assets/fotos/mirador-noche.jpg";
-import terrazaMesa from "../assets/fotos/terraza-mesa.jpg";
-import terrazaPiscina from "../assets/fotos/terraza-piscina.jpg";
-import terrazaDucha from "../assets/fotos/terraza-ducha.jpg";
-import residenciaSalon from "../assets/fotos/residencia-salon.jpg";
-import residenciaAzotea from "../assets/fotos/residencia-azotea.jpg";
-import residenciaBano from "../assets/fotos/residencia-bano.jpg";
 // Galerías de habitación: cada una de una sola sesión fotográfica (Pexels)
 import estudioCama from "../assets/fotos/estudio-cama.jpg";
 import estudioPatio from "../assets/fotos/estudio-patio.jpg";
@@ -65,8 +52,8 @@ import residenciaBanoVilla from "../assets/fotos/residencia-bano-villa.jpg";
 import residenciaCopas from "../assets/fotos/residencia-copas.jpg";
 import nochePozaEstrellas from "../assets/fotos/noche-poza-estrellas.jpg";
 
-export interface Foto {
-  src: ImageMetadata;
+/** Atribución de una fotografía, sin la imagen */
+export interface Credito {
   alt: string;
   autor: string;
   /** Usuario del autor en Unsplash o en Pexels */
@@ -78,8 +65,12 @@ export interface Foto {
   fuente?: "unsplash" | "pexels";
 }
 
+export interface Foto extends Credito {
+  src: ImageMetadata;
+}
+
 /** Página del autor y de la foto en su banco */
-export const enlacesFoto = (f: Foto) =>
+export const enlacesFoto = (f: Credito) =>
   f.fuente === "pexels"
     ? { autor: `https://www.pexels.com/@${f.usuario}/`, foto: `https://www.pexels.com/photo/${f.id}/`, banco: "Pexels" }
     : { autor: `https://unsplash.com/@${f.usuario}`, foto: `https://unsplash.com/photos/${f.id}`, banco: "Unsplash" };
@@ -94,11 +85,8 @@ export const fotos = {
   costaPlayaNegra: { src: costaPlayaNegra, alt: "Playa de arena negra vista desde lo alto, con las olas rompiendo en blanco", autor: "Jose Llamas", usuario: "josilito", id: "Q_gtPPR56K8", archivo: "costa-playa-negra.jpg" },
   llegadaCosta: { src: llegadaCosta, alt: "Costa de roca oscura al amanecer, con el camino sobre el acantilado", autor: "Tropic Alizé", usuario: "tropicalize", id: "JQq2LSqvgaA", archivo: "llegada-costa.jpg" },
   materialBasalto: { src: materialBasalto, alt: "Piedra negra de superficie rugosa, de cerca", autor: "David Jorre", usuario: "davidjorre", id: "oQbLeq4nOek", archivo: "material-basalto.jpg" },
-  materialLino: { src: materialLino, alt: "Lino crudo sobre un sofá con la sombra de una ventana", autor: "Efe Kekikciler", usuario: "mutanzom", id: "APy5TV9HrVo", archivo: "material-lino.jpg" },
   materialCal: { src: materialCal, alt: "Muro encalado con la luz de la tarde entrando en diagonal", autor: "Bernard Hermant", usuario: "bernardhermant", id: "u7VDgNGb78w", archivo: "material-cal.jpg" },
-  casaArco: { src: casaArco, alt: "Arco encalado que se abre a una terraza sobre el mar", autor: "Sebastian Frederik Jacobsen", usuario: "hejsfj", id: "1njwyeX3epc", archivo: "casa-arco.jpg" },
   casaEscalera: { src: casaEscalera, alt: "Escalones de piedra tallados en el acantilado, bajando hacia el agua", autor: "Peter Burdon", usuario: "peterburdon", id: "fwW0b-4tOnQ", archivo: "casa-escalera.jpg" },
-  casaPiscina: { src: casaPiscina, alt: "Piscina desbordante al anochecer, con palmeras recortadas contra el cielo naranja", autor: "Tommaso Ubezio", usuario: "tommasoubezio", id: "j2krsItJ_p0", archivo: "casa-piscina.jpg" },
   diaPoza: { src: diaPoza, alt: "Poza de marea con escalera metálica y una ola rompiendo al amanecer", autor: "Oliver Williams", usuario: "oxwilliams", id: "Ib9ulWsL7mg", archivo: "dia-poza.jpg" },
   diaOrilla: { src: diaOrilla, alt: "Bañista entrando en el mar entre rocas con la primera luz", autor: "Elliot Gouy", usuario: "gouyelliot", id: "c353dQSiTEw", archivo: "dia-orilla.jpg" },
   diaRocas: { src: diaRocas, alt: "Rocas en un mar quieto con la luz rosada del alba", autor: "Antje Winkler", usuario: "antjewinkler", id: "EaD8-Ss49TA", archivo: "dia-rocas.jpg" },
@@ -120,18 +108,8 @@ export const fotos = {
   expBarca: { src: expBarca, alt: "Barca de pesca sobre el mar en calma a la hora dorada", autor: "Alexander Kluge", usuario: "naii", id: "u7HTdpOiAV0", archivo: "exp-barca.jpg" },
   expVina: { src: expVina, alt: "Viñas protegidas por muros de piedra en tierra volcánica, al caer la tarde", autor: "Bruno da Costa", usuario: "ericpetrozza", id: "BgKym3KDnGU", archivo: "exp-vina.jpg" },
   expEstrellas: { src: expEstrellas, alt: "Una persona con una linterna roja bajo la Vía Láctea", autor: "Akbar Nemati", usuario: "akbarnemati", id: "AwhDNkJlSX4", archivo: "exp-estrellas.jpg" },
-  estudioDormitorio: { src: estudioDormitorio, alt: "Dormitorio con pared de madera cálida, cama baja y ropa de lino", autor: "Clay Banks", usuario: "claybanks", id: "9MbWyxGzvD0", archivo: "estudio-dormitorio.jpg" },
-  estudioBano: { src: estudioBano, alt: "Bañera exenta de cerámica sobre canto rodado, con una palmera junto a la pared de piedra", autor: "Jared Rice", usuario: "jareddrice", id: "PibraWHb4h8", archivo: "estudio-bano.jpg" },
   estudioLuz: { src: estudioLuz, alt: "Sol de la mañana sobre la almohada", autor: "Maximilian Bungart", usuario: "hypernature", id: "cY8nJ6_p13c", archivo: "estudio-luz.jpg" },
   miradorVentana: { src: miradorVentana, alt: "Ventanal con cortinas oscuras abierto al mar", autor: "Arthur Charles Pratt", usuario: "cartiyee", id: "YR9CSC9K9Wc", archivo: "mirador-ventana.jpg" },
-  miradorBano: { src: miradorBano, alt: "Bañera frente a un ventanal en arco que da al mar", autor: "Yunshuo Qu", usuario: "yunshuoqu", id: "cKMz8A5Aytg", archivo: "mirador-bano.jpg" },
-  miradorNoche: { src: miradorNoche, alt: "Cama en penumbra con una lámpara de lectura encendida", autor: "Jp Valery", usuario: "jpvalery", id: "DE9MM2voqKc", archivo: "mirador-noche.jpg" },
-  terrazaMesa: { src: terrazaMesa, alt: "Mesa con vino y copas junto a la cama, ante un ventanal sobre el mar", autor: "Antonio Araujo", usuario: "antonioaaaraujo", id: "R1NdTGhd9eM", archivo: "terraza-mesa.jpg" },
-  terrazaPiscina: { src: terrazaPiscina, alt: "Piscina de inmersión en una terraza blanca con tumbonas frente al mar", autor: "Zhen Yao", usuario: "rex_filmer", id: "M2ZYHyE4euA", archivo: "terraza-piscina.jpg" },
-  terrazaDucha: { src: terrazaDucha, alt: "Ducha de travertino con grifería negra", autor: "Peter Muniz", usuario: "petepxl", id: "BEOIjrLSO2Q", archivo: "terraza-ducha.jpg" },
-  residenciaSalon: { src: residenciaSalon, alt: "Salón con ventanales de suelo a techo sobre el mar al atardecer", autor: "Polina Kuzovkova", usuario: "p_kuzovkova", id: "zLCTdR6W8N4", archivo: "residencia-salon.jpg" },
-  residenciaAzotea: { src: residenciaAzotea, alt: "Azotea con un sofá corrido alrededor de un fuego, frente al mar", autor: "Pavel Gromov", usuario: "lastmanpaul", id: "FoXrxrpiPJ8", archivo: "residencia-azotea.jpg" },
-  residenciaBano: { src: residenciaBano, alt: "Lavabo tallado en piedra clara con grifería negra", autor: "Peter Muniz", usuario: "petepxl", id: "wfMM98Vggn0", archivo: "residencia-bano.jpg" },
   // Estudio Jardín: Keegan Checks, una habitación de un hotel boutique en Jambiani
   estudioCama: { src: estudioCama, alt: "Cama con ropa blanca bajo dos cestos tejidos en una pared de estuco terracota", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836723", archivo: "estudio-cama.jpg", fuente: "pexels" },
   estudioPatio: { src: estudioPatio, alt: "Porche con dos butacas de madera frente al jardín de palmeras", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836727", archivo: "estudio-patio.jpg", fuente: "pexels" },
@@ -160,3 +138,22 @@ export const fotos = {
 } satisfies Record<string, Foto>;
 
 export type ClaveFoto = keyof typeof fotos;
+
+// Fotografías del catálogo que hoy no aparecen en ninguna página. Se conservan
+// en src/assets/fotos/ y con su crédito, pero sin import: una imagen importada
+// que no se pinta copia su JPEG original en la build.
+export const fotosSinUso = {
+  materialLino: { alt: "Lino crudo sobre un sofá con la sombra de una ventana", autor: "Efe Kekikciler", usuario: "mutanzom", id: "APy5TV9HrVo", archivo: "material-lino.jpg" },
+  casaArco: { alt: "Arco encalado que se abre a una terraza sobre el mar", autor: "Sebastian Frederik Jacobsen", usuario: "hejsfj", id: "1njwyeX3epc", archivo: "casa-arco.jpg" },
+  casaPiscina: { alt: "Piscina desbordante al anochecer, con palmeras recortadas contra el cielo naranja", autor: "Tommaso Ubezio", usuario: "tommasoubezio", id: "j2krsItJ_p0", archivo: "casa-piscina.jpg" },
+  estudioDormitorio: { alt: "Dormitorio con pared de madera cálida, cama baja y ropa de lino", autor: "Clay Banks", usuario: "claybanks", id: "9MbWyxGzvD0", archivo: "estudio-dormitorio.jpg" },
+  estudioBano: { alt: "Bañera exenta de cerámica sobre canto rodado, con una palmera junto a la pared de piedra", autor: "Jared Rice", usuario: "jareddrice", id: "PibraWHb4h8", archivo: "estudio-bano.jpg" },
+  miradorBano: { alt: "Bañera frente a un ventanal en arco que da al mar", autor: "Yunshuo Qu", usuario: "yunshuoqu", id: "cKMz8A5Aytg", archivo: "mirador-bano.jpg" },
+  miradorNoche: { alt: "Cama en penumbra con una lámpara de lectura encendida", autor: "Jp Valery", usuario: "jpvalery", id: "DE9MM2voqKc", archivo: "mirador-noche.jpg" },
+  terrazaMesa: { alt: "Mesa con vino y copas junto a la cama, ante un ventanal sobre el mar", autor: "Antonio Araujo", usuario: "antonioaaaraujo", id: "R1NdTGhd9eM", archivo: "terraza-mesa.jpg" },
+  terrazaPiscina: { alt: "Piscina de inmersión en una terraza blanca con tumbonas frente al mar", autor: "Zhen Yao", usuario: "rex_filmer", id: "M2ZYHyE4euA", archivo: "terraza-piscina.jpg" },
+  terrazaDucha: { alt: "Ducha de travertino con grifería negra", autor: "Peter Muniz", usuario: "petepxl", id: "BEOIjrLSO2Q", archivo: "terraza-ducha.jpg" },
+  residenciaSalon: { alt: "Salón con ventanales de suelo a techo sobre el mar al atardecer", autor: "Polina Kuzovkova", usuario: "p_kuzovkova", id: "zLCTdR6W8N4", archivo: "residencia-salon.jpg" },
+  residenciaAzotea: { alt: "Azotea con un sofá corrido alrededor de un fuego, frente al mar", autor: "Pavel Gromov", usuario: "lastmanpaul", id: "FoXrxrpiPJ8", archivo: "residencia-azotea.jpg" },
+  residenciaBano: { alt: "Lavabo tallado en piedra clara con grifería negra", autor: "Peter Muniz", usuario: "petepxl", id: "wfMM98Vggn0", archivo: "residencia-bano.jpg" },
+} satisfies Record<string, Credito>;

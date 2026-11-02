@@ -109,3 +109,16 @@ test("la página de créditos nombra a los autores de todas las fotografías", a
   await expect(filas.locator("a[href^='https://www.pexels.com/@']")).toHaveCount(dePexels);
   await expect(filas.locator("a[href^='https://www.pexels.com/photo/']")).toHaveCount(dePexels);
 });
+
+test("la build no copia imágenes originales que ninguna página usa", async () => {
+  // node:fs con import dinámico: así no hace falta @types/node solo para esto
+  const { readdirSync, readFileSync } = await import(String("node:fs"));
+  const archivos: string[] = readdirSync("dist", { recursive: true }).map((a: string) => a.replaceAll("\\", "/"));
+  const texto = archivos
+    .filter((a) => /\.(html|css|js)$/.test(a))
+    .map((a) => readFileSync(`dist/${a}`, "utf8"))
+    .join("\n");
+  const imagenes = archivos.filter((a) => /\.(jpe?g|png)$/i.test(a));
+  const sinUso = imagenes.filter((a) => !texto.includes(a.split("/").pop()!));
+  expect(sinUso, "imágenes de la build sin ninguna referencia").toEqual([]);
+});

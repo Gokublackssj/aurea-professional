@@ -1,8 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
-import { fotos, enlacesFoto } from "../data/fotos";
+import { fotos, fotosSinUso, enlacesFoto } from "../data/fotos";
 
-const lista = Object.values(fotos).map((f) => ({ ...f, enlaces: enlacesFoto(f) }));
+// Todas las del catálogo, también las que hoy no se usan en ninguna página
+const lista = [...Object.values(fotos), ...Object.values(fotosSinUso)].map((f) => ({ ...f, enlaces: enlacesFoto(f) }));
 ---
 
 <Base title="Créditos" description="Autores de las fotografías, el vídeo y las tipografías de esta demo.">
