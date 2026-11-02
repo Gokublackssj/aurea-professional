@@ -17,7 +17,8 @@ async function recorrido(page: Page, selector: string) {
 }
 
 test.describe("Movimiento en escritorio", () => {
-  test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "no-preference" });
+  test.use({ reducedMotion: "no-preference" });
+  test.skip(({ isMobile }) => isMobile, "Estas escenas sticky son específicas de escritorio");
 
   test("arranca el motor con las escenas del inicio y escenarios sticky, sin pins", async ({ page }) => {
     await page.goto("");
@@ -156,7 +157,8 @@ test.describe("Motor que llega tarde (red lenta)", () => {
 });
 
 test.describe("Movimiento en móvil", () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: "no-preference" });
+  test.use({ reducedMotion: "no-preference" });
+  test.skip(({ isMobile }) => !isMobile, "Conservar ambos proyectos móviles: 320 y 390 px");
 
   test("arranca sin fijar la llegada ni el día y sin desbordar", async ({ page }) => {
     await page.goto("");
@@ -172,7 +174,7 @@ test.describe("Movimiento en móvil", () => {
 });
 
 test.describe("Movimiento reducido", () => {
-  test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+  test.use({ reducedMotion: "reduce" });
 
   test("no se oculta ni se fija nada: composición final y bloques normales", async ({ page }) => {
     await page.goto("");

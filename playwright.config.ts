@@ -3,12 +3,13 @@ import { defineConfig, devices } from "@playwright/test";
 // Pruebas en el navegador sobre el sitio construido (npm run build) y servido
 // con astro preview. Usan el Chrome instalado en el equipo (o el canal que
 // indique PW_CHANNEL, por ejemplo "msedge"), sin descargar navegadores.
-// Puerto propio (4323) para no chocar con otros proyectos en marcha.
-const puerto = 4323;
+// PW_PORT permite aislar worktrees; 4323 es el puerto predeterminado.
 
 // Tipo mínimo de las variables de entorno que se leen aquí (evita añadir
 // @types/node solo para esto).
 declare const process: { env: Record<string, string | undefined> };
+
+const puerto = Number(process.env.PW_PORT ?? 4323);
 
 export default defineConfig({
   testDir: "tests",
@@ -29,6 +30,7 @@ export default defineConfig({
   webServer: {
     command: `npm run preview -- --port ${puerto} --host 127.0.0.1`,
     url: `http://127.0.0.1:${puerto}/`,
-    reuseExistingServer: !process.env.CI,
+    // Cada ejecución sirve la build de este worktree; nunca la de otra rama.
+    reuseExistingServer: false,
   },
 });

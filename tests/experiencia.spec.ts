@@ -14,12 +14,12 @@ async function abrirPreferencias(page: Page) {
 }
 
 test.describe("Control de movimiento", () => {
-  test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "no-preference" });
+  test.use({ reducedMotion: "no-preference" });
 
-  test("cambia de modo, se recuerda y el motor se reconstruye sin restos", async ({ page }) => {
+  test("cambia de modo, se recuerda y el motor se reconstruye sin restos", async ({ page, isMobile }) => {
     await page.goto("");
     await motorListo(page);
-    await expect(page.locator(".llegada-escena")).toHaveCSS("position", "sticky");
+    await expect(page.locator(".llegada-escena")).toHaveCSS("position", isMobile ? "relative" : "sticky");
     await expect(page.locator('input[name="movimiento"][value="auto"]')).toBeChecked();
 
     // A reducido: sin escenarios fijos, Un día en bloques, la preferencia se guarda.
@@ -37,12 +37,12 @@ test.describe("Control de movimiento", () => {
     await expect(page.locator("html")).toHaveAttribute("data-movimiento", "reducido");
     await expect(page.locator('input[name="movimiento"][value="reducido"]')).toBeChecked();
 
-    // De vuelta a completo: los escenarios sticky vuelven, sin pins ni duplicados.
+    // De vuelta a completo: sticky solo en escritorio, sin pins ni duplicados.
     await motorListo(page);
     await abrirPreferencias(page);
     await page.getByRole("radio", { name: "Completo" }).check();
     await expect(page.locator("html")).toHaveAttribute("data-movimiento", "completo");
-    await expect(page.locator(".llegada-escena")).toHaveCSS("position", "sticky");
+    await expect(page.locator(".llegada-escena")).toHaveCSS("position", isMobile ? "relative" : "sticky");
     await expect(page.locator(".pin-spacer")).toHaveCount(0);
     // Las palabras del manifiesto se partieron una sola vez
     await expect(page.locator(".frase .palabra .palabra")).toHaveCount(0);
@@ -125,7 +125,7 @@ test.describe("Explorador de habitaciones", () => {
 });
 
 test.describe("El mar y el cielo", () => {
-  test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "no-preference" });
+  test.use({ reducedMotion: "no-preference" });
 
   test("el vídeo no se descarga al cargar, se reproduce al verlo, se pausa con el botón y fuera de pantalla", async ({ page }) => {
     const videos: string[] = [];
@@ -137,7 +137,8 @@ test.describe("El mar y el cielo", () => {
     await video.scrollIntoViewIfNeeded();
     await page.locator(".mar-escena").evaluate((e) => e.scrollIntoView({ block: "center" }));
     await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused && v.currentTime > 0), { timeout: 10_000 }).toBe(true);
-    expect(videos.some((u) => u.endsWith("mar-ocaso-1280.mp4"))).toBe(true);
+    const archivo = (page.viewportSize()?.width ?? 1440) < 768 ? "mar-ocaso-movil.mp4" : "mar-ocaso-1280.mp4";
+    expect(videos.some((u) => u.endsWith(archivo))).toBe(true);
     await page.getByRole("button", { name: "Pausar vídeo" }).click();
     await expect(video).toHaveJSProperty("paused", true);
     await expect(page.getByRole("button", { name: "Reanudar vídeo" })).toBeVisible();
@@ -151,8 +152,9 @@ test.describe("El mar y el cielo", () => {
     await page.evaluate((y) => scrollTo(0, y), top - 200);
     await page.waitForTimeout(800);
     const pequeno = await radio();
-    await page.evaluate((y) => scrollTo(0, y), top + alto - 900);
-    await expect.poll(radio, { timeout: 5000 }).toBeGreaterThan(Math.hypot(1440, 900) / 2);
+    const { width, height } = page.viewportSize()!;
+    await page.evaluate((y) => scrollTo(0, y), top + alto - height);
+    await expect.poll(radio, { timeout: 5000 }).toBeGreaterThan(Math.hypot(width, height) / 2);
     expect(pequeno).toBeLessThan(400);
     await expect(page.locator(".cielo-texto .etiqueta")).toHaveCSS("opacity", "1", { timeout: 5000 });
   });

@@ -1,7 +1,8 @@
 import { test, expect } from "./ayudas";
 
 test.describe("Menú en pantallas estrechas", () => {
-  test.use({ viewport: { width: 390, height: 844 } });
+  // Conservar los 320/390 px definidos por cada proyecto móvil.
+  test.skip(({ isMobile }) => !isMobile, "El menú plegado es específico de móvil");
 
   test("se abre, se cierra con Escape y devuelve el foco", async ({ page }) => {
     await page.goto("");

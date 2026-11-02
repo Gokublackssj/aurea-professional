@@ -2,7 +2,15 @@ import { test as base, expect, type Page } from "@playwright/test";
 
 // Cada prueba falla si la página escribe un error en la consola o lanza una
 // excepción.
-export const test = base.extend<{ errores: string[] }>({
+export const test = base.extend<{ errores: string[]; viewportDelProyecto: void }>({
+  // Impide que un test anunciado como «movil-320» se ejecute a 390/1440 px.
+  viewportDelProyecto: [
+    async ({ page }, usar, info) => {
+      expect(page.viewportSize(), "viewport del proyecto, sin sobrescrituras locales").toEqual(info.project.use.viewport);
+      await usar();
+    },
+    { auto: true },
+  ],
   errores: [
     async ({ page }, usar) => {
       const errores: string[] = [];
