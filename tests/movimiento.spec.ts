@@ -50,6 +50,11 @@ test.describe("Movimiento en escritorio", () => {
     await expect(foto).toHaveCSS("clip-path", /^inset\(0(%|px)?\)$/, { timeout: 5000 });
     // La escena queda fija arriba mientras dura
     expect(await page.locator(".llegada-escena").evaluate((e) => Math.round(e.getBoundingClientRect().top))).toBe(0);
+    // Al final sube la frase, entera dentro de la pantalla
+    const frase = page.locator(".llegada-frase");
+    await expect(frase).toHaveText("Donde termina el camino, empieza el mar.");
+    await expect(frase).toHaveCSS("opacity", "1", { timeout: 5000 });
+    expect(await frase.evaluate((e) => e.scrollWidth <= e.clientWidth + 1 && e.getBoundingClientRect().right <= innerWidth)).toBe(true);
   });
 
   test("Un día en Aurea: el reloj y el momento avanzan con el scroll y las barras llevan a cada momento", async ({ page }) => {
