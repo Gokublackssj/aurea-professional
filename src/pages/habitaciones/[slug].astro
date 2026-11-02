@@ -22,9 +22,11 @@ const datos = [
   ...(h.exterior ? [["Exterior", h.exterior]] : []),
   ["Huéspedes", `Hasta ${h.huespedes}`],
   ["Cama", h.cama],
+  ["Baño", h.bano],
   ["Vista", h.vista],
-  ["En la casa", `${h.llaves} ${h.llaves === 1 ? "llave" : "llaves"}`],
+  ["En la casa", `${h.llaves} ${h.llaves === 1 ? "habitación" : "habitaciones"} de este tipo`],
 ];
+const [portada, ...galeria] = h.fotos;
 ---
 
 <Base title={h.nombre} description={`${h.nombre} en Aurea: ${h.resumen}`}>
@@ -32,7 +34,14 @@ const datos = [
     <div class="portada-foto">
       <!-- Mismo nombre de transición que la foto de esta habitación en la lista
            y en el inicio: al llegar desde allí, la foto viaja hasta aquí. -->
-      <Foto foto={h.fotos[0]} sizes="100vw" prioridad anchos={[640, 960, 1280, 1920]} transicion={`foto-${h.slug}`} />
+      <Foto
+        foto={portada.foto}
+        sizes="100vw"
+        prioridad
+        anchos={[640, 960, 1280, 1920]}
+        transicion={`foto-${h.slug}`}
+        style={portada.foco ? `object-position: ${portada.foco}` : undefined}
+      />
     </div>
     <div class="portada-fila marco" data-entrada>
       <div class="portada-titulo">
@@ -41,9 +50,11 @@ const datos = [
       </div>
       <div class="portada-reserva" data-entrada-paso>
         <p>
-          Desde <strong>{euros(h.precio)}</strong> la noche
+          Desde <strong>{euros(h.precio)}</strong> la noche <small>(precio de ejemplo)</small>
         </p>
-        <a class="boton boton-principal" href={reservar}>Reservar</a>
+        <a class="boton boton-principal" href={reservar} aria-label={`Elegir ${h.conArticulo} y preparar la estancia`}>
+          Elegir esta habitación <span class="flecha" aria-hidden="true">→</span>
+        </a>
       </div>
     </div>
   </section>
@@ -68,13 +79,24 @@ const datos = [
 
   <!-- Galería: cada foto abre el visor a pantalla completa (src/scripts/motion/galeria.ts) -->
   <section class="detalles marco" aria-labelledby="detalles-titulo" data-escena="galeria">
-    <h2 id="detalles-titulo" class="solo-lector">Fotografías de {h.conArticulo}</h2>
-    <button type="button" class="ampliar detalle-a" data-ampliar data-revelar="foto" aria-label={`Ampliar: ${h.nombre}, foto 1 de 2`}>
-      <Foto foto={h.fotos[1]} sizes="(min-width: 48rem) 54vw, 100vw" anchos={[640, 960, 1280, 1600]} />
-    </button>
-    <button type="button" class="ampliar detalle-b" data-ampliar data-revelar="foto" data-revelar-desde="izquierda" aria-label={`Ampliar: ${h.nombre}, foto 2 de 2`}>
-      <Foto foto={h.fotos[2]} sizes="(min-width: 48rem) 30vw, 70vw" anchos={[480, 800, 1000]} />
-    </button>
+    <h2 id="detalles-titulo" class="detalles-titulo" data-revelar="titulo">{h.nombre}, foto a foto</h2>
+    <div class="mosaico" data-fotos={galeria.length}>
+      {
+        galeria.map((f, i) => (
+          <button
+            type="button"
+            class="ampliar"
+            data-ampliar
+            data-revelar="foto"
+            data-revelar-desde={i % 2 ? "izquierda" : undefined}
+            aria-label={`Ampliar: ${f.pie}, foto ${i + 1} de ${galeria.length}`}
+          >
+            <Foto foto={f.foto} sizes="(min-width: 48rem) 45vw, 100vw" anchos={[480, 800, 1200, 1600]} style={f.foco ? `object-position: ${f.foco}` : undefined} />
+            <span class="ampliar-pie">{f.pie}</span>
+          </button>
+        ))
+      }
+    </div>
     <dialog class="visor" aria-label={`Fotografías de ${h.conArticulo}`}>
       <div class="visor-foto"></div>
       <p class="visor-pie"></p>
@@ -92,6 +114,7 @@ const datos = [
       {h.equipamiento.map((e) => <li>{e}</li>)}
     </ul>
     <p class="equipo-nota">Desayuno, termas y acceso a la poza incluidos. Traslado desde el aeropuerto a partir de tres noches.</p>
+    <a class="boton boton-principal equipo-accion" href={reservar}>Preparar mi estancia <span class="flecha" aria-hidden="true">→</span></a>
   </section>
 
   <section class="otras marco" aria-labelledby="otras-titulo">
@@ -101,7 +124,13 @@ const datos = [
         otras.map((o) => (
           <li>
             <a href={ruta(`habitaciones/${o.slug}`)}>
-              <Foto foto={o.fotos[0]} sizes="(min-width: 48rem) 30vw, 100vw" anchos={[480, 800, 1000]} transicion={`foto-${o.slug}`} />
+              <Foto
+                foto={o.fotos[0].foto}
+                sizes="(min-width: 48rem) 30vw, 100vw"
+                anchos={[480, 800, 1000]}
+                transicion={`foto-${o.slug}`}
+                style={o.fotos[0].foco ? `object-position: ${o.fotos[0].foco}` : undefined}
+              />
               <span class="otra-nombre">{o.nombre}</span>
               <span class="otra-datos">
                 {o.metros} m² · desde {euros(o.precio)}
@@ -206,11 +235,70 @@ const datos = [
   }
 
   .detalles {
-    display: grid;
-    grid-template-columns: 7fr 4fr;
-    gap: clamp(1rem, 3vw, 3rem);
-    align-items: start;
     margin-top: var(--seccion);
+  }
+
+  .detalles-titulo {
+    margin-bottom: 2.5rem;
+    font-size: var(--step-head);
+  }
+
+  /* Mosaico editorial: alturas y anchos alternos según cuántas fotos haya */
+  .mosaico {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: clamp(9rem, 14vw, 14rem);
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+
+  .mosaico .ampliar {
+    position: relative;
+    grid-column: span 6;
+    grid-row: span 2;
+  }
+
+  .mosaico .ampliar:nth-child(1) {
+    grid-column: span 7;
+    grid-row: span 3;
+  }
+
+  .mosaico .ampliar:nth-child(2) {
+    grid-column: span 5;
+    grid-row: span 3;
+  }
+
+  .mosaico[data-fotos="3"] .ampliar:nth-child(3) {
+    grid-column: 3 / span 8;
+  }
+
+  .mosaico[data-fotos="5"] .ampliar:nth-child(5) {
+    grid-column: span 12;
+    grid-row: span 3;
+  }
+
+  .mosaico .ampliar :global(picture),
+  .mosaico .ampliar :global(img) {
+    height: 100%;
+  }
+
+  .ampliar-pie {
+    position: absolute;
+    left: 1rem;
+    bottom: 0.9rem;
+    color: var(--marfil);
+    font-size: var(--step-small);
+    font-weight: 600;
+    text-shadow: 0 1px 10px rgb(6 29 30 / 0.6);
+  }
+
+  .portada-reserva small {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
+  .equipo-accion {
+    grid-column: 2;
+    justify-self: start;
   }
 
   /* Fotos que se amplían: botón sin aspecto de botón, con lupa al pasar */
@@ -240,23 +328,11 @@ const datos = [
   }
 
   .ampliar:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--laton);
     outline-offset: 4px;
   }
 
-  .detalle-a :global(img) {
-    aspect-ratio: 3 / 2;
-  }
-
-  .detalle-b {
-    margin-top: 30%;
-  }
-
-  .detalle-b :global(img) {
-    aspect-ratio: 4 / 5;
-  }
-
-  /* Visor a pantalla completa */
+  /* Visor a pantalla completa, de noche */
   .visor {
     width: 100vw;
     max-width: none;
@@ -265,8 +341,8 @@ const datos = [
     margin: 0;
     padding: clamp(1rem, 3vw, 2.5rem);
     border: 0;
-    background: rgb(8 7 6 / 0.96);
-    color: var(--ink);
+    background: rgb(6 29 30 / 0.97);
+    color: var(--marfil);
   }
 
   .visor[open] {
@@ -276,7 +352,11 @@ const datos = [
   }
 
   .visor::backdrop {
-    background: rgb(8 7 6 / 0.7);
+    background: rgb(6 29 30 / 0.7);
+  }
+
+  .visor .boton {
+    color: var(--marfil);
   }
 
   .visor-foto {
@@ -298,7 +378,7 @@ const datos = [
   }
 
   .visor-pie {
-    color: var(--muted);
+    color: var(--noche-texto);
     font-size: var(--step-small);
   }
 
@@ -405,18 +485,27 @@ const datos = [
     }
 
     .relato,
-    .detalles,
     .equipo,
     .equipo ul {
       grid-template-columns: 1fr;
     }
 
-    .detalles :global(.detalle-b) {
-      width: 70%;
-      margin: 0 0 0 auto;
+    .mosaico {
+      grid-auto-rows: 42vw;
     }
 
-    .equipo-nota {
+    .mosaico .ampliar,
+    .mosaico .ampliar:nth-child(n) {
+      grid-column: span 12;
+      grid-row: span 1;
+    }
+
+    .mosaico .ampliar:nth-child(2n) {
+      grid-column: 4 / span 9;
+    }
+
+    .equipo-nota,
+    .equipo-accion {
       grid-column: 1;
     }
   }

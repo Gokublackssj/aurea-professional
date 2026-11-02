@@ -13,7 +13,7 @@ import { ruta } from "../../lib/ruta";
 ---
 
 <section class="cartel marco" aria-labelledby="cartel-titulo" data-escena="cartel">
-  <h2 id="cartel-titulo" class="cartel-titulo" data-revelar="titulo">Habitaciones · {totalLlaves} llaves</h2>
+  <h2 id="cartel-titulo" class="cartel-titulo" data-revelar="titulo">Habitaciones · {totalLlaves} en total</h2>
   <table>
     <caption class="solo-lector">Las cuatro habitaciones de Aurea, con su vista, superficie y precio por noche</caption>
     <thead class="solo-lector">
@@ -44,9 +44,15 @@ import { ruta } from "../../lib/ruta";
       habitaciones.map((h) => (
         <li>
           <a href={ruta(`habitaciones/${h.slug}`)}>
-            <Foto foto={h.fotos[0]} sizes="(min-width: 48rem) 23vw, 46vw" anchos={[400, 640, 900]} transicion={`foto-${h.slug}`} />
+            <Foto
+              foto={h.fotos[0].foto}
+              sizes="(min-width: 48rem) 23vw, 46vw"
+              anchos={[400, 640, 900]}
+              transicion={`foto-${h.slug}`}
+              style={h.fotos[0].foco ? `object-position: ${h.fotos[0].foco}` : undefined}
+            />
             <span>
-              {h.nombre} · {h.llaves} {h.llaves === 1 ? "llave" : "llaves"} · hasta {h.huespedes} huéspedes
+              {h.nombre} · {h.llaves} {h.llaves === 1 ? "habitación" : "habitaciones"} · hasta {h.huespedes} huéspedes
             </span>
           </a>
         </li>
@@ -54,14 +60,14 @@ import { ruta } from "../../lib/ruta";
     }
   </ul>
   <p class="cartel-pie">
-    Precios por noche para dos personas, con desayuno y termas incluidos.
-    <a class="enlace" href={ruta("habitaciones")}>Ver las habitaciones</a>
+    Precios de ejemplo por noche para dos personas, con desayuno y termas incluidos.
+    <a class="enlace" href={ruta("habitaciones")}>Explorar las habitaciones</a>
   </p>
   <div class="cartel-vista" aria-hidden="true">
     {
       habitaciones.map((h) => (
         <div class="cartel-capa" data-slug={h.slug}>
-          <Foto foto={h.fotos[1]} sizes="18rem" anchos={[320, 640]} alt="" />
+          <Foto foto={h.fotos[1].foto} sizes="18rem" anchos={[320, 640]} alt="" style={h.fotos[1].foco ? `object-position: ${h.fotos[1].foco}` : undefined} />
         </div>
       ))
     }
@@ -95,7 +101,7 @@ import { ruta } from "../../lib/ruta";
   th,
   td {
     padding: 0;
-    font-weight: 500;
+    font-weight: 380;
     text-align: left;
     line-height: 1.5;
     vertical-align: baseline;

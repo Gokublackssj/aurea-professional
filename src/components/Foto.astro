@@ -15,11 +15,14 @@ interface Props {
   class?: string;
   alt?: string;
   transicion?: string;
+  /** Estilos de la imagen (p. ej. object-position para encuadrar verticales) */
+  style?: string;
 }
 
-const { foto, sizes, anchos = [480, 800, 1200, 1600, 2000], prioridad = false, class: clase, alt, transicion } = Astro.props;
+const { foto, sizes, anchos = [480, 800, 1200, 1600, 2000], prioridad = false, class: clase, alt, transicion, style } = Astro.props;
 const { src, alt: altPorDefecto } = fotos[foto];
 const widths = anchos.filter((a) => a <= src.width);
+const estilo = [transicion && `view-transition-name: ${transicion}`, style].filter(Boolean).join("; ") || undefined;
 ---
 
 <Picture
@@ -34,5 +37,5 @@ const widths = anchos.filter((a) => a <= src.width);
   fetchpriority={prioridad ? "high" : undefined}
   decoding={prioridad ? "sync" : "async"}
   class:list={["foto", clase]}
-  style={transicion ? `view-transition-name: ${transicion}` : undefined}
+  style={estilo}
 />

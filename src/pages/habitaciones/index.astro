@@ -1,13 +1,16 @@
 ---
-// Habitaciones. Sin JavaScript, las cuatro se leen una tras otra. Con él,
-// el selector (src/scripts/motion/habitaciones.ts) las convierte en pestañas:
-// foto protagonista a la izquierda y ficha a la derecha, con su transición al
-// cambiar. La foto de cada habitación comparte nombre de transición con la
-// portada de su página: al entrar en ella, la foto viaja hasta allí.
+// Habitaciones. Sin JavaScript, las cuatro se leen una tras otra, cada una con
+// su primera foto y su ficha. Con él (src/scripts/motion/habitaciones.ts) se
+// convierten en un explorador: pestañas accesibles, foto protagonista con la
+// galería de esa habitación (tira de miniaturas, flechas, deslizar) y la ficha.
+// Cada galería es de una sola sesión fotográfica: todas muestran el mismo
+// espacio. La foto principal comparte nombre de transición con la portada de
+// su página de detalle: al entrar en ella, la foto viaja hasta allí.
 import Base from "../../layouts/Base.astro";
 import Foto from "../../components/Foto.astro";
 import Pregunta from "../../components/Pregunta.astro";
 import { habitaciones, totalLlaves, euros } from "../../data/habitaciones";
+import { fotos } from "../../data/fotos";
 import { ruta } from "../../lib/ruta";
 
 const desde = Math.min(...habitaciones.map((h) => h.precio));
@@ -18,19 +21,31 @@ const incluido = [
   ["La poza", "Acceso por los 112 escalones a la poza de marea y a la cala de arena negra."],
   ["Traslado", "Desde el aeropuerto, incluido a partir de tres noches."],
   ["Hoja de la tarde", "Cada día, bajo la puerta: la hora del sol, las mareas y lo que hay en la lonja."],
-  ["Silencio", "No hay televisores. Hay discos, libros y un ventanal al poniente."],
+  ["Silencio", "Discos, libros y un ventanal al poniente; en las habitaciones de la casa no hay televisores."],
+];
+
+const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
+  ["Superficie", (h) => `${h.metros} m²`],
+  ["Huéspedes", (h) => `Hasta ${h.huespedes}`],
+  ["Vista", (h) => h.vista],
+  ["Exterior", (h) => h.exterior ?? "—"],
+  ["Cama", (h) => h.cama],
+  ["Baño", (h) => h.bano],
+  ["Desde", (h) => `${euros(h.precio)} / noche`],
 ];
 ---
 
-<Base title="Habitaciones" description="Veintidós llaves en cuatro formas de mirar el mar: estudios, suites y la Residencia Aurea.">
+<Base title="Habitaciones" description="Veintidós habitaciones en cuatro categorías: estudios, suites y la Residencia Aurea, con fotos de cada espacio.">
   <section class="cabeza marco" aria-labelledby="titulo" data-entrada>
+    <span class="etiqueta" data-entrada-paso>Habitaciones · {totalLlaves} en total</span>
     <h1 id="titulo">Habitaciones</h1>
     <div class="cabeza-fila">
       <p class="entradilla" data-entrada-paso>
-        {totalLlaves} llaves en cuatro formas de mirar el mar. Todas con desayuno, termas y la misma puesta de sol delante.
+        Del jardín a la casa entre olivos: cuatro maneras de quedarse. Recórrelas foto a foto: qué se ve desde la cama, qué incluye cada una y
+        qué la hace distinta.
       </p>
       <p class="cabeza-datos" data-entrada-paso>
-        {habitaciones.length} categorías · desde {euros(desde)} la noche
+        {habitaciones.length} categorías · desde {euros(desde)} la noche · precios de ejemplo, para dos personas
       </p>
     </div>
   </section>
@@ -57,12 +72,46 @@ const incluido = [
     {
       habitaciones.map((h) => (
         <article id={h.slug} class="hab" data-slug={h.slug} aria-labelledby={`${h.slug}-titulo`}>
-          <a class="hab-foto" href={ruta(`habitaciones/${h.slug}`)} tabindex="-1" aria-hidden="true">
-            <Foto foto={h.fotos[0]} sizes="(min-width: 48rem) 56vw, 100vw" anchos={[640, 960, 1280, 1600, 2000]} transicion={`foto-${h.slug}`} />
-          </a>
+          <div class="hab-foto">
+            <div class="hab-escena">
+              {h.fotos.map((f, i) => (
+                <figure class:list={["hab-capa", { actual: i === 0 }]} data-pie={f.pie}>
+                  <Foto
+                    foto={f.foto}
+                    sizes="(min-width: 48rem) 56vw, 100vw"
+                    anchos={[640, 960, 1280, 1600, 2000]}
+                    transicion={i === 0 ? `foto-${h.slug}` : undefined}
+                    style={f.foco ? `object-position: ${f.foco}` : undefined}
+                  />
+                </figure>
+              ))}
+              <p class="hab-rotulo" aria-hidden="true">
+                <span class="hab-rotulo-nombre">{h.nombre}</span>
+                <span class="hab-rotulo-pie">{h.fotos[0].pie}</span>
+              </p>
+            </div>
+            <div class="tira" hidden>
+              <button type="button" class="tira-paso" data-paso="-1" aria-label={`Foto anterior de ${h.conArticulo}`}>
+                ←
+              </button>
+              <ol class="tira-fotos" aria-label={`Fotos de ${h.conArticulo}`}>
+                {h.fotos.map((f, i) => (
+                  <li>
+                    <button type="button" data-i={i} aria-current={i === 0 ? "true" : "false"} aria-label={`Foto ${i + 1} de ${h.fotos.length}: ${fotos[f.foto].alt}`}>
+                      <Foto foto={f.foto} sizes="5rem" anchos={[160, 320]} alt="" style={f.foco ? `object-position: ${f.foco}` : undefined} />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+              <button type="button" class="tira-paso" data-paso="1" aria-label={`Foto siguiente de ${h.conArticulo}`}>
+                →
+              </button>
+              <span class="tira-contador" aria-live="polite">1 / {h.fotos.length}</span>
+            </div>
+          </div>
           <div class="hab-info">
             <h2 id={`${h.slug}-titulo`}>{h.nombre}</h2>
-            <p class="hab-resumen">{h.resumen}</p>
+            <p class="hab-resumen">{h.entradilla}</p>
             <dl>
               <div>
                 <dt>Superficie</dt>
@@ -73,35 +122,57 @@ const incluido = [
                 <dd>Hasta {h.huespedes}</dd>
               </div>
               <div>
-                <dt>Cama</dt>
-                <dd>{h.cama}</dd>
-              </div>
-              <div>
-                <dt>En la casa</dt>
-                <dd>
-                  {h.llaves} {h.llaves === 1 ? "llave" : "llaves"}
-                </dd>
+                <dt>Desde</dt>
+                <dd>{euros(h.precio)}</dd>
               </div>
             </dl>
-            <p class="hab-precio">
-              Desde <strong>{euros(h.precio)}</strong> la noche
+            <ul class="servicios" aria-label="Servicios destacados">
+              {h.servicios.map((s) => (
+                <li>{s}</li>
+              ))}
+            </ul>
+            <p class="hab-diferencia">
+              <b>En qué se diferencia:</b> {h.diferencia}
             </p>
             <div class="hab-acciones">
-              <a class="boton boton-principal" href={ruta(`reservas?habitacion=${h.slug}`)}>
-                Reservar
+              <a class="boton boton-principal" href={ruta(`reservas?habitacion=${h.slug}`)} aria-label={`Elegir ${h.conArticulo} y preparar la estancia`}>
+                Elegir esta habitación <span class="flecha" aria-hidden="true">→</span>
               </a>
               <a class="enlace" href={ruta(`habitaciones/${h.slug}`)}>
                 Ver {h.conArticulo}
               </a>
             </div>
-            <div class="hab-miniaturas">
-              <Foto foto={h.fotos[1]} sizes="(min-width: 48rem) 14vw, 44vw" anchos={[320, 480, 640]} />
-              <Foto foto={h.fotos[2]} sizes="(min-width: 48rem) 14vw, 44vw" anchos={[320, 480, 640]} />
-            </div>
           </div>
         </article>
       ))
     }
+  </section>
+
+  <section class="comparador marco" aria-labelledby="comparar-titulo">
+    <h2 id="comparar-titulo" data-revelar="titulo">Las cuatro, lado a lado</h2>
+    <div class="comparador-tabla">
+      <table>
+        <caption class="solo-lector">Comparación de las cuatro habitaciones</caption>
+        <thead>
+          <tr>
+            <th scope="col"><span class="solo-lector">Característica</span></th>
+            {habitaciones.map((h, i) => <th scope="col" data-col={i}>{h.nombre}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {
+            filas.map(([nombre, valor]) => (
+              <tr>
+                <th scope="row">{nombre}</th>
+                {habitaciones.map((h, i) => (
+                  <td data-col={i}>{valor(h)}</td>
+                ))}
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section class="incluido marco" aria-labelledby="incluido-titulo">
@@ -127,10 +198,10 @@ const incluido = [
   }
 
   h1 {
-    font-size: 15.5vw;
-    line-height: 0.85;
-    letter-spacing: -0.05em;
-    white-space: nowrap;
+    margin-top: 1rem;
+    font-size: clamp(3.5rem, 1rem + 11vw, 11rem);
+    line-height: 0.88;
+    letter-spacing: -0.04em;
   }
 
   .cabeza-fila {
@@ -143,22 +214,21 @@ const incluido = [
   }
 
   .entradilla {
-    max-width: 32rem;
-    font-size: var(--step-lead);
-    line-height: 1.4;
+    max-width: 38rem;
   }
 
   .cabeza-datos {
     color: var(--muted);
+    font-size: var(--step-small);
   }
 
   /* — Sin JavaScript: una habitación tras otra — */
   .hab {
     display: grid;
     grid-template-columns: 7fr 5fr;
-    gap: clamp(2rem, 5vw, 6rem);
+    gap: clamp(2rem, 5vw, 5rem);
     align-items: start;
-    scroll-margin-top: 2rem;
+    scroll-margin-top: 6rem;
   }
 
   .hab + .hab {
@@ -166,24 +236,144 @@ const incluido = [
   }
 
   .hab-foto {
-    display: block;
-    overflow: hidden;
+    display: grid;
+    gap: 1rem;
+    align-content: start;
   }
 
-  .hab-foto :global(picture),
-  .hab-foto :global(img) {
+  .hab-escena {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: var(--lino);
+    touch-action: pan-y;
+  }
+
+  .hab-capa {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hab-capa:not(.actual) {
+    visibility: hidden;
+  }
+
+  .hab-capa :global(picture),
+  .hab-capa :global(img) {
     display: block;
     width: 100%;
+    height: 100%;
   }
 
-  .hab-foto :global(img) {
-    aspect-ratio: 4 / 3;
+  .hab-capa :global(img) {
     object-fit: cover;
+  }
+
+  /* Rótulo corto sobre la foto, con un velo neutro solo abajo */
+  .hab-escena::after {
+    content: "";
+    position: absolute;
+    inset: 55% 0 0;
+    z-index: 3;
+    background: linear-gradient(rgb(6 29 30 / 0), rgb(6 29 30 / 0.55)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
+    pointer-events: none;
+  }
+
+  .hab-rotulo {
+    position: absolute;
+    left: 1.5rem;
+    bottom: 1.25rem;
+    z-index: 4;
+    display: grid;
+    gap: 0.3rem;
+    color: var(--marfil);
+  }
+
+  .hab-rotulo-nombre {
+    font: 380 var(--step-sub) / 1 var(--display);
+  }
+
+  .hab-rotulo-pie {
+    font-size: var(--step-small);
+    color: rgb(242 240 234 / 0.85);
+  }
+
+  .tira {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .tira[hidden] {
+    display: none;
+  }
+
+  .tira-fotos {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 3px;
+    scrollbar-width: none;
+  }
+
+  .tira-fotos button {
+    display: block;
+    width: 5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.35rem;
+    overflow: hidden;
+    background: var(--lino);
+    cursor: pointer;
+    opacity: 0.55;
+    transition:
+      opacity 300ms ease-out,
+      box-shadow 300ms ease-out;
+  }
+
+  .tira-fotos button:hover {
+    opacity: 0.85;
+  }
+
+  .tira-fotos button[aria-current="true"] {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--teal);
+  }
+
+  .tira-fotos :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .tira-paso {
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--piedra);
+    border-radius: 50%;
+    background: none;
+    color: var(--ink);
+    font-size: 1.05rem;
+    cursor: pointer;
+  }
+
+  .tira-paso:hover {
+    border-color: var(--tinta);
+  }
+
+  .tira-contador {
+    min-width: 3.5rem;
+    text-align: right;
+    font: 400 1.1rem / 1 var(--display);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
   }
 
   .hab-info {
     display: grid;
-    gap: 1.4rem;
+    gap: 1.25rem;
     align-content: start;
     justify-items: start;
     max-width: 32rem;
@@ -200,24 +390,43 @@ const incluido = [
 
   .hab-info dl {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem 2rem;
-    width: 100%;
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+    gap: 0.5rem 2rem;
   }
 
   dt {
+    font: 600 var(--step-label) / 1.2 var(--text);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     color: var(--muted);
-    font-size: var(--step-small);
   }
 
   dd {
-    margin: 0;
+    margin: 0.35rem 0 0;
+    font: 400 var(--step-sub) / 1 var(--display);
   }
 
-  .hab-precio strong {
-    font-family: var(--display);
-    font-size: var(--step-lead);
-    font-weight: 500;
+  .servicios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .servicios li {
+    padding: 0.45rem 0.85rem;
+    border-radius: var(--radio);
+    background: var(--lino);
+    font-size: var(--step-small);
+  }
+
+  .hab-diferencia {
+    color: var(--muted);
+  }
+
+  .hab-diferencia b {
+    color: var(--ink);
+    font-weight: 600;
   }
 
   .hab-acciones {
@@ -227,21 +436,7 @@ const incluido = [
     gap: 1rem 1.75rem;
   }
 
-  .hab-miniaturas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    width: 100%;
-    margin-top: 0.5rem;
-  }
-
-  .hab-miniaturas :global(img) {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-  }
-
-  /* — Con JavaScript: selector de pestañas — */
+  /* — Con JavaScript: explorador — */
   .pestanas[hidden] {
     display: none;
   }
@@ -250,30 +445,17 @@ const incluido = [
     display: grid;
     grid-template-columns: 7fr 5fr;
     grid-template-rows: auto 1fr;
-    column-gap: clamp(2rem, 5vw, 6rem);
-    row-gap: 2.5rem;
+    column-gap: clamp(2rem, 5vw, 5rem);
+    row-gap: 2rem;
   }
 
   .es-selector .hab {
     display: contents;
   }
 
-  /* La foto ocupa toda la altura de la columna derecha (pestañas y ficha) */
   .es-selector .hab-foto {
     grid-column: 1;
     grid-row: 1 / 3;
-    position: relative;
-    min-height: 34rem;
-  }
-
-  .es-selector .hab-foto :global(picture) {
-    position: absolute;
-    inset: 0;
-  }
-
-  .es-selector .hab-foto :global(img) {
-    height: 100%;
-    aspect-ratio: auto;
   }
 
   .es-selector .hab-info {
@@ -284,6 +466,22 @@ const incluido = [
   .es-selector .hab:not(.actual):not(.saliendo) .hab-foto,
   .es-selector .hab:not(.actual):not(.saliendo) .hab-info {
     visibility: hidden;
+  }
+
+  /* Las habitaciones ocupan la misma celda: la que sale queda debajo de la que entra */
+  .es-selector .hab-foto,
+  .es-selector .hab-info {
+    grid-area: auto;
+  }
+
+  .es-selector .hab .hab-foto {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+
+  .es-selector .hab .hab-info {
+    grid-column: 2;
+    grid-row: 2;
   }
 
   .es-selector .hab:not(.actual) .hab-info {
@@ -302,10 +500,11 @@ const incluido = [
     justify-content: space-between;
     gap: 1rem;
     width: 100%;
-    padding: 0.7rem 0;
+    padding: 0.75rem 0;
     border: 0;
+    border-bottom: 1px solid var(--lino);
     background: none;
-    color: var(--muted);
+    color: var(--piedra);
     font: inherit;
     text-align: left;
     cursor: pointer;
@@ -313,24 +512,7 @@ const incluido = [
   }
 
   .pestana-nombre {
-    position: relative;
-    font-family: var(--display);
-    font-size: var(--step-lead);
-    line-height: 1.1;
-  }
-
-  /* La pestaña elegida se marca con su color y un subrayado dorado que crece */
-  .pestana-nombre::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -0.2em;
-    height: 2px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1);
+    font: 400 var(--step-sub) / 1.1 var(--display);
   }
 
   .pestana-precio {
@@ -343,13 +525,56 @@ const incluido = [
     color: var(--ink);
   }
 
-  [role="tab"][aria-selected="true"] .pestana-nombre::after {
-    transform: scaleX(1);
+  [role="tab"]:focus-visible {
+    outline: 2px solid var(--laton);
+    outline-offset: 4px;
   }
 
-  [role="tab"]:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 4px;
+  /* Comparador */
+  .comparador {
+    margin-top: var(--seccion);
+  }
+
+  .comparador h2 {
+    font-size: var(--step-head);
+    margin-bottom: 2rem;
+  }
+
+  .comparador-tabla {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    min-width: 40rem;
+    border-collapse: collapse;
+    font-size: var(--step-small);
+  }
+
+  th,
+  td {
+    padding: 0.9rem 0.75rem;
+    border-bottom: 1px solid var(--lino);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  thead th {
+    font: 400 1.15rem / 1.1 var(--display);
+  }
+
+  tbody th {
+    width: 18%;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .resaltada {
+    background: var(--blanco);
+  }
+
+  thead .resaltada {
+    color: var(--teal);
   }
 
   .incluido {
@@ -372,28 +597,50 @@ const incluido = [
   }
 
   .incluido dt {
-    font-family: var(--display);
-    font-size: var(--step-lead);
-    color: var(--ink);
     margin-bottom: 0.5rem;
+    font: 400 var(--step-lead) / 1.2 var(--display);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink);
+  }
+
+  .incluido dd {
+    margin: 0;
+    font: inherit;
+    color: var(--muted);
   }
 
   @media (max-width: 47.99rem) {
-    h1 {
-      font-size: 15vw;
-    }
-
     .hab,
     .incluido,
     .incluido dl {
       grid-template-columns: 1fr;
     }
 
-    .hab-foto {
+    .hab-escena {
       margin-inline: calc(-1 * var(--margen));
+      aspect-ratio: 4 / 4.4;
     }
 
-    /* En móvil: pestañas en una fila que se desliza, foto y ficha debajo */
+    .hab-rotulo {
+      left: var(--margen);
+    }
+
+    .tira {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    .tira-contador {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      text-align: left;
+    }
+
+    .tira-fotos button {
+      width: 4rem;
+    }
+
+    /* En móvil: pestañas en una fila deslizable, foto y ficha debajo */
     .selector.es-selector {
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto;
@@ -404,11 +651,14 @@ const incluido = [
       grid-column: 1;
       grid-row: 1;
       display: flex;
-      gap: 1.5rem;
+      gap: 1.25rem;
       overflow-x: auto;
       scrollbar-width: none;
       margin-inline: calc(-1 * var(--margen));
       padding-inline: var(--margen);
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--margen);
+      mask-image: linear-gradient(90deg, #000 82%, transparent);
     }
 
     .pestanas::-webkit-scrollbar {
@@ -419,17 +669,17 @@ const incluido = [
       flex: none;
       width: auto;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.2rem;
+      border: 0;
+      scroll-snap-align: start;
     }
 
-    .es-selector .hab-foto {
+    .es-selector .hab .hab-foto {
       grid-column: 1;
       grid-row: 2;
-      min-height: 0;
-      aspect-ratio: 4 / 3;
     }
 
-    .es-selector .hab-info {
+    .es-selector .hab .hab-info {
       grid-column: 1;
       grid-row: 3;
     }

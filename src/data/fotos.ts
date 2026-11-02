@@ -43,21 +43,51 @@ import terrazaDucha from "../assets/fotos/terraza-ducha.jpg";
 import residenciaSalon from "../assets/fotos/residencia-salon.jpg";
 import residenciaAzotea from "../assets/fotos/residencia-azotea.jpg";
 import residenciaBano from "../assets/fotos/residencia-bano.jpg";
+// Galerías de habitación: cada una de una sola sesión fotográfica (Pexels)
+import estudioCama from "../assets/fotos/estudio-cama.jpg";
+import estudioPatio from "../assets/fotos/estudio-patio.jpg";
+import estudioSofa from "../assets/fotos/estudio-sofa.jpg";
+import estudioArmario from "../assets/fotos/estudio-armario.jpg";
+import miradorVentanal from "../assets/fotos/mirador-ventanal.jpg";
+import miradorAtardecer from "../assets/fotos/mirador-atardecer.jpg";
+import miradorBalcon from "../assets/fotos/mirador-balcon.jpg";
+import miradorBanera from "../assets/fotos/mirador-banera.jpg";
+import terrazaPiscinaPrivada from "../assets/fotos/terraza-piscina-privada.jpg";
+import terrazaDormitorio from "../assets/fotos/terraza-dormitorio.jpg";
+import terrazaLavabos from "../assets/fotos/terraza-lavabos.jpg";
+import terrazaMesaPiscina from "../assets/fotos/terraza-mesa-piscina.jpg";
+import terrazaButaca from "../assets/fotos/terraza-butaca.jpg";
+import residenciaPiscina from "../assets/fotos/residencia-piscina.jpg";
+import residenciaSalonVilla from "../assets/fotos/residencia-salon-villa.jpg";
+import residenciaDormitorio from "../assets/fotos/residencia-dormitorio.jpg";
+import residenciaTerraza from "../assets/fotos/residencia-terraza.jpg";
+import residenciaBanoVilla from "../assets/fotos/residencia-bano-villa.jpg";
+import residenciaCopas from "../assets/fotos/residencia-copas.jpg";
+import nochePozaEstrellas from "../assets/fotos/noche-poza-estrellas.jpg";
 
 export interface Foto {
   src: ImageMetadata;
   alt: string;
   autor: string;
+  /** Usuario del autor en Unsplash o en Pexels */
   usuario: string;
-  /** Identificador de la foto en Unsplash */
+  /** Identificador de la foto en su banco */
   id: string;
   archivo: string;
+  /** Banco de procedencia (Unsplash si no se indica) */
+  fuente?: "unsplash" | "pexels";
 }
 
-// Todas de Unsplash, bajo la licencia de Unsplash (comprobada en la página de
-// cada foto el 30 de octubre de 2026). Ninguna muestra un hotel real llamado
-// Aurea: son referencias visuales para una demo. Créditos completos en
-// CREDITS.md y en /creditos/.
+/** Página del autor y de la foto en su banco */
+export const enlacesFoto = (f: Foto) =>
+  f.fuente === "pexels"
+    ? { autor: `https://www.pexels.com/@${f.usuario}/`, foto: `https://www.pexels.com/photo/${f.id}/`, banco: "Pexels" }
+    : { autor: `https://unsplash.com/@${f.usuario}`, foto: `https://unsplash.com/photos/${f.id}`, banco: "Unsplash" };
+
+// Unsplash (licencia de Unsplash, comprobada en la página de cada foto el 30 de
+// octubre de 2026) y Pexels (licencia de Pexels, comprobada el 31 de octubre de
+// 2026). Ninguna muestra un hotel real llamado Aurea: son referencias visuales
+// para una demo. Créditos completos en /creditos/ y en propuesta/CREDITOS.md.
 export const fotos = {
   costaAcantilado: { src: costaAcantilado, alt: "Acantilado oscuro sobre el mar al caer el sol, con la espuma blanca en la orilla", autor: "Mohammed Imad", usuario: "m_imad", id: "yXXIsTwNsa4", archivo: "costa-acantilado.jpg" },
   costaBarca: { src: costaBarca, alt: "Mar en calma al anochecer, con una línea naranja en el horizonte y una barca lejana", autor: "Mateo Krossler", usuario: "mateokross", id: "6eSX66KO2H4", archivo: "costa-barca.jpg" },
@@ -102,6 +132,31 @@ export const fotos = {
   residenciaSalon: { src: residenciaSalon, alt: "Salón con ventanales de suelo a techo sobre el mar al atardecer", autor: "Polina Kuzovkova", usuario: "p_kuzovkova", id: "zLCTdR6W8N4", archivo: "residencia-salon.jpg" },
   residenciaAzotea: { src: residenciaAzotea, alt: "Azotea con un sofá corrido alrededor de un fuego, frente al mar", autor: "Pavel Gromov", usuario: "lastmanpaul", id: "FoXrxrpiPJ8", archivo: "residencia-azotea.jpg" },
   residenciaBano: { src: residenciaBano, alt: "Lavabo tallado en piedra clara con grifería negra", autor: "Peter Muniz", usuario: "petepxl", id: "wfMM98Vggn0", archivo: "residencia-bano.jpg" },
+  // Estudio Jardín: Keegan Checks, una habitación de un hotel boutique en Jambiani
+  estudioCama: { src: estudioCama, alt: "Cama con ropa blanca bajo dos cestos tejidos en una pared de estuco terracota", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836723", archivo: "estudio-cama.jpg", fuente: "pexels" },
+  estudioPatio: { src: estudioPatio, alt: "Porche con dos butacas de madera frente al jardín de palmeras", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836727", archivo: "estudio-patio.jpg", fuente: "pexels" },
+  estudioSofa: { src: estudioSofa, alt: "Sofá de madera con cojín bordado junto a una vasija tejida", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836728", archivo: "estudio-sofa.jpg", fuente: "pexels" },
+  estudioArmario: { src: estudioArmario, alt: "Armario abierto de madera y rejilla con albornoces y lámparas colgantes", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836721", archivo: "estudio-armario.jpg", fuente: "pexels" },
+  // Suite Mirador: Rosie C, una habitación frente al mar
+  miradorVentanal: { src: miradorVentanal, alt: "Ventanal de suelo a techo abierto al mar turquesa, con la cama delante", autor: "Rosie C", usuario: "rosie-c-94104461", id: "14746021", archivo: "mirador-ventanal.jpg", fuente: "pexels" },
+  miradorAtardecer: { src: miradorAtardecer, alt: "El balcón al atardecer, con una botella de vino sobre la mesa", autor: "Rosie C", usuario: "rosie-c-94104461", id: "14746028", archivo: "mirador-atardecer.jpg", fuente: "pexels" },
+  miradorBalcon: { src: miradorBalcon, alt: "Mesa redonda con flores en el balcón de madera sobre el mar", autor: "Rosie C", usuario: "rosie-c-94104461", id: "14746029", archivo: "mirador-balcon.jpg", fuente: "pexels" },
+  miradorBanera: { src: miradorBanera, alt: "Bañera junto a una ventana estrecha que da al mar", autor: "Rosie C", usuario: "rosie-c-94104461", id: "14746024", archivo: "mirador-banera.jpg", fuente: "pexels" },
+  // Suite Terraza: Keegan Checks, otra habitación del mismo hotel, con piscina privada
+  terrazaPiscinaPrivada: { src: terrazaPiscinaPrivada, alt: "Piscina privada de agua turquesa en la terraza, con el mar al fondo", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836720", archivo: "terraza-piscina-privada.jpg", fuente: "pexels" },
+  terrazaDormitorio: { src: terrazaDormitorio, alt: "Cama blanca ante un arco de estuco que deja ver el doble lavabo", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836703", archivo: "terraza-dormitorio.jpg", fuente: "pexels" },
+  terrazaLavabos: { src: terrazaLavabos, alt: "Doble lavabo de piedra bajo un arco con dos espejos ovalados", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836700", archivo: "terraza-lavabos.jpg", fuente: "pexels" },
+  terrazaMesaPiscina: { src: terrazaMesaPiscina, alt: "Mesa de madera con cuatro sillas junto al borde de la piscina", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836726", archivo: "terraza-mesa-piscina.jpg", fuente: "pexels" },
+  terrazaButaca: { src: terrazaButaca, alt: "Butaca de madera y cuerda tejida junto a un ventanal con cortinas", autor: "Keegan Checks", usuario: "keeganjchecks", id: "39836711", archivo: "terraza-butaca.jpg", fuente: "pexels" },
+  // Residencia Aurea: Ahmet Çötür, una villa con olivos sobre el mar
+  residenciaPiscina: { src: residenciaPiscina, alt: "Piscina desbordante con tumbonas entre olivos, sobre el mar", autor: "Ahmet Çötür", usuario: "ahmetcotur", id: "28054897", archivo: "residencia-piscina.jpg", fuente: "pexels" },
+  residenciaSalonVilla: { src: residenciaSalonVilla, alt: "Salón amplio y luminoso con sofá naranja y muebles bajos", autor: "Ahmet Çötür", usuario: "ahmetcotur", id: "28054893", archivo: "residencia-salon-villa.jpg", fuente: "pexels" },
+  residenciaDormitorio: { src: residenciaDormitorio, alt: "Dormitorio con dos ventanales al mar y cama baja", autor: "Ahmet Çötür", usuario: "ahmetcotur", id: "28054888", archivo: "residencia-dormitorio.jpg", fuente: "pexels" },
+  residenciaTerraza: { src: residenciaTerraza, alt: "Terraza con dos tumbonas rojas mirando al mar", autor: "Ahmet Çötür", usuario: "ahmetcotur", id: "28054889", archivo: "residencia-terraza.jpg", fuente: "pexels" },
+  residenciaBanoVilla: { src: residenciaBanoVilla, alt: "Baño de tonos arena con doble lavabo y ducha de cristal", autor: "Ahmet Çötür", usuario: "ahmetcotur", id: "28054890", archivo: "residencia-bano-villa.jpg", fuente: "pexels" },
+  residenciaCopas: { src: residenciaCopas, alt: "Dos copas de vino sobre una mesa junto a la piscina, con el mar detrás", autor: "Ahmet Çötür", usuario: "ahmetcotur", id: "28054879", archivo: "residencia-copas.jpg", fuente: "pexels" },
+  // Un día, 21:30
+  nochePozaEstrellas: { src: nochePozaEstrellas, alt: "Una poza entre rocas volcánicas bajo un cielo estrellado", autor: "Daniel Torobekov", usuario: "alohaphotostudio", id: "14237715", archivo: "noche-poza-estrellas.jpg", fuente: "pexels" },
 } satisfies Record<string, Foto>;
 
 export type ClaveFoto = keyof typeof fotos;

@@ -1,42 +1,52 @@
 ---
 import Base from "../layouts/Base.astro";
-import { fotos } from "../data/fotos";
+import { fotos, enlacesFoto } from "../data/fotos";
+
+const lista = Object.values(fotos).map((f) => ({ ...f, enlaces: enlacesFoto(f) }));
 ---
 
-<Base title="Créditos" description="Autores de las fotografías y tipografías de esta demo.">
+<Base title="Créditos" description="Autores de las fotografías, el vídeo y las tipografías de esta demo.">
   <section class="creditos marco" aria-labelledby="titulo">
     <h1 id="titulo">Créditos</h1>
     <p class="entradilla">
-      Aurea es un hotel ficticio y esta web, una demo de diseño y desarrollo. Ninguna fotografía muestra un hotel real llamado Aurea. Todas
-      vienen de Unsplash y se usan bajo la <a href="https://unsplash.com/license">licencia de Unsplash</a>, comprobada en la página de cada foto
-      el 30 de octubre de 2026.
+      Aurea es un hotel ficticio y esta web, una demo de diseño y desarrollo. Ninguna fotografía muestra un hotel real llamado Aurea. Vienen de
+      Unsplash, bajo la <a href="https://unsplash.com/license">licencia de Unsplash</a> (comprobada el 30 de octubre de 2026), y de Pexels, bajo la
+      <a href="https://www.pexels.com/license/">licencia de Pexels</a> (comprobada el 31 de octubre de 2026). Cada galería de habitación procede de
+      una sola sesión fotográfica.
     </p>
     <table>
-      <caption class="solo-lector">Fotografías usadas en la web, con su autor y su página en Unsplash</caption>
+      <caption class="solo-lector">Fotografías usadas en la web, con su autor y su página de origen</caption>
       <thead>
         <tr>
           <th scope="col">Fotografía</th>
           <th scope="col">Autor</th>
-          <th scope="col">En Unsplash</th>
+          <th scope="col">Origen</th>
         </tr>
       </thead>
       <tbody>
         {
-          Object.values(fotos).map((f) => (
+          lista.map((f) => (
             <tr>
               <td>{f.alt}</td>
               <td>
-                <a href={`https://unsplash.com/@${f.usuario}`}>{f.autor}</a>
+                <a href={f.enlaces.autor}>{f.autor}</a>
               </td>
               <td>
-                <a href={`https://unsplash.com/photos/${f.id}`}>{f.id}</a>
+                <a href={f.enlaces.foto}>
+                  {f.enlaces.banco} · {f.id}
+                </a>
               </td>
             </tr>
           ))
         }
       </tbody>
     </table>
-    <p class="tipos">Tipografías: Bodoni Moda y Jost, bajo la SIL Open Font License, servidas desde el propio sitio mediante Fontsource.</p>
+    <p class="tipos">
+      Vídeo del mar: «Serene Ocean Sunset with Vibrant Colors», de <a href="https://www.pexels.com/@rahimegul/">Rahime Gül</a>, en
+      <a href="https://www.pexels.com/video/serene-ocean-sunset-with-vibrant-colors-39798335/">Pexels</a>, recortado en bucle, sin audio y con el
+      color ajustado al de las fotografías.
+    </p>
+    <p class="tipos">Tipografías: Fraunces y Manrope, bajo la SIL Open Font License, servidas desde el propio sitio mediante Fontsource.</p>
   </section>
 </Base>
 
@@ -47,18 +57,18 @@ import { fotos } from "../data/fotos";
 
   h1 {
     font-size: var(--step-display);
+    line-height: 0.9;
   }
 
   .entradilla {
     max-width: 44rem;
     margin-top: 2rem;
-    font-size: var(--step-lead);
-    line-height: 1.4;
   }
 
   .entradilla a,
+  .tipos a,
   td a {
-    text-decoration-color: var(--accent);
+    text-decoration-color: var(--laton);
   }
 
   table {
@@ -69,19 +79,20 @@ import { fotos } from "../data/fotos";
 
   th {
     text-align: left;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--muted);
     padding-bottom: 1rem;
   }
 
   td {
     padding: 0.75rem 1.5rem 0.75rem 0;
-    border-top: 1px solid #2a2520;
+    border-top: 1px solid var(--linea);
     vertical-align: top;
   }
 
   .tipos {
-    margin-top: 3rem;
+    margin-top: 2rem;
+    max-width: 44rem;
     color: var(--muted);
   }
 
@@ -94,7 +105,7 @@ import { fotos } from "../data/fotos";
       display: grid;
       gap: 0.25rem;
       padding-block: 0.75rem;
-      border-top: 1px solid #2a2520;
+      border-top: 1px solid var(--linea);
     }
 
     td {

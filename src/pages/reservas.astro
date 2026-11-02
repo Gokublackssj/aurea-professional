@@ -53,7 +53,7 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
             habitaciones.map((h, i) => (
               <label class="opcion">
                 <input type="radio" name="habitacion" value={h.slug} checked={i === 0} required />
-                <Foto foto={h.fotos[0]} sizes="(min-width: 64rem) 18vw, (min-width: 48rem) 40vw, 90vw" anchos={[320, 480, 640]} alt="" />
+                <Foto foto={h.fotos[0].foto} sizes="(min-width: 64rem) 18vw, (min-width: 48rem) 40vw, 90vw" anchos={[320, 480, 640]} alt="" />
                 <span class="opcion-nombre">{h.nombre}</span>
                 <span class="opcion-datos">
                   {h.metros} m² · hasta {h.huespedes} · desde {euros(h.precio)}
