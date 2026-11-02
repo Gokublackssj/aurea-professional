@@ -1,7 +1,11 @@
 ---
-// Barra simple: nombre, tres enlaces y una acción (Reservar). En el inicio se
-// apoya sobre la foto del hero y omite el nombre, que ya ocupa la portada.
-// En pantallas estrechas los enlaces se recogen tras un botón «Menú».
+// Cabecera fija: nombre, la navegación y la acción principal («Preparar mi
+// estancia»). Siempre está fija (sin saltos de maquetación al cambiar de
+// estado): arriba del todo es transparente; al bajar se esconde y al subir
+// vuelve con fondo (src/scripts/cabecera.ts). En el inicio empieza sobre la
+// foto del hero, en marfil, y aparece al terminar la apertura.
+// En pantallas estrechas los enlaces se recogen tras «Menú», en un panel a
+// pantalla completa (src/scripts/menu.ts).
 import { navegacion, reservas } from "../data/navegacion";
 import { ruta, enSeccion } from "../lib/ruta";
 
@@ -13,15 +17,9 @@ const { sobreFoto = false } = Astro.props;
 const actual = Astro.url.pathname;
 ---
 
-<header class:list={["cabecera", "marco", { "sobre-foto": sobreFoto }]}>
-  {
-    !sobreFoto && (
-      <a class="marca" href={ruta("")}>
-        Aurea
-      </a>
-    )
-  }
-  <button class="menu-boton" type="button" aria-expanded="false" aria-controls="menu-principal">Menú</button>
+<header class:list={["cabecera", "marco", { "sobre-foto": sobreFoto }]} data-cabecera>
+  <a class="marca" href={ruta("")} aria-label="Aurea, inicio">Aurea</a>
+  <button class="menu-boton boton" type="button" aria-expanded="false" aria-controls="menu-principal">Menú</button>
   <nav id="menu-principal" class="menu" aria-label="Principal">
     <ul>
       {
@@ -33,9 +31,9 @@ const actual = Astro.url.pathname;
           </li>
         ))
       }
-      <li>
+      <li class="menu-accion">
         <a class="boton boton-principal reservar" href={ruta(reservas.destino)} aria-current={enSeccion(actual, reservas.destino) ? "page" : undefined}>
-          Reservar
+          {reservas.texto}
         </a>
       </li>
     </ul>
@@ -44,29 +42,51 @@ const actual = Astro.url.pathname;
 
 <script>
   import "../scripts/menu";
+  import "../scripts/cabecera";
 </script>
 
 <style>
   .cabecera {
-    position: relative;
-    z-index: 20;
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 30;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem 2rem;
-    min-height: 5.5rem;
+    min-height: 5rem;
+    color: var(--ink);
+    transition:
+      transform 500ms var(--salida),
+      background-color 400ms ease-out,
+      color 400ms ease-out,
+      box-shadow 400ms ease-out;
+  }
+
+  /* Reserva el alto de la cabecera fija en las páginas que no empiezan con foto */
+  :global(body:not(:has(.sobre-foto))) :global(main) {
+    padding-top: 5rem;
   }
 
   .sobre-foto {
-    position: absolute;
-    inset: 0 0 auto;
-    justify-content: flex-end;
+    color: var(--marfil);
+  }
+
+  /* Estados que pone src/scripts/cabecera.ts */
+  .cabecera.con-fondo {
+    background: rgb(242 240 234 / 0.94);
+    color: var(--tinta);
+    box-shadow: 0 1px 0 var(--lino);
+  }
+
+  .cabecera.escondida {
+    transform: translateY(-100%);
   }
 
   .marca {
     font-family: var(--display);
-    font-size: var(--step-lead);
-    font-weight: 500;
+    font-size: 1.5rem;
+    font-weight: 400;
     letter-spacing: -0.01em;
     text-decoration: none;
   }
@@ -78,61 +98,70 @@ const actual = Astro.url.pathname;
   }
 
   .menu a:not(.boton) {
+    position: relative;
     display: inline-block;
-    padding-block: 0.75rem;
-    font-size: var(--step-body);
+    padding-block: 0.6rem;
+    font: 500 var(--step-small) / 1 var(--text);
     text-decoration: none;
-    text-decoration-color: var(--accent);
   }
 
-  .menu a:not(.boton):hover,
-  .menu a[aria-current="page"]:not(.boton) {
-    text-decoration-line: underline;
+
+  /* Subrayado de latón que crece al pasar y marca la página actual */
+  .menu a:not(.boton)::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.15rem;
+    height: 1px;
+    background: var(--laton);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 400ms var(--salida);
   }
 
-  .reservar {
-    min-height: 2.75rem;
-    padding-inline: 1.25rem;
+  .menu a:not(.boton):hover::after,
+  .menu a[aria-current="page"]:not(.boton)::after {
+    transform: scaleX(1);
+  }
+
+  .sobre-foto:not(.con-fondo) .reservar {
+    background: var(--marfil);
+    color: var(--tinta);
   }
 
   .menu-boton {
     display: none;
-    min-height: 2.75rem;
-    padding: 0 0.25rem;
-    border: 0;
-    background: none;
-    color: var(--ink);
-    font: 500 var(--step-body) / 1 var(--text);
-    cursor: pointer;
-    text-decoration: underline;
-    text-decoration-color: var(--accent);
-    text-underline-offset: 0.3em;
-  }
-
-  /* Sobre la foto, un velo neutro solo detrás de la fila de enlaces */
-  .sobre-foto::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 -2rem;
-    z-index: -1;
-    background: linear-gradient(rgb(16 14 12 / 0.55), rgb(16 14 12 / 0)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
-    pointer-events: none;
   }
 
   @media (max-width: 47.99rem) {
     :global(html.js) .menu-boton {
-      display: block;
+      display: inline-flex;
+      position: relative;
+      z-index: 2;
     }
 
+    /* Panel a pantalla completa, de noche */
     :global(html.js) .menu {
-      position: absolute;
-      inset: 100% 0 auto;
-      padding: 0.5rem var(--margen) 1.5rem;
-      background: var(--bg);
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      align-content: center;
+      padding: 6rem var(--margen) 2rem;
+      background: var(--noche);
+      color: var(--marfil);
     }
 
     :global(html.js) .menu:not(.abierto) {
       display: none;
+    }
+
+    :global(html.js) .cabecera:has(.menu.abierto) {
+      color: var(--marfil);
+      background: transparent;
+      box-shadow: none;
+      transform: none;
     }
 
     :global(html.js) .menu ul {
@@ -142,20 +171,45 @@ const actual = Astro.url.pathname;
     }
 
     :global(html.js) .menu a:not(.boton) {
-      display: block;
-      padding-block: 0.875rem;
-      font-size: var(--step-lead);
-      font-family: var(--display);
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      padding-block: 0.9rem;
+      border-bottom: 1px solid rgb(242 240 234 / 0.14);
+      font: 380 clamp(1.9rem, 1.2rem + 3vw, 2.6rem) / 1.1 var(--display);
+    }
+
+    :global(html.js) .menu a:not(.boton)::after {
+      display: none;
+    }
+
+    /* Numeración del panel con un contador CSS: no altera el texto del enlace */
+    :global(html.js) .menu ul {
+      counter-reset: seccion;
+    }
+
+    :global(html.js) .menu li:not(.menu-accion) a::before {
+      counter-increment: seccion;
+      content: counter(seccion, decimal-leading-zero);
+      font: 600 var(--step-label) / 1 var(--text);
+      letter-spacing: 0.12em;
+      color: var(--laton-claro);
+    }
+
+    :global(html.js) .menu-accion {
+      margin-top: 2rem;
     }
 
     :global(html.js) .reservar {
       width: 100%;
-      margin-top: 1rem;
       min-height: 3.25rem;
+      background: var(--laton-claro);
+      color: var(--noche);
     }
 
     /* Sin JavaScript, los enlaces se quedan a la vista y se reparten en filas */
     :global(html:not(.js)) .cabecera {
+      position: static;
       flex-wrap: wrap;
     }
 

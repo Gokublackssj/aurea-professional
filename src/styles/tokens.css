@@ -1,37 +1,64 @@
-/* Tokens de Aurea. Dark Luxury tomado del propio cabo: basalto (fondo),
-   cal bajo la luz de la tarde (tinta) y el oro de la hora áurea (acento, solo
-   en la acción principal). Un único campo claro, la cal, rompe la sala oscura. */
+/* Tokens de Aurea. La paleta del cabo a la luz del día: marfil y lino (fondos),
+   piedra y grafito (texto secundario), tinta (texto), teal profundo (acción
+   principal y secciones de noche) y latón envejecido (detalles, nunca texto
+   pequeño). Los nombres de variable se conservan de la versión anterior para
+   que todas las páginas cambien de piel desde aquí. */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --bg: #100e0c;
-  --surface: #1b1815;
-  --ink: #ebe8e2;
-  --muted: #b0aaa0;
-  --accent: #d9a24e;
-  --accent-ink: #100e0c;
+  /* Paleta */
+  --marfil: #f2f0ea;
+  --blanco: #fbfaf7;
+  --lino: #e4e0d6;
+  --arena: #d6cdbb;
+  --piedra: #a39c8e;
+  --grafito: #57574f;
+  --tinta: #141412;
+  --teal: #0b2e2f;
+  --teal-hover: #134243;
+  --noche: #061d1e;
+  --noche-texto: #c9d3cf;
+  --noche-suave: #8fa6a2;
+  --laton: #a8844a;
+  --laton-claro: #c9a66b;
+  --error: #9b3a28;
 
-  /* Campo claro: la cal */
-  --field: #e4e1db;
-  --field-ink: #16130f;
-  --field-muted: #545049;
+  /* Roles (los que usan las páginas) */
+  --bg: var(--marfil);
+  --surface: var(--lino);
+  --ink: var(--tinta);
+  --muted: var(--grafito);
+  --accent: var(--teal);
+  --accent-ink: var(--marfil);
+  --linea: var(--lino);
 
-  /* Tipografía: Bodoni Moda para mostrar, Jost para leer */
-  --display: "Bodoni Moda Variable", "Bodoni Moda", Didot, "Bodoni 72", Georgia, serif;
-  --text: "Jost Variable", Jost, "Century Gothic", system-ui, sans-serif;
+  /* Campo de contraste: la noche del cabo */
+  --field: var(--noche);
+  --field-ink: var(--marfil);
+  --field-muted: var(--noche-texto);
 
-  /* Cinco tamaños, ni uno más */
-  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
-  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
-  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
-  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
-  --step-display: clamp(2.5rem, 1rem + 6vw, 6.5rem);
+  /* Tipografía: Fraunces para mostrar (eje de tamaño óptico), Manrope para leer */
+  --display: "Fraunces Variable", Fraunces, Georgia, serif;
+  --text: "Manrope Variable", Manrope, system-ui, sans-serif;
+
+  /* Escala: siete tamaños */
+  --step-label: 0.75rem;
+  --step-small: 0.875rem;
+  --step-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --step-sub: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  --step-head: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+  --step-display: clamp(3.5rem, 1rem + 10vw, 11rem);
 
   /* Marco: un par de márgenes iguales en todo el sitio */
-  --margen: clamp(1.25rem, 3.2vw, 3rem);
-  --seccion: clamp(6rem, 12vw, 13rem);
+  --margen: clamp(1.25rem, 4vw, 4rem);
+  --seccion: clamp(6rem, 12vw, 11rem);
   --columna: 36rem;
+  --radio: 999px;
 
-  /* Fotografías en la sala oscura: algo más bajas de luz que el original */
-  --foto: brightness(0.86) contrast(1.05);
+  /* Un tratamiento común para todas las fotografías */
+  --foto: saturate(0.86) contrast(1.03) brightness(0.97);
+
+  /* Curvas */
+  --salida: cubic-bezier(0.16, 1, 0.3, 1);
 }

@@ -5,7 +5,7 @@ const paginas = [
   { ruta: "", h1: /^Aurea/, nav: "Inicio" },
   { ruta: "habitaciones/", h1: /^Habitaciones$/, nav: "Habitaciones" },
   { ruta: "experiencias/", h1: /^Experiencias$/, nav: "Experiencias" },
-  { ruta: "reservas/", h1: /^Reservas$/, nav: "Reservar" },
+  { ruta: "reservas/", h1: /^Reservas$/, nav: "Preparar mi estancia" },
   ...habitaciones.map((h) => ({ ruta: `habitaciones/${h.slug}/`, h1: new RegExp(`^${h.nombre}$`), nav: "Habitaciones" })),
 ];
 
@@ -57,7 +57,7 @@ test("la navegación principal lleva a las cuatro páginas", async ({ page }) =>
   const destinos = [
     ["Habitaciones", /^Habitaciones$/],
     ["Experiencias", /^Experiencias$/],
-    ["Reservar", /^Reservas$/],
+    ["Preparar mi estancia", /^Reservas$/],
     ["Inicio", /^Aurea/],
   ] as const;
   for (const [enlace, h1] of destinos) {

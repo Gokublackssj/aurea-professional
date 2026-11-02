@@ -6,4 +6,5 @@ export const navegacion = [
   { destino: "experiencias", texto: "Experiencias" },
 ] as const;
 
-export const reservas = { destino: "reservas", texto: "Reservas" } as const;
+// Texto de la acción: es una demostración, no consulta disponibilidad real.
+export const reservas = { destino: "reservas", texto: "Preparar mi estancia" } as const;

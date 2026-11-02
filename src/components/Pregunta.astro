@@ -19,17 +19,17 @@ const letras = Math.max(arriba.length, abajo.length);
 const asunto = encodeURIComponent("Consulta sobre una estancia en Aurea");
 ---
 
-<section class="pregunta marco" aria-labelledby="pregunta-titulo" style={`--letras:${letras}`} data-escena="pregunta">
+<section class="pregunta marco noche" aria-labelledby="pregunta-titulo" style={`--letras:${letras}`} data-escena="pregunta">
   <h2 id="pregunta-titulo" class="solo-lector">{arriba} {abajo}</h2>
   <p class="linea-arriba" aria-hidden="true">{arriba}</p>
   <p class="linea-abajo" aria-hidden="true">{abajo}</p>
   <div class="respuestas">
     <div class="botones">
-      <a class="boton boton-principal" href={reservar}>Elegir fechas</a>
+      <a class="boton boton-principal" href={reservar}>Preparar mi estancia</a>
       <span class="o">o</span>
       <a class="boton" href={`mailto:${sitio.correo}?subject=${asunto}`}>Escribir a recepción</a>
     </div>
-    <p>Respondemos en menos de un día, con tus fechas confirmadas o la alternativa más cercana.</p>
+    <p>Elige fechas, huéspedes y habitación en la reserva de demostración, o escríbenos con lo que necesites.</p>
   </div>
 </section>
 
@@ -40,7 +40,6 @@ const asunto = encodeURIComponent("Consulta sobre una estancia en Aurea");
     min-height: 100svh;
     margin-top: var(--seccion);
     padding-block: 2rem 1.5rem;
-    background: #0a0908;
     text-align: center;
     /* Las dos mitades entran desde fuera de la pantalla */
     overflow: hidden;
@@ -51,7 +50,7 @@ const asunto = encodeURIComponent("Consulta sobre una estancia en Aurea");
     display: block;
     font-family: var(--display);
     font-size: clamp(4.5rem, 1rem + 11vw, 10.5rem);
-    font-weight: 500;
+    font-weight: 340;
     letter-spacing: -0.03em;
     line-height: 1;
   }
