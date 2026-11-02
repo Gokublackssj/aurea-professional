@@ -11,7 +11,9 @@ import type { Condiciones } from "./index";
 
 export function manifiesto(raiz: HTMLElement, c: Condiciones) {
   const frase = raiz.querySelector<HTMLElement>(".frase")!;
-  const palabras = SplitText.create(frase, { type: "words", wordsClass: "palabra", aria: "auto" }).words;
+  // aria "none": aria-label no está permitido en un <p>; las palabras siguen
+  // en el DOM en su orden y se leen igual.
+  const palabras = SplitText.create(frase, { type: "words", wordsClass: "palabra", aria: "none" }).words;
   const arcos = [...raiz.querySelectorAll<HTMLElement>(".arco")];
 
   gsap.to(palabras, {

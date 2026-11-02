@@ -28,9 +28,11 @@ export function cielo(raiz: HTMLElement, c: Condiciones) {
   const aro = raiz.querySelector<HTMLElement>(".cielo-aro")!;
   const velo = raiz.querySelector<HTMLElement>(".cielo-velo")!;
   const etiqueta = texto.querySelector<HTMLElement>(".etiqueta")!;
+  // En el párrafo, aria "none": aria-label no está permitido en un <p>, y el
+  // texto partido sigue en el DOM en su orden.
   const lineas = [
     ...SplitText.create(texto.querySelector(".titulo")!, { type: "lines", mask: "lines", aria: "auto" }).lines,
-    ...SplitText.create(texto.querySelector("p")!, { type: "lines", mask: "lines", aria: "auto" }).lines,
+    ...SplitText.create(texto.querySelector("p")!, { type: "lines", mask: "lines", aria: "none" }).lines,
   ];
 
   const radio0 = () => Math.min(window.innerWidth, window.innerHeight) * (c.movil ? 0.3 : 0.22);

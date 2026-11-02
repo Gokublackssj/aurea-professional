@@ -70,7 +70,7 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
       }
     </div>
     {
-      habitaciones.map((h) => (
+      habitaciones.map((h, n) => (
         <article id={h.slug} class="hab" data-slug={h.slug} aria-labelledby={`${h.slug}-titulo`}>
           <div class="hab-foto">
             <div class="hab-escena">
@@ -82,6 +82,7 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
                     anchos={[640, 960, 1280, 1600, 2000]}
                     transicion={i === 0 ? `foto-${h.slug}` : undefined}
                     style={f.foco ? `object-position: ${f.foco}` : undefined}
+                    prioridad={n === 0 && i === 0}
                   />
                 </figure>
               ))}
@@ -254,8 +255,10 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
     inset: 0;
   }
 
+  /* display: none (no visibility): así el navegador no descarga las fotos que
+     no se ven; motion/habitaciones.ts carga cada una al pedirla. */
   .hab-capa:not(.actual) {
-    visibility: hidden;
+    display: none;
   }
 
   .hab-capa :global(picture),
@@ -505,7 +508,8 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
     border: 0;
     border-bottom: 1px solid var(--lino);
     background: none;
-    color: var(--piedra);
+    /* Inactivas: más claras que la elegida, pero legibles (4,8:1) */
+    color: var(--piedra-texto);
     font: inherit;
     text-align: left;
     cursor: pointer;

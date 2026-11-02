@@ -12,6 +12,8 @@
   --lino: #e4e0d6;
   --arena: #d6cdbb;
   --piedra: #a39c8e;
+  /* Piedra para texto: el gris más claro que cumple 4,5:1 sobre marfil */
+  --piedra-texto: #6e695f;
   --grafito: #57574f;
   --tinta: #141412;
   --teal: #0b2e2f;

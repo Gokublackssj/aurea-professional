@@ -262,11 +262,26 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     display: none;
   }
 
+  /* Con JavaScript, el formulario se pinta ya en pasos antes de que arranque
+     el script (html.js se pone en línea en <head>): sin saltos al cargar. */
+  :global(html.js) .pasos-nav[hidden] {
+    display: flex;
+  }
+
+  :global(html.js) .formulario:not(.en-pasos) .paso:not([data-paso="0"]),
+  :global(html.js) .formulario:not(.en-pasos) .aviso {
+    display: none;
+  }
+
+  :global(html.js) .formulario:not(.en-pasos) {
+    gap: 1.5rem;
+  }
+
   .pasos-nav li {
     flex: 1;
     padding-top: 0.75rem;
     border-top: 2px solid var(--lino);
-    color: var(--piedra);
+    color: var(--piedra-texto);
     font: 600 var(--step-label) / 1.2 var(--text);
     letter-spacing: 0.08em;
     text-transform: uppercase;
