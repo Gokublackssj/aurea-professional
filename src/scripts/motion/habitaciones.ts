@@ -128,10 +128,23 @@ export function selectorHabitaciones(raiz: HTMLElement, c: Condiciones) {
 
     // La ficha que sale sigue visible durante la transición.
     fichas[anterior].classList.add("saliendo");
+    const entra = sentido > 0 ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)";
+    const sale = sentido > 0 ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)";
+    const entrantes = [...despues.info.children, ...despues.tira.children];
     const fin = () => {
       fichas[anterior].classList.remove("saliendo");
-      gsap.set([antes.foto, antes.escena, antes.info, despues.foto, despues.escena], { clearProps: "opacity,visibility,transform,zIndex,clipPath" });
+      gsap.set([antes.foto, antes.escena, antes.info, despues.foto, despues.escena, despues.info, ...entrantes], { clearProps: "opacity,visibility,transform,zIndex,clipPath" });
     };
+
+    // La ficha nueva empieza ya en el estado de partida de la transición: la
+    // foto puede tardar en decodificarse (la primera vez, unos 250 ms) y,
+    // mientras, se sigue viendo la habitación anterior, no la nueva encima sin
+    // barrido ni las dos fichas superpuestas.
+    if (c.reducido) gsap.set([despues.foto, despues.info], { autoAlpha: 0 });
+    else {
+      gsap.set(despues.escena, { clipPath: entra });
+      gsap.set(entrantes, { autoAlpha: 0 });
+    }
 
     lista(imgNueva).then(() => {
       if (actual !== nuevo) return fin();
@@ -142,8 +155,6 @@ export function selectorHabitaciones(raiz: HTMLElement, c: Condiciones) {
           .to(antes.info, { autoAlpha: 0, duration: 0.25 }, 0);
         return;
       }
-      const entra = sentido > 0 ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)";
-      const sale = sentido > 0 ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)";
       gsap.set(despues.foto, { zIndex: 2 });
       gsap.set(antes.foto, { zIndex: 1 });
       transicion = gsap

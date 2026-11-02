@@ -449,7 +449,88 @@ for (const [caso, conexion] of [
   });
 }
 
+/**
+ * Para cada fotograma, cuánto se parece la zona a la foto de destino frente a
+ * la de partida: 0 = la de antes, 1 = la nueva (diferencia media de luminancia
+ * con cada referencia). Y su textura, para detectar una capa vacía.
+ */
+async function progresoEntreFotos(browser: Browser, fotogramas: { t: number; jpg: string }[], zona: Zona, desde: string, hasta: string) {
+  const lienzo = await browser.newPage();
+  const resultado = await lienzo.evaluate(
+    async ({ fotogramas, zona, desde, hasta }) => {
+      const luz = async (jpg: string) => {
+        const img = new Image();
+        img.src = `data:image/jpeg;base64,${jpg}`;
+        await img.decode();
+        const c = document.createElement("canvas");
+        [c.width, c.height] = [img.width, img.height];
+        const ctx = c.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        const d = ctx.getImageData(zona.x * img.width, zona.y * img.height, zona.ancho * img.width, zona.alto * img.height).data;
+        const l = new Float32Array(d.length / 4);
+        for (let i = 0; i < l.length; i++) l[i] = 0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2];
+        return l;
+      };
+      const diferencia = (a: Float32Array, b: Float32Array) => a.reduce((s, v, i) => s + Math.abs(v - b[i]), 0) / a.length;
+      const [a, b] = [await luz(desde), await luz(hasta)];
+      const salida: { t: number; progreso: number; textura: number }[] = [];
+      for (const { t, jpg } of fotogramas) {
+        const l = await luz(jpg);
+        const [da, db] = [diferencia(l, a), diferencia(l, b)];
+        const m = l.reduce((s, v) => s + v, 0) / l.length;
+        salida.push({ t, progreso: da / (da + db || 1), textura: Math.sqrt(l.reduce((s, v) => s + (v - m) ** 2, 0) / l.length) });
+      }
+      return salida;
+    },
+    { fotogramas, zona, desde, hasta },
+  );
+  await lienzo.close();
+  return resultado;
+}
+
 test.describe("Selector de habitaciones", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  for (const destino of [1, 2]) {
+    test(`primer cambio a la habitación ${destino + 1}, sin caché: ni la nueva antes del barrido, ni vuelta atrás, ni capa vacía`, async ({ page, browser }) => {
+      await page.goto("habitaciones/");
+      await motorListo(page);
+      await page.waitForTimeout(1000);
+      const escena = page.locator(".hab.actual .hab-escena");
+      await escena.evaluate((e) => e.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(400);
+      // Zona de la foto (sin el rótulo de abajo), en fracciones de la ventana
+      const zona = await escena.evaluate((e) => {
+        const r = e.getBoundingClientRect();
+        return { x: (r.left + r.width * 0.1) / innerWidth, y: (r.top + r.height * 0.1) / innerHeight, ancho: (r.width * 0.8) / innerWidth, alto: (r.height * 0.55) / innerHeight };
+      });
+      const scroll = await page.evaluate(() => scrollY);
+      const grabacion = await grabarFotogramas(page);
+      await page.waitForTimeout(400);
+      const tClic = await page.evaluate(() => performance.timeOrigin + performance.now());
+      // Clic sin desplazar la página, y en el primer fotograma después: la ficha nueva aún no enseña su texto
+      const textoNuevoVisible = await page.evaluate(async (n) => {
+        (document.querySelectorAll('[role="tab"]')[n] as HTMLElement).click();
+        await new Promise(requestAnimationFrame);
+        return [...document.querySelectorAll(".hab")[n].querySelector(".hab-info")!.children].some((h) => getComputedStyle(h).visibility !== "hidden" && Number(getComputedStyle(h).opacity) > 0.05);
+      }, destino);
+      expect(textoNuevoVisible, "el texto de la habitación nueva, superpuesto al de la anterior antes de la transición").toBe(false);
+      await page.waitForTimeout(2600);
+      const fotogramas = (await grabacion.parar()).filter((f) => Math.abs(f.y - scroll) < 2);
+      const antes = fotogramas.filter((f) => f.t < tClic);
+      const despues = fotogramas.filter((f) => f.t >= tClic);
+      expect(antes.length, "fotograma de referencia antes del clic").toBeGreaterThan(0);
+      const serie = await progresoEntreFotos(browser, despues, zona, antes[antes.length - 1].jpg, despues[despues.length - 1].jpg);
+      test.info().annotations.push({ type: "progreso", description: serie.map((s) => `${Math.round(s.t - tClic)}ms:${s.progreso.toFixed(2)}`).join(" ") });
+      for (const s of serie) expect(s.textura, `capa vacía a ${Math.round(s.t - tClic)} ms del clic`).toBeGreaterThan(TEXTURA_MINIMA);
+      // Del clic al final la escena va de la foto anterior a la nueva sin volver atrás
+      const llegada = serie.findIndex((s) => s.progreso > 0.8);
+      expect(llegada, "la foto nueva llega").toBeGreaterThanOrEqual(0);
+      const retroceso = serie.slice(llegada).find((s) => s.progreso < 0.5);
+      expect(retroceso && `vuelve a la foto anterior a ${Math.round(retroceso.t - tClic)} ms tras verse la nueva a ${Math.round(serie[llegada].t - tClic)} ms`).toBeFalsy();
+    });
+  }
+
   test("se elige con clic y con las flechas, y la dirección lo recuerda", async ({ page }) => {
     await page.goto("habitaciones/");
     await motorListo(page);
