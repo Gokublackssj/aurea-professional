@@ -1,37 +1,50 @@
 ---
-// El nombre bajo la fotografía: la foto ocupa la parte alta de la pantalla y
-// «Aurea», a todo lo ancho, cierra la parte baja. El nombre es el logotipo.
-// Movimiento: src/scripts/motion/hero.ts
+// Apertura: una línea de latón se dibuja, la foto se abre en una píldora que
+// separa el nombre en dos («Au» · «rea»), crece hasta la pantalla completa y
+// el nombre se reúne sobre ella. Movimiento: src/scripts/motion/hero.ts.
+// Sin JavaScript y en modo reducido se ve directamente la composición final:
+// foto a sangre, el nombre y la frase sobre ella. Solo con movimiento completo
+// la página arranca en el estado de apertura (foto cerrada, frase en tinta
+// sobre marfil, visible desde el primer pintado: es la imagen principal en móvil).
 import Foto from "../Foto.astro";
+import { totalLlaves } from "../../data/habitaciones";
 import { ruta } from "../../lib/ruta";
+
+const numeros = ["cero", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve", "veinte", "veintiuna", "veintidós"];
+const habitacionesEnLetra = numeros[totalLlaves] ?? String(totalLlaves);
 ---
 
 <section class="hero" aria-labelledby="hero-titulo" data-escena="hero">
   <div class="hero-foto">
     <Foto foto="costaAcantilado" sizes="100vw" prioridad anchos={[640, 960, 1280, 1600, 1920, 2400]} />
-    <div class="hero-velo" aria-hidden="true"></div>
   </div>
-  <div class="hero-banda marco">
-    <span class="hero-linea" aria-hidden="true"></span>
-    <div class="hero-fila">
-      <p class="hero-frase">Hotel de veintidós llaves sobre un cabo de basalto, frente al poniente del Atlántico.</p>
-      <a class="boton boton-principal" href={ruta("reservas")}>Reservar estancia</a>
+  <div class="hero-velo" aria-hidden="true"></div>
+  <span class="hero-linea" aria-hidden="true"></span>
+  <h1 id="hero-titulo" class="hero-nombre">
+    <span class="mitad mitad-a" aria-hidden="true">Au</span><span class="mitad mitad-b" aria-hidden="true">rea</span><span class="solo-lector">Aurea, hotel en Cabo Lumbre</span>
+  </h1>
+  <div class="hero-pie marco">
+    <div>
+      <span class="etiqueta hero-etiqueta">Cabo Lumbre · Atlántico</span>
+      <p class="hero-frase">{habitacionesEnLetra[0].toUpperCase() + habitacionesEnLetra.slice(1)} habitaciones sobre un cabo de basalto, frente al mar abierto.</p>
     </div>
-    <h1 id="hero-titulo" class="hero-nombre"><span class="hero-nombre-texto">Aurea</span><span class="solo-lector">, hotel en Cabo Lumbre</span></h1>
+    <a class="boton boton-laton hero-boton" href={ruta("reservas")}>Preparar mi estancia <span class="flecha" aria-hidden="true">→</span></a>
   </div>
 </section>
 
 <style>
   .hero {
-    display: grid;
-    grid-template-rows: 46svh auto;
-    min-height: 100svh;
+    position: relative;
+    height: 100svh;
+    min-height: 37rem;
     overflow: hidden;
+    background: var(--marfil);
+    color: var(--marfil);
   }
 
   .hero-foto {
-    position: relative;
-    overflow: hidden;
+    position: absolute;
+    inset: 0;
   }
 
   .hero-foto :global(picture),
@@ -43,97 +56,95 @@ import { ruta } from "../../lib/ruta";
 
   .hero-foto :global(img) {
     object-fit: cover;
-    object-position: 50% 28%;
+    object-position: 50% 40%;
   }
 
+  /* Velo: sombra arriba (cabecera) y abajo (frase); se oscurece al bajar */
   .hero-velo {
     position: absolute;
     inset: 0;
-    background: #050403;
-    opacity: 0;
+    background: linear-gradient(180deg, rgb(6 29 30 / 0.4), rgb(6 29 30 / 0) 30%, rgb(6 29 30 / 0) 50%, rgb(6 29 30 / 0.72)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
     pointer-events: none;
   }
 
-  .hero-banda {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 1.5rem;
-    padding-top: 1.5rem;
-  }
-
-  /* La línea dorada que separa la foto del nombre */
   .hero-linea {
     position: absolute;
-    top: 0;
-    left: var(--margen);
-    right: var(--margen);
-    height: 2px;
-    background: var(--accent);
-    transform-origin: 0 50%;
-  }
-
-  .hero-fila {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.5rem;
-  }
-
-  .hero-frase {
-    max-width: 30rem;
-    font-size: var(--step-body);
-  }
-
-  .hero-nombre {
-    font-size: min(35vw, 50svh);
-    /* La A de Bodoni vuela a la izquierda de su caja: se compensa para que el
-       nombre arranque en el margen como el resto de la página */
-    padding-left: 0.05em;
-    line-height: 0.8;
-    letter-spacing: -0.05em;
-    white-space: nowrap;
-    /* El trazo inferior casi toca el borde de la pantalla */
-    margin-bottom: -0.02em;
-  }
-
-  /* Antes del primer pintado. En los dos modos, nombre, frase y navegación
-     esperan al motor (en reducido solo aparecen con un fundido). Con
-     movimiento completo, además, la foto empieza en una franja (que ya se
-     pinta: es la imagen principal) y la línea dorada sin dibujar; en modo
-     reducido la foto se ve entera desde el principio.
-     Si el motor no arranca, el script de la cabecera quita «motion» a los 4 s. */
-  :global(html.motion[data-movimiento="completo"]) .hero-foto {
-    clip-path: inset(44% 9% 44% 9%);
-  }
-
-  :global(html.motion) .hero-nombre,
-  :global(html.motion) .hero-fila,
-  :global(html.motion) .cabecera.sobre-foto {
-    visibility: hidden;
-  }
-
-  :global(html.motion[data-movimiento="completo"]) .hero-linea {
+    left: 50%;
+    top: 50%;
+    width: 38vw;
+    height: 1px;
+    margin-left: -19vw;
+    background: var(--laton);
     transform: scaleX(0);
   }
 
+  /* El nombre: centrado (estado de apertura) y en su sitio final (más abajo y
+     más pequeño); el motor pasa de uno a otro */
+  .hero-nombre {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--step-display);
+    font-weight: 340;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
+    pointer-events: none;
+  }
+
+  .mitad {
+    display: inline-block;
+  }
+
+  .hero-pie {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem;
+    padding-bottom: 2.25rem;
+  }
+
+  .hero-pie p {
+    max-width: 26rem;
+    font-size: var(--step-lead);
+    line-height: 1.35;
+  }
+
+  .hero-etiqueta {
+    margin-bottom: 1rem;
+    color: var(--laton-claro);
+  }
+
+  /* Estado de apertura (solo movimiento completo, antes de que entre el motor) */
+  :global(html.motion[data-movimiento="completo"]) .hero-foto {
+    clip-path: inset(50% 50% 50% 50% round 999px);
+  }
+
+  :global(html.motion[data-movimiento="completo"]) .hero-velo,
+  :global(html.motion[data-movimiento="completo"]) .hero-boton {
+    opacity: 0;
+  }
+
+  :global(html.motion[data-movimiento="completo"]) .hero-nombre,
+  :global(html.motion[data-movimiento="completo"]) .hero-frase {
+    color: var(--tinta);
+  }
+
+  :global(html.motion[data-movimiento="completo"]) .hero-etiqueta {
+    color: var(--grafito);
+  }
+
+  :global(html.motion[data-movimiento="completo"]) .cabecera.sobre-foto {
+    visibility: hidden;
+  }
+
   @media (max-width: 47.99rem) {
-    .hero {
-      grid-template-rows: 50svh auto;
-    }
-
-    .hero-fila {
-      flex-direction: column;
-    }
-
-    .hero-nombre {
-      font-size: 31vw;
-      padding-bottom: 0.75rem;
-    }
-
-    :global(html.motion[data-movimiento="completo"]) .hero-foto {
-      clip-path: inset(40% 6% 40% 6%);
+    .hero-pie {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
     }
   }
 </style>

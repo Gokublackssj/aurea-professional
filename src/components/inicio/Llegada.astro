@@ -1,210 +1,143 @@
 ---
-// Banda de paneles desiguales: el camino desde la costa hasta la casa, en
-// cuatro cortes (la costa de roca al amanecer, los escalones, el arco encalado
-// y la terraza con su piscina).
-// Movimiento (src/scripts/motion/llegada.ts): en escritorio la escena se fija
-// y el primer panel crece hasta ocupar la pantalla; la «lente», el «marco» y
-// la frase final solo existen para esa escena y no se muestran sin ella.
+// El camino hasta Aurea, en formato cine: una banda panorámica que se abre en
+// vertical hasta ocupar la pantalla. Movimiento: src/scripts/motion/llegada.ts.
+// Escritorio con movimiento: el escenario es sticky (CSS) dentro de una sección
+// de 2,1 pantallas; título y texto ceden la pantalla a la foto y aparece la
+// frase final. Móvil: título, foto que se abre y texto debajo, sin fijar.
+// Modo reducido: la banda en su primer fotograma, con todo el texto.
 import Foto from "../Foto.astro";
-
-const paneles = [
-  { foto: "llegadaCosta", crece: 5 },
-  { foto: "casaEscalera", crece: 2 },
-  { foto: "casaArco", crece: 3 },
-  { foto: "terrazaPiscina", crece: 2 },
-] as const;
 ---
 
 <section class="llegada" aria-labelledby="llegada-titulo" data-escena="llegada">
   <div class="llegada-escena">
-    <h2 id="llegada-titulo" class="llegada-titulo marco">La llegada</h2>
-    <div class="banda">
-      {
-        paneles.map((p, i) => (
-          <figure class="panel" style={`--crece:${p.crece}`}>
-            <Foto foto={p.foto} sizes={i === 0 ? "(min-width: 48rem) 42vw, 64vw" : "(min-width: 48rem) 25vw, 64vw"} anchos={[480, 800, 1200, 1600]} />
-            {i === 0 && <figcaption class="panel-titulo">La carretera termina en la puerta</figcaption>}
-          </figure>
-        ))
-      }
+    <div class="llegada-foto">
+      <Foto foto="llegadaCosta" sizes="100vw" anchos={[960, 1280, 1600, 2000]} />
+      <div class="llegada-velo" aria-hidden="true"></div>
     </div>
-    <p class="llegada-pie marco">
-      Cincuenta minutos por la carretera de la costa desde el aeropuerto. El último kilómetro es nuestro: una pista de picón negro
-      entre tabaibas que acaba en un portón de madera.
-    </p>
-    <div class="llegada-lente" aria-hidden="true">
-      <Foto foto="llegadaCosta" sizes="100vw" alt="" anchos={[960, 1280, 1600, 2000, 2400]} />
-      <div class="llegada-velo"></div>
+    <div class="llegada-cabeza marco">
+      <h2 id="llegada-titulo" class="titulo">El camino hasta Aurea</h2>
+      <span class="etiqueta">50 minutos desde el aeropuerto</span>
     </div>
-    <div class="llegada-marco" aria-hidden="true"></div>
-    <p class="llegada-frase" aria-hidden="true">El último kilómetro<br />es nuestro</p>
+    <div class="llegada-pie marco">
+      <p>La carretera de la costa termina en un portón de madera. El último kilómetro es una pista de picón negro entre tabaibas.</p>
+      <span class="etiqueta">Traslado incluido desde 3 noches</span>
+    </div>
+    <p class="llegada-frase titulo marco" aria-hidden="true">Al final de la pista, solo queda el mar</p>
   </div>
 </section>
 
 <style>
   .llegada {
-    padding-top: var(--seccion);
+    position: relative;
   }
 
   .llegada-escena {
     position: relative;
-  }
-
-  .llegada-titulo {
-    padding-left: calc(var(--margen) + 16.66vw);
-    margin-bottom: 4rem;
-    font-size: var(--step-head);
-  }
-
-  .banda {
-    display: flex;
-    height: 68svh;
-  }
-
-  .panel {
-    position: relative;
-    flex: var(--crece) 1 0;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .panel :global(picture),
-  .panel :global(img) {
-    width: 100%;
-    height: 100%;
-  }
-
-  .panel :global(img) {
-    object-fit: cover;
-  }
-
-  .panel-titulo {
-    position: absolute;
-    inset: 0 auto auto 0;
-    max-width: 16ch;
-    padding: 1.5rem 2rem 2.5rem var(--margen);
-    font-family: var(--display);
-    font-size: var(--step-lead);
-    line-height: 1.05;
-    /* Velo neutro solo en la esquina del texto */
-    background: radial-gradient( /* taste-skill-ignore: velo neutro bajo texto sobre foto */
-      120% 100% at 0 0,
-      rgb(16 14 12 / 0.7),
-      rgb(16 14 12 / 0) 75%
-    );
-  }
-
-  .llegada-pie {
-    max-width: calc(var(--columna) + 2 * var(--margen));
-    margin-top: 1.5rem;
-  }
-
-  /* Piezas de la escena: no existen fuera de ella */
-  .llegada-lente,
-  .llegada-marco,
-  .llegada-frase {
-    display: none;
-  }
-
-  /* Escena activa (escritorio con movimiento): una pantalla exacta, fijada */
-  .llegada.es-escena .llegada-escena {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     height: 100svh;
     overflow: hidden;
   }
 
-  .llegada.es-escena .banda {
-    height: 58svh;
-  }
-
-  .llegada.es-escena .llegada-titulo {
-    margin-bottom: 3rem;
-  }
-
-  /* El primer panel lo sustituye la lente, que es la que crece */
-  .llegada.es-escena .panel:first-child :global(picture) {
-    visibility: hidden;
-  }
-
-  .llegada.es-escena .llegada-lente {
-    display: block;
+  .llegada-foto {
     position: absolute;
     inset: 0;
-    z-index: 2;
-    overflow: hidden;
+    clip-path: inset(29% 0% 29% 0%);
   }
 
-  .llegada-lente :global(picture),
-  .llegada-lente :global(img) {
+  .llegada-foto :global(picture),
+  .llegada-foto :global(img) {
+    display: block;
     width: 100%;
     height: 100%;
   }
 
-  .llegada-lente :global(img) {
+  .llegada-foto :global(img) {
     object-fit: cover;
-    object-position: 30% 50%;
   }
 
   .llegada-velo {
     position: absolute;
     inset: 0;
-    background: #050403;
+    background: linear-gradient(180deg, rgb(6 29 30 / 0) 40%, rgb(6 29 30 / 0.65)); /* taste-skill-ignore: velo neutro bajo texto sobre foto */
     opacity: 0;
   }
 
-  .llegada.es-escena .llegada-marco {
-    display: block;
+  .llegada-cabeza {
     position: absolute;
-    z-index: 3;
-    border: 1px solid rgb(217 162 78 / 0.85);
-    pointer-events: none;
+    top: 9vh;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 2rem;
   }
 
-  .llegada.es-escena .llegada-frase {
-    display: block;
+  .llegada-pie {
     position: absolute;
-    z-index: 4;
-    inset: 50% var(--margen) auto;
-    transform: translateY(-50%);
-    font-family: var(--display);
-    font-size: var(--step-display);
-    line-height: 0.95;
-    letter-spacing: -0.03em;
-    text-align: center;
-    pointer-events: none;
+    bottom: 9vh;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .llegada-pie p {
+    max-width: 30rem;
+    color: var(--muted);
+  }
+
+  .llegada-frase {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 12vh;
+    color: var(--marfil);
+    opacity: 0;
+  }
+
+  /* Escritorio con movimiento completo: escenario sticky. La altura de la
+     sección es el recorrido (100svh + lo que dura la escena). */
+  @media (min-width: 48rem) {
+    :global(html[data-movimiento="completo"]) .llegada {
+      height: 210svh;
+    }
+
+    :global(html[data-movimiento="completo"]) .llegada-escena {
+      position: sticky;
+      top: 0;
+    }
   }
 
   @media (max-width: 47.99rem) {
-    .llegada-titulo {
-      padding-left: var(--margen);
-      margin-bottom: 2rem;
+    .llegada-escena {
+      height: auto;
+      display: grid;
+      gap: 1.5rem;
+      padding-top: 4rem;
     }
 
-    /* Dos por dos: la primera fila 64/36 y la segunda 36/64 */
-    .banda {
-      flex-wrap: wrap;
-      height: 84svh;
+    .llegada-cabeza,
+    .llegada-pie {
+      position: static;
+      flex-direction: column;
+      align-items: start;
+      gap: 0.5rem;
     }
 
-    .panel {
-      flex: none;
-      height: 50%;
+    .llegada-cabeza {
+      order: -1;
     }
 
-    .panel:nth-child(1),
-    .panel:nth-child(4) {
-      width: 64%;
+    .llegada-foto {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      clip-path: inset(30% 0% 30% 0%);
     }
 
-    .panel:nth-child(2),
-    .panel:nth-child(3) {
-      width: 36%;
-    }
-
-    .panel-titulo {
-      padding: 1rem 1.5rem 2rem var(--margen);
+    .llegada-frase,
+    .llegada-velo {
+      display: none;
     }
   }
 </style>

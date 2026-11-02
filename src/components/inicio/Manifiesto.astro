@@ -1,96 +1,136 @@
 ---
-// Frase en escalera: cada línea empieza más a la derecha que la anterior, como
-// los escalones que bajan a la cala. A la derecha, los dos materiales del cabo.
+// El cabo en una frase: la tinta avanza palabra a palabra con el scroll. A la
+// derecha, los dos materiales que nombra (basalto y cal) en dos arcos; debajo,
+// tres cifras del lugar. Movimiento: src/scripts/motion/manifiesto.ts.
 import Foto from "../Foto.astro";
 import { sitio } from "../../data/sitio";
+import { totalLlaves } from "../../data/habitaciones";
 
-const lineas = ["Aquí el día", "se mide por la luz:", "basalto al alba,", "cal a mediodía", "y oro al caer la tarde."];
+const cifras = [
+  [sitio.alturaSobreElMar, "metros sobre el Atlántico"],
+  [sitio.escalones, "escalones hasta la cala"],
+  [totalLlaves, "habitaciones en toda la casa"],
+] as const;
 ---
 
 <section class="manifiesto marco" aria-labelledby="manifiesto-titulo" data-escena="manifiesto">
-  <h2 id="manifiesto-titulo" class="solo-lector">El cabo</h2>
-  <p class="escalera">
-    {lineas.map((l, i) => <span style={`--i:${i}`}>{l}</span>)}
-  </p>
-  <div class="materiales">
-    <Foto foto="materialBasalto" sizes="(min-width: 48rem) 28vw, 46vw" anchos={[400, 600, 800, 1000]} />
-    <Foto foto="materialCal" sizes="(min-width: 48rem) 28vw, 46vw" anchos={[400, 600, 800, 1000]} />
+  <div class="manifiesto-texto">
+    <h2 id="manifiesto-titulo" class="etiqueta">El cabo</h2>
+    <p class="frase">Aquí el día se mide por la luz: basalto al alba, cal a mediodía y oro cuando el sol se pone sobre el mar.</p>
   </div>
-  <p class="nota">
-    {sitio.lugar}, costa de poniente. A {sitio.alturaSobreElMar} metros sobre el Atlántico y a {sitio.escalones} escalones de la cala.
-  </p>
+  <div class="arcos">
+    <figure class="arco">
+      <Foto foto="materialBasalto" sizes="(min-width: 48rem) 20vw, 46vw" anchos={[320, 480, 640, 800]} />
+    </figure>
+    <figure class="arco">
+      <Foto foto="materialCal" sizes="(min-width: 48rem) 20vw, 46vw" anchos={[320, 480, 640, 800]} />
+    </figure>
+  </div>
+  <dl class="cifras">
+    {
+      cifras.map(([n, texto]) => (
+        <div class="cifra">
+          <dt>{texto}</dt>
+          <dd data-contar={n}>{n}</dd>
+        </div>
+      ))
+    }
+  </dl>
 </section>
 
 <style>
   .manifiesto {
     display: grid;
-    grid-template-columns: 1fr 28vw;
-    grid-template-rows: 1fr auto;
-    column-gap: 4vw;
-    row-gap: 3rem;
-    align-items: start;
-    min-height: 100svh;
-    padding-block: var(--seccion) 4rem;
-    background: var(--surface);
+    grid-template-columns: 7fr 5fr;
+    gap: 3rem 6vw;
+    align-items: center;
+    padding-block: var(--seccion);
   }
 
-  .escalera {
-    display: flex;
-    flex-direction: column;
-    align-self: center;
-    font-family: var(--display);
-    font-size: clamp(1.5rem, 1rem + 1.4vw, 2.25rem);
-    line-height: 1.12;
-    letter-spacing: -0.02em;
-  }
-
-  .escalera span {
-    padding-left: calc(var(--i) * 6vw);
-  }
-
-  .escalera span:nth-child(even) {
-    color: var(--muted);
-  }
-
-  .materiales {
+  .manifiesto-texto {
     display: grid;
-    gap: 1rem;
-    grid-row: 1;
-    grid-column: 2;
-    align-self: center;
+    gap: 2rem;
   }
 
-  .materiales :global(img) {
+  .frase {
+    font: 380 clamp(1.75rem, 1rem + 2.6vw, 3.4rem) / 1.12 var(--display);
+    letter-spacing: -0.015em;
+  }
+
+  /* Con el motor, las palabras empiezan apagadas y pasan a tinta. El tono de
+     partida cumple 3:1 sobre marfil (AA para texto grande): se lee siempre. */
+  .frase :global(.palabra) {
+    color: #8a8478;
+  }
+
+  .arcos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .arco {
+    overflow: hidden;
+    border-radius: 999px 999px 0 0;
+  }
+
+  .arco :global(picture),
+  .arco :global(img) {
+    display: block;
     width: 100%;
-    aspect-ratio: 3 / 2;
+  }
+
+  .arco :global(img) {
+    aspect-ratio: 3 / 5;
     object-fit: cover;
   }
 
-  .nota {
-    grid-column: 1;
-    max-width: 24rem;
+  .arco:nth-child(2) {
+    margin-bottom: 4rem;
+  }
+
+  .cifras {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--linea);
+  }
+
+  .cifra {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.25rem;
+  }
+
+  .cifra dd {
+    margin: 0;
+    font: 340 clamp(2.5rem, 1.5rem + 3vw, 4.5rem) / 1 var(--display);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cifra dt {
     color: var(--muted);
+    font-size: var(--step-small);
   }
 
   @media (max-width: 47.99rem) {
     .manifiesto {
       grid-template-columns: 1fr;
-      grid-template-rows: auto;
-      min-height: 0;
     }
 
-    .escalera {
-      font-size: 1.5rem;
+    .cifras {
+      gap: 1rem;
     }
 
-    .escalera span {
-      padding-left: calc(var(--i) * 5vw);
+    .cifra dd {
+      font-size: 2.25rem;
     }
 
-    .materiales {
-      grid-row: auto;
-      grid-column: 1;
-      grid-template-columns: 1fr 1fr;
+    .arco:nth-child(2) {
+      margin-bottom: 2rem;
     }
   }
 </style>

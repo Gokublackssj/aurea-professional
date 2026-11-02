@@ -20,6 +20,13 @@ for (const el of document.querySelectorAll<HTMLElement>("[data-hoja='sol']")) {
       : `Hoy el sol se puso a las ${hora(puesta, zonaHoraria)}. Desde las ${hora(aurea, zonaHoraria)}, la terraza se quedó en silencio y la casa apagó sus luces.`;
 }
 
+// La hora del momento «hora áurea» (reloj de la escena y bloques): la de hoy
+if (aurea !== null) {
+  const hhmm = hora(aurea, zonaHoraria).padStart(5, "0");
+  for (const el of document.querySelectorAll<HTMLElement>("[data-hoja-hora='aurea']")) el.textContent = hhmm;
+  for (const el of document.querySelectorAll<HTMLElement>("[data-hoja-digito]")) el.textContent = hhmm[Number(el.dataset.hojaDigito)] ?? el.textContent;
+}
+
 for (const el of document.querySelectorAll<HTMLElement>("[data-hoja='luna']")) {
   const porcentaje = Math.round(fase.iluminacion * 100);
   const cielo = porcentaje < 50 ? "Una noche buena para la Vía Láctea." : "Una noche para mirar la luna con el telescopio.";
