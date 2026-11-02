@@ -88,6 +88,15 @@ if (!raizDoc.dataset.motor) {
   const fuentes = Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]);
 
   fuentes.then(() => {
+    // Si el motor llega tarde (red lenta), el aviso del <head> ya quitó
+    // «motion» a los 4 s y se está viendo la composición final: lo que ya está
+    // a la vista queda como entrado, para no ocultarlo y volver a animarlo.
+    if (!raizDoc.classList.contains("motion")) {
+      document.querySelectorAll<HTMLElement>('[data-escena="hero"]').forEach((el) => (el.dataset.entrada = "hecha"));
+      document.querySelectorAll<HTMLElement>("[data-entrada], [data-revelar]").forEach((el) => {
+        if (el.getBoundingClientRect().top < innerHeight) el.dataset.revelado = "si";
+      });
+    }
     construir();
     // GSAP ya ha fijado los estados iniciales (los fromTo se aplican al
     // crearse): el CSS que ocultaba la entrada antes del primer pintado sobra.

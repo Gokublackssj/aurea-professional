@@ -88,6 +88,68 @@ test.describe("Movimiento en escritorio", () => {
   });
 });
 
+test.describe("Motor que llega tarde (red lenta)", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  test("lo que el aviso de 4 s ya enseñó no se vuelve a ocultar: ni la foto del hero ni la cabecera de página", async ({ page }) => {
+    // Los scripts tardan 5 s: el aviso del <head> quita «motion» antes de que llegue el motor
+    await page.route(/\/_astro\/.*\.js$/, async (r) => {
+      await new Promise((ok) => setTimeout(ok, 5000));
+      await r.continue();
+    });
+    // Fracción visible de la foto del hero en cada fotograma
+    await page.addInitScript(() => {
+      const serie: [number, number][] = ((window as unknown as { __serie: [number, number][] }).__serie = []);
+      const fraccion = (cp: string) => {
+        const n = (cp.match(/inset\(([^)]*)\)/) || [])[1];
+        if (!n) return 1;
+        const [a, d = a, b = a, i = d] = n.split("round")[0].trim().split(/\s+/).map(parseFloat);
+        return Math.max(0, (100 - a - b) / 100) * Math.max(0, (100 - d - i) / 100);
+      };
+      const bucle = () => {
+        const f = document.querySelector(".hero-foto");
+        if (f) serie.push([performance.now(), fraccion(getComputedStyle(f).clipPath)]);
+        if (!(window as unknown as { __parar?: boolean }).__parar) requestAnimationFrame(bucle);
+      };
+      requestAnimationFrame(bucle);
+    });
+    await page.goto("");
+    await motorListo(page);
+    await page.waitForTimeout(2000);
+    const serie = await page.evaluate(() => {
+      const w = window as unknown as { __serie: [number, number][]; __parar: boolean };
+      w.__parar = true;
+      return w.__serie;
+    });
+    const entera = serie.findIndex(([, f]) => f > 0.95);
+    expect(entera, "el aviso enseña la foto entera").toBeGreaterThanOrEqual(0);
+    const cierre = serie.slice(entera).find(([, f]) => f < 0.95);
+    expect(cierre && `la foto se cierra a ${Math.round(cierre[0])} ms`).toBeFalsy();
+    await expect(page.locator(".hero-boton")).toHaveCSS("opacity", "1");
+
+    // La cabecera de una página interior (data-entrada) tampoco desaparece al llegar el motor
+    await page.goto("experiencias/");
+    await expect(page.locator("html")).not.toHaveClass(/(^|\s)motion(\s|$)/, { timeout: 6000 });
+    const titulo = page.locator("[data-entrada] h1");
+    await expect(titulo).toBeVisible();
+    const visibleHastaElMotor = page.evaluate(async () => {
+      const h1 = document.querySelector("[data-entrada] h1")!;
+      let oculto = 0;
+      while (document.documentElement.dataset.motion !== "listo") await new Promise(requestAnimationFrame);
+      const t0 = performance.now();
+      while (performance.now() - t0 < 1500) {
+        await new Promise(requestAnimationFrame);
+        // La entrada oculta el título bajando sus líneas fuera de su máscara (SplitText)
+        const desplazado = [...h1.querySelectorAll("*")].some((e) => Math.abs(new DOMMatrix(getComputedStyle(e).transform).f) > 1);
+        const s = getComputedStyle(h1.closest("[data-entrada]")!);
+        if (s.visibility === "hidden" || Number(s.opacity) < 0.5 || desplazado) oculto++;
+      }
+      return oculto;
+    });
+    expect(await visibleHastaElMotor, "fotogramas con la cabecera oculta tras llegar el motor").toBe(0);
+  });
+});
+
 test.describe("Movimiento en móvil", () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: "no-preference" });
 
