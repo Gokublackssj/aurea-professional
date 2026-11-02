@@ -77,11 +77,12 @@ test("cada habitación del selector abre su página de detalle", async ({ page }
   }
 });
 
-test("el botón Reservar de una habitación la deja elegida en el formulario", async ({ page }) => {
+test("«Elegir esta habitación» la deja elegida en la reserva", async ({ page }) => {
   await page.goto("habitaciones/suite-terraza/");
-  await page.locator(".portada-reserva").getByRole("link", { name: "Reservar" }).click();
+  await page.locator(".portada-reserva").getByRole("link", { name: "Elegir la Suite Terraza y preparar la estancia" }).click();
   await expect(page).toHaveURL(/reservas\/?\?habitacion=suite-terraza$/);
-  await expect(page.getByRole("radio", { name: /Suite Terraza/ })).toBeChecked();
+  // La habitación se elige en el tercer paso: el radio está marcado aunque aún no se vea
+  await expect(page.locator("input[name='habitacion'][value='suite-terraza']")).toBeChecked();
   await expect(page.locator("[data-resumen='habitacion']")).toHaveText("Suite Terraza");
 });
 
@@ -94,13 +95,17 @@ test("una ruta inexistente devuelve la página 404", async ({ page, errores }) =
   errores.splice(0, errores.length, ...errores.filter((e) => e !== esperado));
 });
 
-// Las 43 fotografías de src/assets/fotos, una por fila (como en CREDITS.md).
-const totalFotos = 43;
+// Las 63 fotografías de src/assets/fotos, una por fila (como en CREDITS.md):
+// 43 de Unsplash y 20 de Pexels.
+const deUnsplash = 43;
+const dePexels = 20;
 
 test("la página de créditos nombra a los autores de todas las fotografías", async ({ page }) => {
   await page.goto("creditos/");
   const filas = page.locator("tbody tr");
-  await expect(filas).toHaveCount(totalFotos);
-  await expect(filas.locator("a[href^='https://unsplash.com/@']")).toHaveCount(totalFotos);
-  await expect(filas.locator("a[href^='https://unsplash.com/photos/']")).toHaveCount(totalFotos);
+  await expect(filas).toHaveCount(deUnsplash + dePexels);
+  await expect(filas.locator("a[href^='https://unsplash.com/@']")).toHaveCount(deUnsplash);
+  await expect(filas.locator("a[href^='https://unsplash.com/photos/']")).toHaveCount(deUnsplash);
+  await expect(filas.locator("a[href^='https://www.pexels.com/@']")).toHaveCount(dePexels);
+  await expect(filas.locator("a[href^='https://www.pexels.com/photo/']")).toHaveCount(dePexels);
 });

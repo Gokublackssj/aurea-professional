@@ -19,57 +19,92 @@ test.describe("Menú en pantallas estrechas", () => {
 
 test("«La hoja de hoy» sustituye la frase general por la hora del sol y la luna de hoy", async ({ page }) => {
   await page.goto("");
-  await expect(page.locator("[data-hoja='sol']")).toHaveText(/^Hoy el sol se (pone|puso) a las \d{2}:\d{2}\./);
-  await expect(page.locator("[data-hoja='luna']")).toHaveText(/Esta noche, .+ con un \d{1,3} % iluminado\./);
+  // Un día en Aurea lo repite en la escena (escritorio) y en la lista (móvil y reducido)
+  for (const el of await page.locator("[data-hoja='sol']").all()) await expect(el).toHaveText(/^Hoy el sol se (pone|puso) a las \d{2}:\d{2}\./);
+  for (const el of await page.locator("[data-hoja='luna']").all()) await expect(el).toHaveText(/Esta noche, .+ con un \d{1,3} % iluminado\./);
+  await expect(page.locator("[data-hoja='sol']")).toHaveCount(2);
 });
 
-test.describe("Formulario de reserva", () => {
+test.describe("Reserva de demostración", () => {
+  const siguiente = (page: import("@playwright/test").Page) => page.locator("[data-adelante]");
+
   test("calcula noches y estimación, y dice a qué hora se pone el sol el día de llegada", async ({ page }) => {
-    await page.goto("reservas/");
-    await page.getByRole("radio", { name: /Suite Mirador/ }).check({ force: true });
+    await page.goto("reservas/?habitacion=suite-mirador");
     await page.getByLabel("Llegada").fill("2027-06-21");
     await page.getByLabel("Salida").fill("2027-06-24");
     await expect(page.locator("[data-resumen='noches']")).toHaveText("3 noches");
     await expect(page.locator("[data-resumen='total']")).toHaveText(/1830\s?€/);
     await expect(page.locator("[data-resumen='sol']")).toHaveText(/el sol se pone a las 21:\d{2}/);
+    await expect(page.locator("[data-resumen='habitacion']")).toHaveText("Suite Mirador");
   });
 
-  test("no deja elegir más huéspedes de los que caben en la habitación", async ({ page }) => {
+  test("avanza por pasos, valida cada uno y marca el paso actual", async ({ page }) => {
     await page.goto("reservas/");
-    const huespedes = page.locator("select[name='huespedes']");
-    const deshabilitadas = () => huespedes.locator("option").evaluateAll((os) => os.filter((o) => (o as HTMLOptionElement).disabled).map((o) => (o as HTMLOptionElement).value));
-    // Suite Terraza admite tres: se eligen tres.
-    await page.getByRole("radio", { name: /Suite Terraza/ }).check({ force: true });
-    await huespedes.selectOption("3");
-    expect(await deshabilitadas()).toEqual(["4"]);
-    // Suite Mirador admite dos: el número baja solo y el 3 deja de poder elegirse.
-    await page.getByRole("radio", { name: /Suite Mirador/ }).check({ force: true });
-    await expect(huespedes).toHaveValue("2");
-    expect(await deshabilitadas()).toEqual(["3", "4"]);
-  });
-
-  test("avisa de lo que falta y marca los campos", async ({ page }) => {
-    await page.goto("reservas/");
-    await page.getByRole("button", { name: "Enviar solicitud" }).click();
+    await expect(page.locator(".pasos-nav li[aria-current='step']")).toHaveText("Fechas");
+    // Sin fechas no se avanza
+    await siguiente(page).click();
     const errores = page.getByRole("alert");
     await expect(errores).toContainText("Falta la fecha de llegada");
-    await expect(errores).toContainText("Falta tu nombre");
     await expect(page.getByLabel("Llegada")).toHaveAttribute("aria-invalid", "true");
     await expect(page.getByLabel("Llegada")).toBeFocused();
+    // Estancia mínima: una noche no basta
+    await page.getByLabel("Llegada").fill("2027-03-10");
+    await page.getByLabel("Salida").fill("2027-03-11");
+    await siguiente(page).click();
+    await expect(errores).toContainText("estancia mínima");
+    await page.getByLabel("Salida").fill("2027-03-12");
+    await siguiente(page).click();
+    await expect(page.locator(".pasos-nav li[aria-current='step']")).toHaveText("Huéspedes");
+    // La zona de alerta se vacía (y vacía no se muestra)
+    await expect(page.locator(".errores")).toBeEmpty();
+    // Atrás conserva lo escrito
+    await page.locator("[data-atras]").click();
+    await expect(page.getByLabel("Salida")).toHaveValue("2027-03-12");
   });
 
-  test("con todo correcto abre el correo con la solicitud escrita", async ({ page }) => {
+  test("las habitaciones en las que no cabe el grupo quedan deshabilitadas", async ({ page }) => {
+    await page.goto("reservas/?habitacion=suite-mirador");
+    await page.getByLabel("Llegada").fill("2027-03-10");
+    await page.getByLabel("Salida").fill("2027-03-13");
+    await siguiente(page).click();
+    await page.locator("select[name='huespedes']").selectOption("3");
+    await siguiente(page).click();
+    // La Suite Mirador admite dos: queda deshabilitada y deja de estar elegida
+    await expect(page.getByRole("radio", { name: /Suite Mirador/ })).toBeDisabled();
+    await expect(page.getByRole("radio", { name: /Estudio Jardín/ })).toBeDisabled();
+    await expect(page.getByRole("radio", { name: /Suite Terraza/ })).toBeEnabled();
+    await expect(page.locator("[data-resumen='habitacion']")).toHaveText("Sin elegir");
+    await siguiente(page).click();
+    await expect(page.getByRole("alert")).toContainText("Elige una habitación");
+  });
+
+  test("con todo correcto muestra la confirmación de demostración y prepara el correo", async ({ page }) => {
     await page.goto("reservas/?habitacion=estudio-jardin");
     await page.getByLabel("Llegada").fill("2027-03-10");
     await page.getByLabel("Salida").fill("2027-03-12");
+    await siguiente(page).click();
+    await siguiente(page).click();
+    await expect(page.getByRole("radio", { name: /Estudio Jardín/ })).toBeChecked();
+    await siguiente(page).click();
     await page.getByLabel("Nombre").fill("Ana Prueba");
+    // Correo incompleto: se rechaza
+    await page.getByLabel("Correo electrónico").fill("ana@example");
+    await siguiente(page).click();
+    await expect(page.getByRole("alert")).toContainText("no parece completo");
     await page.getByLabel("Correo electrónico").fill("ana@example.com");
-    await page.getByRole("button", { name: "Enviar solicitud" }).click();
+    await siguiente(page).click();
+
+    await expect(page.getByRole("heading", { name: "Solicitud preparada" })).toBeVisible();
+    await expect(page.locator("[data-codigo]")).toHaveText(/^AUR-DEMO-\d{4}$/);
+    await expect(page.locator(".confirmacion")).toContainText("no se ha hecho ninguna reserva ni ningún pago");
     const formulario = page.locator("form.formulario");
-    await expect(formulario).toHaveAttribute("data-enviado", /^mailto:/);
     const url = decodeURIComponent((await formulario.getAttribute("data-enviado")) ?? "");
     expect(url).toMatch(/^mailto:reservas@aurea-hotel\.example\?subject=Solicitud de estancia: Estudio Jardín, 2027-03-10/);
     expect(url).toContain("Salida: 2027-03-12 (2 noches)");
     expect(url).toContain("Nombre: Ana Prueba");
+    // Empezar de nuevo vuelve al primer paso con el formulario vacío
+    await page.getByRole("button", { name: "Empezar de nuevo" }).click();
+    await expect(page.locator(".pasos-nav li[aria-current='step']")).toHaveText("Fechas");
+    await expect(page.getByLabel("Llegada")).toHaveValue("");
   });
 });

@@ -225,7 +225,7 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
   /* — Sin JavaScript: una habitación tras otra — */
   .hab {
     display: grid;
-    grid-template-columns: 7fr 5fr;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     gap: clamp(2rem, 5vw, 5rem);
     align-items: start;
     scroll-margin-top: 6rem;
@@ -300,7 +300,7 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
 
   .tira {
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 0.75rem;
   }
@@ -319,6 +319,7 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
 
   .tira-fotos button {
     display: block;
+    flex: none;
     width: 5rem;
     padding: 0;
     border: 0;
@@ -388,11 +389,11 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
     line-height: 1.4;
   }
 
+  /* Tres datos en fila; en pantallas muy estrechas el tercero baja de línea */
   .hab-info dl {
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
-    gap: 0.5rem 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem clamp(1.25rem, 4vw, 2rem);
   }
 
   dt {
@@ -443,7 +444,7 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
 
   .selector.es-selector {
     display: grid;
-    grid-template-columns: 7fr 5fr;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     grid-template-rows: auto 1fr;
     column-gap: clamp(2rem, 5vw, 5rem);
     row-gap: 2rem;
@@ -627,7 +628,7 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
     }
 
     .tira {
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto minmax(0, 1fr) auto;
     }
 
     .tira-contador {
@@ -642,7 +643,8 @@ const filas: [string, (h: (typeof habitaciones)[number]) => string][] = [
 
     /* En móvil: pestañas en una fila deslizable, foto y ficha debajo */
     .selector.es-selector {
-      grid-template-columns: 1fr;
+      /* minmax(0, …): la tira de miniaturas no puede ensanchar la columna */
+      grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto auto auto;
       row-gap: 1.5rem;
     }

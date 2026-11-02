@@ -71,18 +71,26 @@ export function selectorHabitaciones(raiz: HTMLElement, c: Condiciones) {
   let transicion: gsap.core.Timeline | undefined;
 
   // — Fotos dentro de una habitación —
-  const fotoActual = (p: ReturnType<typeof partes>) => Math.max(0, p.capas.findIndex((capa) => capa.classList.contains("actual")));
+  // Dos índices en la escena: la foto pedida (cambia al momento, para que las
+  // flechas encadenen bien con clics rápidos) y la pintada (cambia cuando la
+  // imagen ya se ha decodificado). Durante el fundido hay dos capas «actual»:
+  // por eso no se deduce el índice de las clases.
+  const fotoPedida = (p: ReturnType<typeof partes>) => Number(p.escena.dataset.foto ?? 0);
+  const fotoPintada = (p: ReturnType<typeof partes>) => Number(p.escena.dataset.pintada ?? 0);
   const verFoto = (ficha: HTMLElement, i: number) => {
     const p = partes(ficha);
     const n = p.capas.length;
-    const desde = fotoActual(p);
     const hasta = (i + n) % n;
-    if (hasta === desde) return;
-    const sentido = hasta > desde ? 1 : -1;
+    if (hasta === fotoPedida(p)) return;
+    p.escena.dataset.foto = String(hasta);
     const img = p.capas[hasta].querySelector("img")!;
     lista(img).then(() => {
-      if (fotoActual(p) !== desde) return; // otro clic llegó antes
+      if (fotoPedida(p) !== hasta) return; // llegó otro clic después: gana el último
       transicion?.progress(1);
+      const desde = fotoPintada(p);
+      if (desde === hasta) return;
+      p.escena.dataset.pintada = String(hasta);
+      const sentido = hasta > desde ? 1 : -1;
       const vieja = p.capas[desde];
       const nueva = p.capas[hasta];
       nueva.classList.add("actual");
@@ -113,7 +121,7 @@ export function selectorHabitaciones(raiz: HTMLElement, c: Condiciones) {
     const despues = partes(fichas[nuevo]);
     const anterior = actual;
     const sentido = nuevo > anterior ? 1 : -1;
-    const imgNueva = despues.capas[fotoActual(despues)].querySelector("img")!;
+    const imgNueva = despues.capas[fotoPintada(despues)].querySelector("img")!;
     actual = nuevo;
     pintar();
     history.replaceState(null, "", `#${fichas[nuevo].dataset.slug}`);
@@ -169,7 +177,7 @@ export function selectorHabitaciones(raiz: HTMLElement, c: Condiciones) {
     const p = partes(ficha);
     p.minis.forEach((m, i) => m.addEventListener("click", () => verFoto(ficha, i), { signal }));
     ficha.querySelectorAll<HTMLButtonElement>(".tira-paso").forEach((b) =>
-      b.addEventListener("click", () => verFoto(ficha, fotoActual(p) + Number(b.dataset.paso)), { signal }),
+      b.addEventListener("click", () => verFoto(ficha, fotoPedida(p) + Number(b.dataset.paso)), { signal }),
     );
     // Deslizar con el dedo sobre la foto: siguiente o anterior (el scroll vertical sigue libre)
     let toque: [number, number] | null = null;
@@ -180,7 +188,7 @@ export function selectorHabitaciones(raiz: HTMLElement, c: Condiciones) {
         if (!toque) return;
         const [dx, dy] = [e.clientX - toque[0], e.clientY - toque[1]];
         toque = null;
-        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) verFoto(ficha, fotoActual(p) + (dx < 0 ? 1 : -1));
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) verFoto(ficha, fotoPedida(p) + (dx < 0 ? 1 : -1));
       },
       { signal },
     );
