@@ -1,4 +1,10 @@
 ---
+// Reservas (demostración). Sin JavaScript, el formulario completo se envía por
+// correo (mailto). Con él (src/scripts/reserva.ts) se convierte en cinco pasos
+// (fechas, huéspedes, habitación, datos y confirmación) con un resumen que se
+// actualiza, la hora de la puesta de sol del día de llegada y una confirmación
+// marcada como demostración, desde la que se puede abrir la solicitud en el
+// programa de correo. No se reserva ni se cobra nada.
 import Base from "../layouts/Base.astro";
 import Mapa from "../components/Mapa.astro";
 import Foto from "../components/Foto.astro";
@@ -12,15 +18,20 @@ const politicas = [
   ["Estancia mínima", "Dos noches; tres en la Residencia Aurea y en julio y agosto."],
 ];
 
+const pasos = ["Fechas", "Huéspedes", "Habitación", "Datos", "Confirmación"];
+
 // Datos que necesita el script de la reserva (precio y capacidad por habitación).
 const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { nombre: h.nombre, precio: h.precio, huespedes: h.huespedes }]));
 ---
 
-<Base title="Reservas" description="Solicita tu estancia en Aurea: fechas, habitación y huéspedes." fotoPie="costaAcantilado">
+<Base title="Reservas" description="Prepara tu estancia en Aurea: fechas, huéspedes y habitación. Reserva de demostración." fotoPie="costaBarca">
   <section class="cabeza marco" aria-labelledby="titulo" data-entrada>
-    <h1 id="titulo">Reservas</h1>
+    <div>
+      <span class="etiqueta" data-entrada-paso>Reservas · demostración</span>
+      <h1 id="titulo">Reservas</h1>
+    </div>
     <p class="entradilla" data-entrada-paso>
-      Elige fechas y habitación y te respondemos en menos de un día, con la estancia confirmada o la alternativa más cercana.
+      Elige fechas, huéspedes y habitación, y prepararemos tu solicitud. Es una demostración: no se hace ninguna reserva ni ningún pago real.
     </p>
   </section>
 
@@ -34,8 +45,12 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
       novalidate
       data-habitaciones={JSON.stringify(datosHabitaciones)}
     >
-      <fieldset class="fechas">
-        <legend>Fechas</legend>
+      <ol class="pasos-nav" aria-label="Pasos de la reserva" hidden>
+        {pasos.map((p) => <li>{p}</li>)}
+      </ol>
+
+      <fieldset class="paso fechas" data-paso="0">
+        <legend>¿Cuándo llegas?</legend>
         <label>
           <span>Llegada</span>
           <input type="date" name="llegada" required />
@@ -44,34 +59,46 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
           <span>Salida</span>
           <input type="date" name="salida" required />
         </label>
+        <p class="nota ancho">Estancia mínima de dos noches; tres en la Residencia Aurea y en julio y agosto.</p>
       </fieldset>
 
-      <fieldset>
-        <legend>Habitación</legend>
+      <fieldset class="paso" data-paso="1">
+        <legend>¿Cuántos sois?</legend>
+        <label class="corto">
+          <span>Huéspedes (mayores de doce años)</span>
+          <select name="huespedes">
+            {[1, 2, 3, 4].map((n) => <option value={n} selected={n === 2}>{n}</option>)}
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset class="paso" data-paso="2">
+        <legend>Elige la habitación</legend>
         <div class="opciones">
           {
             habitaciones.map((h, i) => (
               <label class="opcion">
                 <input type="radio" name="habitacion" value={h.slug} checked={i === 0} required />
-                <Foto foto={h.fotos[0].foto} sizes="(min-width: 64rem) 18vw, (min-width: 48rem) 40vw, 90vw" anchos={[320, 480, 640]} alt="" />
+                <Foto
+                  foto={h.fotos[0].foto}
+                  sizes="(min-width: 64rem) 18vw, (min-width: 48rem) 40vw, 90vw"
+                  anchos={[320, 480, 640]}
+                  alt=""
+                  style={h.fotos[0].foco ? `object-position: ${h.fotos[0].foco}` : undefined}
+                />
                 <span class="opcion-nombre">{h.nombre}</span>
                 <span class="opcion-datos">
                   {h.metros} m² · hasta {h.huespedes} · desde {euros(h.precio)}
                 </span>
+                <span class="opcion-aviso" data-aviso>No cabéis en esta habitación</span>
               </label>
             ))
           }
         </div>
       </fieldset>
 
-      <fieldset class="personas">
-        <legend>Huéspedes y contacto</legend>
-        <label>
-          <span>Huéspedes</span>
-          <select name="huespedes">
-            {[1, 2, 3, 4].map((n) => <option value={n} selected={n === 2}>{n}</option>)}
-          </select>
-        </label>
+      <fieldset class="paso personas" data-paso="3">
+        <legend>Tus datos</legend>
         <label>
           <span>Nombre</span>
           <input type="text" name="nombre" autocomplete="name" required />
@@ -90,16 +117,42 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
         </label>
       </fieldset>
 
+      <div class="paso confirmacion" data-paso="4" hidden tabindex="-1">
+        <span class="sello">Solo<br />demostración</span>
+        <h3>Solicitud preparada</h3>
+        <p class="codigo" data-codigo></p>
+        <p>Es una demostración: no se ha hecho ninguna reserva ni ningún pago.</p>
+        <p class="suave">
+          Si quieres, puedes abrirla en tu programa de correo: se prepara un mensaje a {sitio.correo} con estos datos, y eres tú quien decide si lo
+          envía.
+        </p>
+        <div class="confirmacion-acciones">
+          <button type="button" class="boton boton-principal" data-abrir-correo>Abrir en mi correo</button>
+          <button type="button" class="boton" data-reiniciar>Empezar de nuevo</button>
+        </div>
+      </div>
+
       <div class="errores" role="alert" aria-live="assertive"></div>
-      <button class="boton boton-principal enviar" type="submit">Enviar solicitud</button>
+      <div class="navegacion-pasos">
+        <button type="button" class="boton" data-atras hidden>← Atrás</button>
+        <button class="boton boton-principal enviar" type="submit" data-adelante>Enviar solicitud</button>
+      </div>
       <p class="aviso">
-        Aurea es una demo: el botón abre tu programa de correo con la solicitud escrita, y nada se envía a ningún servidor.
+        Demostración: sin JavaScript, el botón abre tu programa de correo con la solicitud escrita; no se envía nada a ningún servidor.
       </p>
     </form>
 
-    <aside class="resumen" aria-labelledby="resumen-titulo">
-      <h2 id="resumen-titulo">Tu estancia</h2>
+    <aside class="resumen noche" aria-labelledby="resumen-titulo">
+      <h2 id="resumen-titulo" class="etiqueta">Tu estancia</h2>
       <dl aria-live="polite">
+        <div>
+          <dt>Fechas</dt>
+          <dd data-resumen="fechas">Elige las fechas</dd>
+        </div>
+        <div>
+          <dt>Huéspedes</dt>
+          <dd data-resumen="huespedes">2</dd>
+        </div>
         <div>
           <dt>Habitación</dt>
           <dd data-resumen="habitacion">{habitaciones[0].nombre}</dd>
@@ -108,15 +161,15 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
           <dt>Noches</dt>
           <dd data-resumen="noches">Elige las fechas</dd>
         </div>
-        <div>
-          <dt>Estimación</dt>
+        <div class="total">
+          <dt>Estimación de ejemplo</dt>
           <dd data-resumen="total">Desde {euros(habitaciones[0].precio)} la noche</dd>
         </div>
       </dl>
       <p class="resumen-sol" data-resumen="sol">
-        El sol se pone delante de tu habitación: hacia las 18:20 en invierno y las 21:10 en verano.
+        El sol se pone delante de la terraza: hacia las 18:20 en invierno y las 21:10 en verano.
       </p>
-      <p class="resumen-nota">Para dos personas, con desayuno y termas. La tarifa final se confirma por correo.</p>
+      <p class="resumen-nota">Para dos personas, con desayuno y termas. Precios de ejemplo: no representan tarifas ni disponibilidad reales.</p>
     </aside>
   </section>
 
@@ -171,14 +224,13 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
   }
 
   h1 {
-    font-size: 17vw;
-    line-height: 0.82;
-    letter-spacing: -0.05em;
+    margin-top: 1rem;
+    font-size: clamp(3.5rem, 1rem + 13vw, 14rem);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
   }
 
   .entradilla {
-    font-size: var(--step-lead);
-    line-height: 1.4;
     padding-bottom: 1rem;
   }
 
@@ -186,7 +238,7 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
   .reserva {
     display: grid;
     grid-template-columns: 7fr 4fr;
-    gap: clamp(2rem, 6vw, 7rem);
+    gap: clamp(2rem, 6vw, 6rem);
     align-items: start;
     margin-top: clamp(4rem, 8vw, 7rem);
   }
@@ -196,19 +248,56 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     gap: 3rem;
   }
 
+  .formulario.en-pasos {
+    gap: 1.5rem;
+  }
+
+  /* Indicador de pasos */
+  .pasos-nav {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .pasos-nav[hidden] {
+    display: none;
+  }
+
+  .pasos-nav li {
+    flex: 1;
+    padding-top: 0.75rem;
+    border-top: 2px solid var(--lino);
+    color: var(--piedra);
+    font: 600 var(--step-label) / 1.2 var(--text);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition:
+      color 300ms ease-out,
+      border-color 300ms ease-out;
+  }
+
+  .pasos-nav li.hecho,
+  .pasos-nav li[aria-current="step"] {
+    color: var(--ink);
+    border-color: var(--teal);
+  }
+
   fieldset {
+    display: grid;
+    gap: 1.25rem;
     margin: 0;
     padding: 0;
     border: 0;
-    display: grid;
-    gap: 1.25rem;
+  }
+
+  fieldset[hidden],
+  .paso[hidden] {
+    display: none;
   }
 
   legend {
     padding: 0;
     margin-bottom: 1.25rem;
-    font-family: var(--display);
-    font-size: var(--step-lead);
+    font: 400 var(--step-sub) / 1.1 var(--display);
   }
 
   .fechas,
@@ -220,14 +309,23 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     grid-column: 1 / -1;
   }
 
+  .corto {
+    max-width: 20rem;
+  }
+
+  .nota {
+    color: var(--muted);
+    font-size: var(--step-small);
+  }
+
   label {
     display: grid;
     gap: 0.5rem;
   }
 
   label:not(.opcion) > span {
-    font-size: var(--step-small);
     color: var(--muted);
+    font-size: var(--step-small);
   }
 
   small {
@@ -240,12 +338,11 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     width: 100%;
     min-height: 3.25rem;
     padding: 0.75rem 1rem;
-    border: 1px solid #3a342d;
-    border-radius: 0;
-    background: var(--surface);
+    border: 1px solid var(--piedra);
+    border-radius: 0.6rem;
+    background: var(--blanco);
     color: var(--ink);
     font: inherit;
-    color-scheme: dark;
   }
 
   textarea {
@@ -255,47 +352,37 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 0;
-    border-color: transparent;
+    outline: 2px solid var(--laton);
+    outline-offset: 2px;
   }
 
   [aria-invalid="true"] {
-    border-color: #e07a5f;
+    border-color: var(--error);
   }
 
   .opciones {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .opcion {
     position: relative;
     gap: 0.25rem;
     padding: 0 0 1.25rem;
-    background: var(--surface);
-    cursor: pointer;
+    border-radius: 0.75rem;
     overflow: hidden;
+    background: var(--blanco);
+    box-shadow: inset 0 0 0 1px var(--lino);
+    cursor: pointer;
     transition:
-      background-color 300ms ease-out,
-      color 300ms ease-out;
+      box-shadow 300ms ease-out,
+      transform 300ms ease-out;
   }
 
   .opcion :global(picture) {
     display: block;
     overflow: hidden;
-  }
-
-  .opcion :global(img) {
-    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  :global(html[data-movimiento="completo"]) .opcion:hover :global(img) {
-    transform: scale(1.05);
-  }
-
-  .opcion :global(picture) {
     margin-bottom: 1rem;
   }
 
@@ -303,25 +390,29 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
+    transition: transform 900ms var(--salida);
+  }
+
+  :global(html[data-movimiento="completo"]) .opcion:hover :global(img) {
+    transform: scale(1.05);
   }
 
   .opcion-nombre,
-  .opcion-datos {
+  .opcion-datos,
+  .opcion-aviso {
     padding-inline: 1.25rem;
   }
 
   .opcion input {
     position: absolute;
-    opacity: 0;
     width: 1px;
     height: 1px;
     min-height: 0;
+    opacity: 0;
   }
 
   .opcion-nombre {
-    font-family: var(--display);
-    font-size: var(--step-lead);
-    line-height: 1.15;
+    font: 400 var(--step-lead) / 1.15 var(--display);
   }
 
   .opcion-datos {
@@ -329,18 +420,28 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     font-size: var(--step-small);
   }
 
-  .opcion:has(input:checked) {
-    background: var(--ink);
-    color: var(--bg);
+  .opcion-aviso {
+    display: none;
+    color: var(--error);
+    font-size: var(--step-small);
   }
 
-  .opcion:has(input:checked) .opcion-datos {
-    color: #4a433a;
+  .opcion:has(input:checked) {
+    box-shadow: inset 0 0 0 2px var(--teal);
   }
 
   .opcion:has(input:focus-visible) {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--laton);
     outline-offset: 3px;
+  }
+
+  .opcion:has(input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .opcion:has(input:disabled) .opcion-aviso {
+    display: block;
   }
 
   .errores:empty {
@@ -349,18 +450,25 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
 
   .errores {
     padding: 1rem 1.25rem;
-    background: #2a1a15;
-    color: #f2c9bd;
+    border-radius: 0.6rem;
+    background: #f6e7e2;
+    color: var(--error);
   }
 
-  .errores ul {
+  .errores :global(ul) {
     display: grid;
     gap: 0.25rem;
   }
 
+  .navegacion-pasos {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
   .enviar {
-    justify-self: start;
-    min-width: 16rem;
+    margin-left: auto;
+    min-width: 14rem;
   }
 
   .aviso {
@@ -369,22 +477,75 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     font-size: var(--step-small);
   }
 
+  .en-pasos .aviso {
+    display: none;
+  }
+
+  /* Confirmación (demostración) */
+  .confirmacion {
+    display: grid;
+    justify-items: center;
+    gap: 1.1rem;
+    padding: 2.5rem 1.5rem;
+    border-radius: 1rem;
+    background: var(--blanco);
+    text-align: center;
+  }
+
+  .confirmacion[hidden] {
+    display: none;
+  }
+
+  .confirmacion h3 {
+    font-size: var(--step-head);
+  }
+
+  .confirmacion p {
+    max-width: 34rem;
+  }
+
+  .sello {
+    display: inline-grid;
+    place-items: center;
+    width: 8.5rem;
+    height: 8.5rem;
+    border: 1px solid var(--laton);
+    border-radius: 50%;
+    color: var(--laton);
+    font: 600 var(--step-label) / 1.3 var(--text);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .codigo {
+    font: 400 var(--step-sub) / 1 var(--display);
+    letter-spacing: 0.06em;
+  }
+
+  .confirmacion-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  /* Resumen: un bloque de noche que acompaña al formulario */
   .resumen {
     position: sticky;
-    top: 2rem;
+    top: 6.5rem;
     display: grid;
-    gap: 1.75rem;
-    padding: clamp(1.5rem, 3vw, 2.5rem);
-    background: var(--surface);
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border-radius: 1rem;
   }
 
   .resumen h2 {
-    font-size: var(--step-lead);
+    font-size: var(--step-label);
   }
 
   .resumen dl {
     display: grid;
-    gap: 1rem;
+    gap: 0.9rem;
   }
 
   .resumen dt,
@@ -397,18 +558,35 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     margin: 0;
   }
 
+  .resumen dt {
+    font: 600 var(--step-label) / 1.2 var(--text);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--noche-suave);
+  }
+
   .resumen dd {
-    font-family: var(--display);
-    font-size: var(--step-lead);
-    line-height: 1.2;
+    margin-top: 0.25rem;
+    font: 400 1.2rem / 1.25 var(--display);
+  }
+
+  .resumen .total {
+    padding-top: 1rem;
+    border-top: 1px solid rgb(242 240 234 / 0.2);
+  }
+
+  .resumen .total dd {
+    font-size: var(--step-sub);
+    color: var(--laton-claro);
+    font-variant-numeric: tabular-nums;
   }
 
   .resumen-sol {
-    color: var(--accent);
+    color: var(--laton-claro);
   }
 
   .resumen-nota {
-    color: var(--muted);
+    color: var(--noche-suave);
     font-size: var(--step-small);
   }
 
@@ -435,10 +613,10 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
   }
 
   address a {
-    text-decoration-color: var(--accent);
+    text-decoration-color: var(--laton);
   }
 
-  /* Políticas: bloque de texto a dos columnas */
+  /* Políticas */
   .politicas {
     display: grid;
     grid-template-columns: 4fr 8fr;
@@ -455,10 +633,13 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
   }
 
   .politicas dt {
-    font-family: var(--display);
-    font-size: var(--step-lead);
-    color: var(--ink);
     margin-bottom: 0.5rem;
+    font: 400 var(--step-lead) / 1.2 var(--display);
+    color: var(--ink);
+  }
+
+  .politicas dd {
+    color: var(--muted);
   }
 
   @media (max-width: 63.99rem) {
@@ -482,12 +663,19 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
       grid-template-columns: 1fr;
     }
 
-    h1 {
-      font-size: 21vw;
+    /* En móvil solo se nombra el paso actual */
+    .pasos-nav li {
+      font-size: 0;
+    }
+
+    .pasos-nav li[aria-current="step"] {
+      flex: 3;
+      font-size: var(--step-label);
     }
 
     .enviar {
-      justify-self: stretch;
+      min-width: 0;
+      flex: 1;
     }
   }
 </style>
