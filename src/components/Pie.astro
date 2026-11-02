@@ -1,6 +1,7 @@
 ---
-// El pie es la última fotografía: enlaces, el control de movimiento y el
-// contacto arriba, el nombre a todo lo ancho abajo y una línea legal debajo.
+// El pie es la última fotografía: enlaces y contacto arriba, el nombre a todo
+// lo ancho abajo y una línea legal debajo, con la preferencia de movimiento
+// plegada (se despliega al pedirla).
 // Movimiento: src/scripts/motion/pie.ts. Control: src/scripts/control-movimiento.ts
 import Foto from "./Foto.astro";
 import { navegacion, reservas } from "../data/navegacion";
@@ -31,20 +32,6 @@ const opcionesMovimiento = [
           <li><a href={ruta("creditos")}>Créditos</a></li>
         </ul>
       </nav>
-      <fieldset class="movimiento">
-        <legend>Movimiento</legend>
-        <div class="movimiento-opciones">
-          {
-            opcionesMovimiento.map((o) => (
-              <label>
-                <input type="radio" name="movimiento" value={o.valor} checked={o.valor === "auto"} />
-                <span>{o.texto}</span>
-              </label>
-            ))
-          }
-        </div>
-        <p class="movimiento-nota" data-movimiento-nota aria-live="polite">Automático sigue el ajuste de tu sistema.</p>
-      </fieldset>
       <address>
         {sitio.direccion.map((l) => <span>{l}</span>)}
         <a href={`tel:${sitio.telefono.replace(/\s/g, "")}`}>{sitio.telefono}</a>
@@ -57,6 +44,23 @@ const opcionesMovimiento = [
         Aurea es un hotel ficticio: esta web es una demo de diseño y desarrollo. Sus fotografías son referencias visuales de Unsplash y Pexels,
         con sus autores en <a href={ruta("creditos")}>créditos</a>; los precios y la reserva son de demostración.
       </p>
+      <details class="preferencias">
+        <summary>Movimiento: <span data-movimiento-actual>Automático</span></summary>
+        <fieldset class="movimiento">
+          <legend class="solo-lector">Movimiento de la página</legend>
+          <div class="movimiento-opciones">
+            {
+              opcionesMovimiento.map((o) => (
+                <label>
+                  <input type="radio" name="movimiento" value={o.valor} checked={o.valor === "auto"} />
+                  <span>{o.texto}</span>
+                </label>
+              ))
+            }
+          </div>
+          <p class="movimiento-nota" data-movimiento-nota aria-live="polite">Automático sigue el ajuste de tu sistema.</p>
+        </fieldset>
+      </details>
     </div>
   </div>
 </footer>
@@ -102,7 +106,7 @@ const opcionesMovimiento = [
 
   .pie-fila {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr 1fr;
     align-items: start;
     gap: 2rem;
   }
@@ -144,27 +148,63 @@ const opcionesMovimiento = [
     text-align: right;
   }
 
-  /* Control de movimiento: tres opciones en una pastilla de texto */
+  /* Preferencia de movimiento: una línea discreta junto al aviso legal que
+     se despliega al pedirla (details nativo: teclado y lector de pantalla) */
+  .preferencias {
+    margin-top: 0.5rem;
+    font-size: var(--step-small);
+  }
+
+  .preferencias summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2.75rem;
+    color: rgb(242 240 234 / 0.75);
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .preferencias summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .preferencias summary::after {
+    content: "+";
+    color: var(--laton-claro);
+  }
+
+  .preferencias[open] summary::after {
+    content: "−";
+  }
+
+  .preferencias summary:hover,
+  .preferencias summary:focus-visible {
+    color: var(--marfil);
+  }
+
+  .preferencias summary:focus-visible {
+    outline: 2px solid var(--laton-claro);
+    outline-offset: 2px;
+  }
+
+  .preferencias summary span {
+    color: var(--marfil);
+  }
+
   .movimiento {
     display: grid;
-    justify-items: center;
-    gap: 0.6rem;
+    justify-items: start;
+    gap: 0.25rem;
     margin: 0;
     padding: 0;
     border: 0;
   }
 
-  legend {
-    padding: 0;
-    margin-bottom: 0.6rem;
-    font-size: var(--step-small);
-  }
-
   .movimiento-opciones {
     display: flex;
-    padding: 0.25rem;
-    border-radius: var(--radio);
-    background: rgb(6 29 30 / 0.7);
+    flex-wrap: wrap;
+    gap: 0 1.25rem;
   }
 
   .movimiento label {
@@ -182,21 +222,21 @@ const opcionesMovimiento = [
 
   .movimiento span {
     display: block;
-    padding: 0.6rem 0.95rem;
-    border-radius: var(--radio);
-    font-size: var(--step-small);
+    padding-block: 0.7rem;
+    color: rgb(242 240 234 / 0.75);
+    background: linear-gradient(var(--laton-claro), var(--laton-claro)) no-repeat 0 calc(100% - 0.45rem) / 0 1px; /* taste-skill-ignore: subrayado, no un degradado */
     transition:
-      background-color 200ms ease-out,
-      color 200ms ease-out;
+      color 200ms ease-out,
+      background-size 300ms ease-out;
   }
 
   .movimiento label:hover span {
-    background: rgb(242 240 234 / 0.12);
+    color: var(--marfil);
   }
 
   .movimiento input:checked + span {
-    background: var(--marfil);
-    color: var(--tinta);
+    color: var(--marfil);
+    background-size: 100% 1px;
   }
 
   .movimiento input:focus-visible + span {
@@ -205,7 +245,7 @@ const opcionesMovimiento = [
   }
 
   .movimiento-nota {
-    font-size: var(--step-small);
+    color: rgb(242 240 234 / 0.75);
   }
 
   .pie-nombre {
@@ -227,18 +267,6 @@ const opcionesMovimiento = [
     text-decoration: underline;
   }
 
-  @media (max-width: 63.99rem) {
-    .pie-fila {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .movimiento {
-      grid-column: 1 / -1;
-      grid-row: 2;
-      justify-items: start;
-    }
-  }
-
   @media (max-width: 47.99rem) {
     .pie {
       min-height: 88svh;
@@ -246,10 +274,6 @@ const opcionesMovimiento = [
 
     .pie-fila {
       grid-template-columns: 1fr;
-    }
-
-    .movimiento {
-      grid-row: auto;
     }
 
     address {

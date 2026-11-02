@@ -7,6 +7,12 @@ import type { Browser, Page } from "@playwright/test";
 
 const motorListo = (page: Page) => expect(page.locator("html")).toHaveAttribute("data-motion", "listo");
 
+/** La preferencia de movimiento está plegada en el pie: se despliega si hace falta */
+async function abrirPreferencias(page: Page) {
+  const preferencias = page.locator(".preferencias");
+  if ((await preferencias.getAttribute("open")) === null) await preferencias.locator("summary").click();
+}
+
 test.describe("Control de movimiento", () => {
   test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "no-preference" });
 
@@ -17,6 +23,7 @@ test.describe("Control de movimiento", () => {
     await expect(page.locator('input[name="movimiento"][value="auto"]')).toBeChecked();
 
     // A reducido: sin escenarios fijos, Un día en bloques, la preferencia se guarda.
+    await abrirPreferencias(page);
     await page.getByRole("radio", { name: "Reducido" }).check();
     await expect(page.locator("html")).toHaveAttribute("data-movimiento", "reducido");
     await expect(page.locator(".pin-spacer")).toHaveCount(0);
@@ -32,6 +39,7 @@ test.describe("Control de movimiento", () => {
 
     // De vuelta a completo: los escenarios sticky vuelven, sin pins ni duplicados.
     await motorListo(page);
+    await abrirPreferencias(page);
     await page.getByRole("radio", { name: "Completo" }).check();
     await expect(page.locator("html")).toHaveAttribute("data-movimiento", "completo");
     await expect(page.locator(".llegada-escena")).toHaveCSS("position", "sticky");
@@ -40,6 +48,45 @@ test.describe("Control de movimiento", () => {
     await expect(page.locator(".frase .palabra .palabra")).toHaveCount(0);
   });
 
+});
+
+test.describe("Preferencia de movimiento en el pie", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  test("plegada en una línea; se abre con teclado o con un toque, se elige con las flechas y se anuncia", async ({ page, hasTouch }) => {
+    await page.goto("reservas/");
+    const preferencias = page.locator(".preferencias");
+    const resumen = preferencias.locator("summary");
+    await expect(resumen).toHaveText("Movimiento: Automático");
+    // Discreta: una línea de texto pequeña, plegada y sin opciones a la vista
+    await expect(page.getByRole("radio", { name: "Reducido" })).toBeHidden();
+    expect((await resumen.boundingBox())!.height).toBeLessThanOrEqual(48);
+
+    // Teclado: Intro despliega, Tab entra en el grupo, las flechas eligen
+    await resumen.focus();
+    await page.keyboard.press("Enter");
+    await expect(preferencias).toHaveAttribute("open", "");
+    await expect(page.getByRole("group", { name: "Movimiento de la página" })).toBeVisible();
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("radio", { name: "Automático" })).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("radio", { name: "Completo" })).toBeChecked();
+    await expect(page.locator("html")).toHaveAttribute("data-preferencia", "completo");
+    await expect(resumen).toHaveText("Movimiento: Completo");
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("html")).toHaveAttribute("data-movimiento", "reducido");
+    await expect(page.locator("[data-movimiento-nota]")).toContainText("reducido");
+    await expect(resumen).toHaveText("Movimiento: Reducido");
+
+    // Se recuerda al volver; plegada otra vez, y en pantallas táctiles se abre con un toque
+    await page.reload();
+    await expect(resumen).toHaveText("Movimiento: Reducido");
+    await expect(preferencias).not.toHaveAttribute("open", "");
+    if (hasTouch) await resumen.tap();
+    else await resumen.click();
+    await expect(page.getByRole("radio", { name: "Reducido" })).toBeChecked();
+    await expect(page.getByRole("radio", { name: "Reducido" })).toBeVisible();
+  });
 });
 
 test.describe("Control de movimiento con el sistema en «reducir movimiento»", () => {
@@ -51,6 +98,7 @@ test.describe("Control de movimiento con el sistema en «reducir movimiento»", 
     await expect(page.locator("html")).toHaveAttribute("data-movimiento", "reducido");
     await motorListo(page);
     await expect(page.locator(".pin-spacer")).toHaveCount(0);
+    await abrirPreferencias(page);
     await page.getByRole("radio", { name: "Completo" }).check();
     await expect(page.locator("html")).toHaveAttribute("data-movimiento", "completo");
   });
