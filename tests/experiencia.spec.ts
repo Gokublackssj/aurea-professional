@@ -129,6 +129,27 @@ test.describe("El mar con movimiento reducido", () => {
   });
 });
 
+test.describe("Zoom de las fotos al pasar", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  test("amplía con un puntero que pasa por encima y no en pantallas táctiles", async ({ page, hasTouch }) => {
+    await page.goto("habitaciones/suite-mirador/");
+    await motorListo(page);
+    const conHover = await page.evaluate(() => matchMedia("(hover: hover)").matches);
+    expect(conHover).toBe(!hasTouch);
+    const enlace = page.locator(".otras a").first();
+    await enlace.scrollIntoViewIfNeeded();
+    await enlace.hover();
+    const escala = () => enlace.locator("img").evaluate((i) => new DOMMatrix(getComputedStyle(i).transform).a);
+    if (conHover) {
+      await expect.poll(escala).toBeGreaterThan(1.03);
+    } else {
+      await page.waitForTimeout(1000);
+      expect(await escala()).toBe(1);
+    }
+  });
+});
+
 test.describe("Póster del mar", () => {
   test("se descarga un solo póster, el de su tamaño, y vídeo y póster se escalan juntos", async ({ page }) => {
     const posteres: string[] = [];

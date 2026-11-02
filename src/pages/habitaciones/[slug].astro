@@ -323,8 +323,12 @@ const [portada, ...galeria] = h.fotos;
     transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  :global(html[data-movimiento="completo"]) .ampliar:hover :global(img) {
-    transform: scale(1.04);
+  /* Solo con un puntero que pasa por encima: en pantallas táctiles el toque
+     dejaría la foto ampliada */
+  @media (hover: hover) {
+    :global(html[data-movimiento="completo"]) .ampliar:hover :global(img) {
+      transform: scale(1.04);
+    }
   }
 
   .ampliar:focus-visible {
@@ -454,8 +458,12 @@ const [portada, ...galeria] = h.fotos;
     transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  :global(html[data-movimiento="completo"]) .otras a:hover :global(img) {
-    transform: scale(1.05);
+  /* Solo con un puntero que pasa por encima: en pantallas táctiles el toque
+     dejaría la foto ampliada */
+  @media (hover: hover) {
+    :global(html[data-movimiento="completo"]) .otras a:hover :global(img) {
+      transform: scale(1.05);
+    }
   }
 
   .otra-nombre {

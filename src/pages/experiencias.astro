@@ -525,8 +525,12 @@ const carta: Momento[] = [
     color: var(--accent);
   }
 
-  :global(html[data-movimiento="completo"]) .carta-fila li:hover :global(img) {
-    transform: scale(1.06);
+  /* Solo con un puntero que pasa por encima: en pantallas táctiles el toque
+     dejaría la foto ampliada */
+  @media (hover: hover) {
+    :global(html[data-movimiento="completo"]) .carta-fila li:hover :global(img) {
+      transform: scale(1.06);
+    }
   }
 
   /* El mar: vídeo a todo lo ancho, texto marfil encima */

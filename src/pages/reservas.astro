@@ -408,8 +408,12 @@ const datosHabitaciones = Object.fromEntries(habitaciones.map((h) => [h.slug, { 
     transition: transform 900ms var(--salida);
   }
 
-  :global(html[data-movimiento="completo"]) .opcion:hover :global(img) {
-    transform: scale(1.05);
+  /* Solo con un puntero que pasa por encima: en pantallas táctiles el toque
+     dejaría la foto ampliada */
+  @media (hover: hover) {
+    :global(html[data-movimiento="completo"]) .opcion:hover :global(img) {
+      transform: scale(1.05);
+    }
   }
 
   .opcion-nombre,
