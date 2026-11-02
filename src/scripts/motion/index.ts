@@ -23,6 +23,8 @@ import { pie } from "./pie";
 import { selectorHabitaciones } from "./habitaciones";
 import { galeria } from "./galeria";
 import { mapa } from "./mapa";
+import { mar } from "./mar";
+import { cielo } from "./cielo";
 import { revelar } from "./revelar";
 
 export interface Condiciones {
@@ -34,16 +36,18 @@ export interface Condiciones {
 /** Una escena crea sus animaciones; si toca algo más (clases, eventos), devuelve cómo deshacerlo. */
 export type Escena = (raiz: HTMLElement, c: Condiciones) => void | (() => void);
 
-// En el orden en que aparecen en la página: ScrollTrigger calcula los pins de
-// arriba abajo.
+// En el orden en que aparecen en la página. Ya no hay pins de GSAP: las escenas
+// largas son sticky (CSS) y GSAP solo traduce el scroll en animación.
 const escenas: Record<string, Escena> = {
   hero,
   manifiesto,
   llegada,
-  dia,
   cartel,
+  dia,
   habitaciones: selectorHabitaciones,
   galeria,
+  mar,
+  cielo,
   mapa,
   fuera,
   pregunta,
