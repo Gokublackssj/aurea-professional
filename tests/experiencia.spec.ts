@@ -175,7 +175,7 @@ test.describe("Póster del mar", () => {
 // cielo naranja; una superficie oscura (vídeo vacío, controles) no.
 type Color = { r: number; g: number; b: number };
 async function cieloDelMar(page: Page, browser: Browser, nombre: string): Promise<Color> {
-  // complete no garantiza que el póster ya esté pintado (decoding="async")
+  // complete no garantiza que el póster ya esté decodificado y pintado
   await page.locator(".mar-poster img").evaluate((i: HTMLImageElement) => i.decode());
   const captura = await page.locator(".mar-escena").screenshot();
   await test.info().attach(nombre, { body: captura, contentType: "image/png" });
@@ -212,6 +212,78 @@ async function sinDesborde(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 }
 
+// Fotogramas reales del mar, sin depender del color: «textura» es la
+// desviación de la luminancia en la zona (una superficie vacía es lisa) y
+// «cambio», la diferencia media con el fotograma anterior (el póster está
+// quieto; el vídeo, no). Escala de 0 a 255.
+const TEXTURA_MINIMA = 12;
+const MOVIMIENTO_MINIMO = 0.25;
+const mediana = (xs: number[]) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] : 0);
+type Zona = { x: number; y: number; ancho: number; alto: number };
+
+/** Parte de la escena sin texto ni botón, en fracciones de la ventana */
+function zonaDelMar(page: Page): Promise<Zona> {
+  return page.evaluate(() => {
+    const r = document.querySelector(".mar-escena")!.getBoundingClientRect();
+    const texto = document.querySelector(".mar-texto")!.getBoundingClientRect();
+    const [arriba, abajo] = [r.top + r.height * 0.15, Math.min(texto.top - 8, r.top + r.height * 0.6)];
+    return { x: (r.left + r.width * 0.1) / innerWidth, y: arriba / innerHeight, ancho: (r.width * 0.8) / innerWidth, alto: (abajo - arriba) / innerHeight };
+  });
+}
+
+/** Graba lo que compone Chrome (screencast): cada fotograma pintado, con su hora y su scroll */
+async function grabarFotogramas(page: Page) {
+  const cdp = await page.context().newCDPSession(page);
+  const fotogramas: { t: number; y: number; jpg: string }[] = [];
+  cdp.on("Page.screencastFrame", (f) => {
+    fotogramas.push({ t: (f.metadata.timestamp ?? 0) * 1000, y: f.metadata.scrollOffsetY, jpg: f.data });
+    cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId }).catch(() => {});
+  });
+  await cdp.send("Page.startScreencast", { format: "jpeg", quality: 85, maxWidth: 480, maxHeight: 480 });
+  return {
+    parar: async () => {
+      await cdp.send("Page.stopScreencast");
+      await cdp.detach();
+      return fotogramas;
+    },
+  };
+}
+
+async function analizarFotogramas(browser: Browser, fotogramas: { t: number; jpg: string }[], zona: Zona) {
+  const lienzo = await browser.newPage();
+  const resultado = await lienzo.evaluate(
+    async ({ fotogramas, zona }) => {
+      let anterior: Float32Array | null = null;
+      const salida: { t: number; textura: number; cambio: number }[] = [];
+      for (const { t, jpg } of fotogramas) {
+        const img = new Image();
+        img.src = `data:image/jpeg;base64,${jpg}`;
+        await img.decode();
+        const c = document.createElement("canvas");
+        [c.width, c.height] = [img.width, img.height];
+        const ctx = c.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        const d = ctx.getImageData(zona.x * img.width, zona.y * img.height, zona.ancho * img.width, zona.alto * img.height).data;
+        const luz = new Float32Array(d.length / 4);
+        for (let i = 0; i < luz.length; i++) luz[i] = 0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2];
+        const m = luz.reduce((a, b) => a + b, 0) / luz.length;
+        const textura = Math.sqrt(luz.reduce((a, b) => a + (b - m) ** 2, 0) / luz.length);
+        let cambio = 0;
+        if (anterior && anterior.length === luz.length) {
+          for (let i = 0; i < luz.length; i++) cambio += Math.abs(luz[i] - anterior[i]);
+          cambio /= luz.length;
+        }
+        anterior = luz;
+        salida.push({ t, textura, cambio });
+      }
+      return salida;
+    },
+    { fotogramas, zona },
+  );
+  await lienzo.close();
+  return resultado;
+}
+
 test.describe("El mar sin JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
@@ -236,34 +308,74 @@ test.describe("El mar con JavaScript: el póster se ve hasta que llega el vídeo
 
   test("movimiento completo y MP4 retrasado: póster, después vídeo, sin fotogramas vacíos", async ({ page, browser }) => {
     await page.route(/\.mp4$/, async (r) => {
-      await new Promise((ok) => setTimeout(ok, 2500));
+      await new Promise((ok) => setTimeout(ok, 4000));
       await r.continue();
     });
     const pedidos = pedidosDelMar(page);
     await page.goto("experiencias/");
     await motorListo(page);
     const video = page.locator(".mar-video");
-    // Fotograma a fotograma mientras se acerca y espera al MP4: siempre hay imagen
-    const muestreo = page.evaluate(async () => {
+    // Hora del primer fotograma del vídeo, para separar las dos fases
+    const primerFotograma = video.evaluate(
+      (v: HTMLVideoElement) => new Promise<number>((ok) => v.addEventListener("loadeddata", () => ok(performance.timeOrigin + performance.now()), { once: true })),
+    );
+    await page.locator(".mar-escena").evaluate((e) => e.scrollIntoView({ block: "center" }));
+    // Lo que pinta el navegador mientras espera el MP4, en el paso al vídeo y
+    // durante la reproducción: cada fotograma real, no el estado de los recursos
+    const zona = await zonaDelMar(page);
+    const scroll = await page.evaluate(() => scrollY);
+    const grabacion = await grabarFotogramas(page);
+    // El screencast puede saltarse un hueco muy corto: además, en cada fotograma
+    // de la página, el póster o el vídeo tienen que estar a la vista (ni ellos ni
+    // sus contenedores ocultos o transparentes)
+    const vigilancia = page.evaluate(async () => {
       const v = document.querySelector<HTMLVideoElement>(".mar-video")!;
       const i = document.querySelector<HTMLImageElement>(".mar-poster img")!;
+      const aLaVista = (e: Element) => {
+        if (getComputedStyle(e).visibility === "hidden") return false;
+        for (let x: Element | null = e; x; x = x.parentElement) {
+          const s = getComputedStyle(x);
+          if (s.display === "none" || Number(s.opacity) < 0.05) return false;
+        }
+        return true;
+      };
       let vacios = 0;
+      let reproduciendoDesde = 0;
       const t0 = performance.now();
-      while (performance.now() - t0 < 6000 && !(v.readyState >= 2 && !v.paused)) {
+      while (performance.now() - t0 < 12_000 && !(reproduciendoDesde && performance.now() - reproduciendoDesde > 2000)) {
         await new Promise(requestAnimationFrame);
-        if (!(i.complete && i.naturalWidth > 0) && v.readyState < 2) vacios++;
+        if (!reproduciendoDesde && !v.paused && v.readyState >= 2) reproduciendoDesde = performance.now();
+        const conPoster = i.complete && i.naturalWidth > 0 && aLaVista(i);
+        const conVideo = v.readyState >= 2 && aLaVista(v);
+        if (!conPoster && !conVideo) vacios++;
       }
       return vacios;
     });
-    await page.locator(".mar-escena").evaluate((e) => e.scrollIntoView({ block: "center" }));
+    const t0 = await page.evaluate(() => performance.timeOrigin + performance.now());
     await page.waitForTimeout(1200);
     expect(await video.evaluate((v: HTMLVideoElement) => v.readyState)).toBeLessThan(2);
     const esperando = await cieloDelMar(page, browser, "mar-esperando-mp4");
     expect(esCielo(esperando), `póster mientras llega el vídeo: ${JSON.stringify(esperando)}`).toBe(true);
-    expect(await muestreo).toBe(0);
+    const t1 = await primerFotograma;
     await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused && v.currentTime > 0), { timeout: 10_000 }).toBe(true);
-    const reproduciendo = await cieloDelMar(page, browser, "mar-reproduciendo");
-    expect(esCielo(reproduciendo), `vídeo reproduciéndose: ${JSON.stringify(reproduciendo)}`).toBe(true);
+    await page.waitForTimeout(2000);
+    // Fuera el último fotograma de antes del desplazamiento, que el screencast entrega al empezar
+    const grabados = (await grabacion.parar()).filter((f) => Math.abs(f.y - scroll) < 2);
+    const fotogramas = await analizarFotogramas(browser, grabados, zona);
+    // El póster, una vez asentada la entrada de la escena con el scroll (scrub de
+    // 0,3 s) y con margen antes del primer fotograma del vídeo (relojes distintos)
+    const poster = fotogramas.filter((f) => f.t > t0 + 800 && f.t < t1 - 200);
+    const enVideo = fotogramas.filter((f) => f.t > t1 + 300);
+    test.info().annotations.push({ type: "fotogramas", description: JSON.stringify({ poster: poster.length, video: enVideo.length, texturaMin: Math.min(...fotogramas.map((f) => f.textura)), movimientoPoster: mediana(poster.slice(1).map((f) => f.cambio)), movimientoVideo: mediana(enVideo.map((f) => f.cambio)) }) });
+    // Ningún fotograma vacío: siempre hay imagen con detalle (póster o vídeo), nunca una superficie lisa
+    expect(fotogramas.filter((f) => f.t < t1).length, "fotogramas mientras se espera el MP4").toBeGreaterThan(0);
+    for (const f of fotogramas) expect(f.textura, `fotograma vacío a ${Math.round(f.t - t1)} ms del primer fotograma del vídeo`).toBeGreaterThan(TEXTURA_MINIMA);
+    expect(await vigilancia, "fotogramas de la página sin póster ni vídeo a la vista").toBe(0);
+    // El vídeo se ve: la escena se mueve como el mar, cosa que el póster, estático, no hace
+    expect(enVideo.length, "fotogramas pintados durante la reproducción").toBeGreaterThanOrEqual(10);
+    expect(mediana(enVideo.map((f) => f.cambio)), "movimiento visible durante la reproducción").toBeGreaterThan(MOVIMIENTO_MINIMO);
+    // Quieto: Chrome casi no pinta fotogramas nuevos, y los que pinta no cambian
+    expect(mediana(poster.slice(1).map((f) => f.cambio)), "el póster está quieto").toBeLessThan(MOVIMIENTO_MINIMO);
     expect(pedidos.filter((p) => p.endsWith(".webp"))).toEqual([posterDe(page)]);
     expect(pedidos.filter((p) => p.endsWith(".mp4"))).toHaveLength(1);
     await sinDesborde(page);
