@@ -625,18 +625,24 @@ test.describe("Visor de fotos", () => {
 });
 
 test.describe("Cartel del inicio", () => {
-  test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "no-preference" });
-  // La vista flotante solo existe con ratón; los proyectos móviles emulan pantalla táctil.
-  test.skip(({ isMobile }) => isMobile, "Sin ratón no hay vista flotante");
+  test.use({ reducedMotion: "no-preference" });
 
-  test("al pasar por una fila aparece junto al cursor otra vista de la habitación", async ({ page }) => {
+  test("pasar por los nombres no abre fotos; la tira enseña las cuatro y cada nombre lleva a su habitación", async ({ page }) => {
     await page.goto("");
     await motorListo(page);
-    const fila = page.locator('.cartel tbody tr[data-slug="suite-terraza"]');
+    const cartel = page.locator(".cartel");
+    const fila = cartel.locator('tbody tr[data-slug="suite-terraza"]');
     await fila.scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
+    const fotos = () => cartel.locator("img").evaluateAll((imgs) => imgs.filter((i) => i.getBoundingClientRect().width > 0 && getComputedStyle(i).visibility !== "hidden").length);
+    const antes = await fotos();
     await fila.hover();
-    await expect(page.locator(".cartel-vista")).toHaveCSS("opacity", "1", { timeout: 3000 });
-    await expect(page.locator('.cartel-capa[data-slug="suite-terraza"]')).toHaveCSS("visibility", "visible");
+    await page.mouse.move((await fila.boundingBox())!.x + 40, (await fila.boundingBox())!.y + 10, { steps: 5 });
+    await page.waitForTimeout(800);
+    expect(await fotos(), "fotos a la vista en el cartel al pasar por un nombre").toBe(antes);
+    await expect(cartel.locator(".tira a")).toHaveCount(4);
+    await expect(cartel.locator(".tira img")).toHaveCount(4);
+    await fila.getByRole("link", { name: "Suite Terraza" }).click();
+    await expect(page).toHaveURL(/\/habitaciones\/suite-terraza\/?$/);
   });
 });
